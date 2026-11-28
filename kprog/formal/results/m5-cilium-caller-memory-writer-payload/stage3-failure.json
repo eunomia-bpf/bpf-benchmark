@@ -1,0 +1,25 @@
+{
+  "phase": "stage3",
+  "source_sha256": "675ffc533f231a49c8665f6ef5fe998d6abe90db3e6d6f4a86240c8cb0942ab4",
+  "source_lines": 234,
+  "full_log_bytes": 612,
+  "full_log_sha256": "5298d48a06b19d17d7d69ab9ceaf72f21ea2aa2e724255330d3a5472eb8d1586",
+  "receipt": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cilium-caller-memory-writer-payload/Proof.lean"
+    ],
+    "exit": 1,
+    "seconds": 74.28988242149353,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "diagnosis": "line86 explicit generic transfer application still reaches default200000 heartbeat during actual-world elaboration/type matching",
+  "repair": "build the same explicit transfer application Expr directly and assign for kernel checking, as existing linked symbol/layout equality certificates do; no new premise or budget increase"
+}

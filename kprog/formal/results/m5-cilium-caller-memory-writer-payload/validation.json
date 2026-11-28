@@ -1,0 +1,238 @@
+{
+  "scope": "original volatile payload builtin with actual linked nonvolatile classification and real allocated8-byte payload store",
+  "source_sha256": "6f9dc9db6b861d88f185b2e5a978ab790e8f6d6738aa674445fe07024b4fcc71",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage6": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-payload/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 73.45127773284912,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerMemoryWriterPayload"
+      ],
+      "exit": 0,
+      "seconds": 76.85402131080627,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.7269599437713623,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-payload/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.3359081745147705,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "prior_failed_phases": [
+    {
+      "phase": "stage1",
+      "source_sha256": "b9e65c51bf9ee03eb1dae1bf7e88de9637dbc9b185ac782d2321f22ce02afa8b",
+      "source_lines": 227,
+      "full_log_bytes": 612,
+      "full_log_sha256": "28f75c8ba1a06d7191d8c4d06fa0fefbab2ba336743bd8cee9393bb8455bcae1",
+      "receipt": {
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-j1",
+          "results/m5-cilium-caller-memory-writer-payload/Proof.lean"
+        ],
+        "exit": 1,
+        "seconds": 77.35940623283386,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368,
+        "timing_lock": "shared"
+      },
+      "diagnosis": "line76 rw symbols_source scans/reduces large linked environment; default200000 heartbeat timeout; subsequent new declarations not accepted as a verified package",
+      "repair": "replace goal-wide rewrite with congrArg blockIsVolatile and Eq.trans; actual symbols equality/global qualifier check unchanged; no budget increase"
+    },
+    {
+      "phase": "stage2",
+      "source_sha256": "7210c8931d27e413aac051d5402a4367bd36453c7c345427b15caf6bd01df6a5",
+      "source_lines": 227,
+      "full_log_bytes": 612,
+      "full_log_sha256": "3c8652dcd9f65c23aff1c4d040063b464d4ff32a5309178d7bf86f0864637683",
+      "receipt": {
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-j1",
+          "results/m5-cilium-caller-memory-writer-payload/Proof.lean"
+        ],
+        "exit": 1,
+        "seconds": 74.50043034553528,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368,
+        "timing_lock": "shared"
+      },
+      "diagnosis": "line79 congrArg/trans application reaches default200000 heartbeat budget while connecting actual huge world to symbols",
+      "repair": "generic arbitrary-world transport lemma with explicit arguments; actual linked symbol equality/global qualifier certificate unchanged; no proof budget increase"
+    },
+    {
+      "phase": "stage3",
+      "source_sha256": "675ffc533f231a49c8665f6ef5fe998d6abe90db3e6d6f4a86240c8cb0942ab4",
+      "source_lines": 234,
+      "full_log_bytes": 612,
+      "full_log_sha256": "5298d48a06b19d17d7d69ab9ceaf72f21ea2aa2e724255330d3a5472eb8d1586",
+      "receipt": {
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-j1",
+          "results/m5-cilium-caller-memory-writer-payload/Proof.lean"
+        ],
+        "exit": 1,
+        "seconds": 74.28988242149353,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368,
+        "timing_lock": "shared"
+      },
+      "diagnosis": "line86 explicit generic transfer application still reaches default200000 heartbeat during actual-world elaboration/type matching",
+      "repair": "build the same explicit transfer application Expr directly and assign for kernel checking, as existing linked symbol/layout equality certificates do; no new premise or budget increase"
+    },
+    {
+      "phase": "stage4",
+      "source_sha256": "bef1aa4075b5b252a6f1ffed076d5837140b5f9f3fb442942c26fa6ca774946a",
+      "source_lines": 242,
+      "full_log_bytes": 612,
+      "full_log_sha256": "5298d48a06b19d17d7d69ab9ceaf72f21ea2aa2e724255330d3a5472eb8d1586",
+      "receipt": {
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-j1",
+          "results/m5-cilium-caller-memory-writer-payload/Proof.lean"
+        ],
+        "exit": 1,
+        "seconds": 70.07413363456726,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368,
+        "timing_lock": "shared"
+      },
+      "diagnosis": "line86 run_tac remains default200000 heartbeat timeout; direct Expr construction within same declaration did not resolve it; precise sub-operation not isolated",
+      "repair": "split finite actual-global qualifier certificate, generic symbols conclusion and final environment transfer into separate checked declarations; direct explicit Expr references compiled certificates; default budget unchanged"
+    },
+    {
+      "phase": "stage5",
+      "source_sha256": "ddafb172a9e2ad1f4a9e9c5b3e06d8f020c520f8180b832efbd86429a1fee2f0",
+      "source_lines": 245,
+      "full_log_bytes": 577,
+      "full_log_sha256": "7afe1ac375f6534b56383b2b449de8347434288a37a8109bcdbd20a0c80dab02",
+      "receipt": {
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-j1",
+          "results/m5-cilium-caller-memory-writer-payload/Proof.lean"
+        ],
+        "exit": 1,
+        "seconds": 70.46749329566956,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368,
+        "timing_lock": "shared"
+      },
+      "diagnosis": "separate declarations no longer report heartbeat error; final run_tac elabTerm quotation of local b reports unknown hygienic identifier b and kernel metavariables",
+      "repair": "extract actual block FVar from guarded Eq/Senv.block_is_volatile goal syntax instead of quoting local name; same fully-applied transfer proof and kernel checking; no budget or premise change"
+    }
+  ],
+  "focused_jobs": 306,
+  "full_jobs": 1573,
+  "root_queries": [
+    "source",
+    "statement_source",
+    "break_source",
+    "nonvolatile",
+    "arguments_value",
+    "writable",
+    "write",
+    "bound_frame",
+    "word_value",
+    "builtin",
+    "advance",
+    "incoming_index",
+    "from_word"
+  ],
+  "actual_memory_writer_unmaterialize_commit": "10a579ecacdc65ea27a116e829e50b059e3dbb25",
+  "source": "exact original s77 EF_vstore Mint64 arguments/types, payload-loop s78 break and actual tag-loop continuation retained",
+  "classification": "kernel-checks all actual linked program global qualifiers and proves blockIsVolatile=false; uses imported VolatileStore.nonvol/VolatileStoreSem, no assumed external outcome or Senv transport",
+  "store": "actual allocated payload block1/8B rights derive Mint64 zero store/readback; other-block/caller/access/frontier frames retain actual word data by allocation-name separation",
+  "execution": "actual argument values at index0/payload0, imported builtin Step2 and Star/E0 through loop entry/store/exit/continuation to original tag loop; TempEnv unchanged, builtin is not labeled InternalRun",
+  "composition": "actual164 internal prefix plus real payload builtin/loop Star(E0), both Word.Store and Payload.Store witnesses retained; incoming index0/payload0 derived from actual temporary frames/values",
+  "boundary": "prior supplied ABI/SP=-32/table/tag/access/width8 premises explicit; payload modeled memory write/empty trace follows actual qualifier certificate, not a physical/native I-O claim",
+  "open": "original tag volatile load/store with current real tag-memory reads, provider-outcome/whole-entry width composition, linked whole-entry/provider/Senv transport/native whole-state",
+  "old_allocator_or_successful_store_oracle_used": false,
+  "provider_success_existence_or_purity_claimed": false,
+  "native_whole_state_proved_here": false,
+  "resource_assignment": "existing run.py timingSH/CPU17/j1/nice0/32GiB/unchanged proof settings/fullEX-nformal-full-check; nonblocking shared timing preflight before launch",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

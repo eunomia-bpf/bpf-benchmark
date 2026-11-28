@@ -1,0 +1,25 @@
+{
+  "phase": "stage1",
+  "source_sha256": "b9e65c51bf9ee03eb1dae1bf7e88de9637dbc9b185ac782d2321f22ce02afa8b",
+  "source_lines": 227,
+  "full_log_bytes": 612,
+  "full_log_sha256": "28f75c8ba1a06d7191d8c4d06fa0fefbab2ba336743bd8cee9393bb8455bcae1",
+  "receipt": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cilium-caller-memory-writer-payload/Proof.lean"
+    ],
+    "exit": 1,
+    "seconds": 77.35940623283386,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "diagnosis": "line76 rw symbols_source scans/reduces large linked environment; default200000 heartbeat timeout; subsequent new declarations not accepted as a verified package",
+  "repair": "replace goal-wide rewrite with congrArg blockIsVolatile and Eq.trans; actual symbols equality/global qualifier check unchanged; no budget increase"
+}

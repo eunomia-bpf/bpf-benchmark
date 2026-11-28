@@ -1,0 +1,25 @@
+{
+  "phase": "stage2",
+  "source_sha256": "7210c8931d27e413aac051d5402a4367bd36453c7c345427b15caf6bd01df6a5",
+  "source_lines": 227,
+  "full_log_bytes": 612,
+  "full_log_sha256": "3c8652dcd9f65c23aff1c4d040063b464d4ff32a5309178d7bf86f0864637683",
+  "receipt": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cilium-caller-memory-writer-payload/Proof.lean"
+    ],
+    "exit": 1,
+    "seconds": 74.50043034553528,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "diagnosis": "line79 congrArg/trans application reaches default200000 heartbeat budget while connecting actual huge world to symbols",
+  "repair": "generic arbitrary-world transport lemma with explicit arguments; actual linked symbol equality/global qualifier certificate unchanged; no proof budget increase"
+}

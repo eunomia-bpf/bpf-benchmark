@@ -1,0 +1,25 @@
+{
+  "phase": "stage5",
+  "source_sha256": "ddafb172a9e2ad1f4a9e9c5b3e06d8f020c520f8180b832efbd86429a1fee2f0",
+  "source_lines": 245,
+  "full_log_bytes": 577,
+  "full_log_sha256": "7afe1ac375f6534b56383b2b449de8347434288a37a8109bcdbd20a0c80dab02",
+  "receipt": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cilium-caller-memory-writer-payload/Proof.lean"
+    ],
+    "exit": 1,
+    "seconds": 70.46749329566956,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "diagnosis": "separate declarations no longer report heartbeat error; final run_tac elabTerm quotation of local b reports unknown hygienic identifier b and kernel metavariables",
+  "repair": "extract actual block FVar from guarded Eq/Senv.block_is_volatile goal syntax instead of quoting local name; same fully-applied transfer proof and kernel checking; no budget or premise change"
+}

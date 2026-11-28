@@ -1,0 +1,25 @@
+{
+  "phase": "stage4",
+  "source_sha256": "bef1aa4075b5b252a6f1ffed076d5837140b5f9f3fb442942c26fa6ca774946a",
+  "source_lines": 242,
+  "full_log_bytes": 612,
+  "full_log_sha256": "5298d48a06b19d17d7d69ab9ceaf72f21ea2aa2e724255330d3a5472eb8d1586",
+  "receipt": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cilium-caller-memory-writer-payload/Proof.lean"
+    ],
+    "exit": 1,
+    "seconds": 70.07413363456726,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "diagnosis": "line86 run_tac remains default200000 heartbeat timeout; direct Expr construction within same declaration did not resolve it; precise sub-operation not isolated",
+  "repair": "split finite actual-global qualifier certificate, generic symbols conclusion and final environment transfer into separate checked declarations; direct explicit Expr references compiled certificates; default budget unchanged"
+}
