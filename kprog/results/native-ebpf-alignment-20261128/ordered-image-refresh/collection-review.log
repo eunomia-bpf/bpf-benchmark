@@ -1,0 +1,41 @@
+{
+  "utc": "2026-11-28T13:22:22Z",
+  "newest_resume": "COORDINATOR2026-11-28T11:20Z",
+  "same_build_pid": 1475904,
+  "original_controller_status": 1,
+  "original_controller_sha256": "b0267f5d9050388cdaf3a8e57ed8cf6ab3a1e89bd37e9bad44372f67b82b756d",
+  "collection_status": 0,
+  "disposition": "All build/payload/tar/kernel/P/source/app checks pass. Controller1 is solely an attempted deletion of an already-absent oldimage. Exact oldID absent in inventory and inspect, current newID present. Originalfailure unchanged; no rebuild/tag/cleanup performed by collector.",
+  "current_image": "sha256:31f611e1374d1f6cd7660166b97816bbdff2d75013843a7066c6d704dd9db388",
+  "old_image": "sha256:6b88c0ba4c2253a3eadc999048dc39789185f7516b86a70ec14d098418610e11",
+  "old_absent": true,
+  "inside_image_verification": {
+    "returncode": 0,
+    "result": {
+      "files": 121,
+      "bad": []
+    },
+    "container_cpu": 19
+  },
+  "kernel_P_source_app_unchanged": true,
+  "runtime_tar": {
+    "path": "/workspaces/repository/.cache/container-images/x86_64-runner-runtime.image.tar",
+    "bytes": 769532928,
+    "sha256": "fdd0971ac5c79f5e95d9b8695a7a8a069dc687363fce523b46a0a74adfdc5930"
+  },
+  "products": {
+    "/usr/local/bin/native-link": {
+      "host_path": "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "sha256": "bb2c9d6aece9a3e795806441d82baef3c6b9746a3680536ac97450371a21be0e"
+    },
+    "/usr/local/lib/bpfrejit/libnative_loader.so": {
+      "host_path": "/workspaces/repository/runner/build-llvmbpf/native_loader/libnative_loader.so",
+      "sha256": "35d61b57ff110fcce9ee4e1a7a2f91ac050744d423a50331f2f3a865249790f9"
+    },
+    "/opt/bpf-benchmark/native-bpf/x86_64/kprog-perf-context-lto": {
+      "host_path": "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto",
+      "sha256": "5075689e48693c7b0057fada7c014c14df456bd3bb2f8a1a19b0a26fd3544a48"
+    }
+  },
+  "limits": "Image delivery only. No six-app/installed-code/equalwork/performance acceptance yet; schedulingconfound remains."
+}
