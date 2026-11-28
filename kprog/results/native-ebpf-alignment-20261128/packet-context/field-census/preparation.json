@@ -1,0 +1,19 @@
+{
+  "prepared_utc": "2026-11-28T09:05:23Z",
+  "newest_resume": "COORDINATOR 2026-11-28T07:17Z",
+  "source_sha256": {
+    "vendor/bpf/cilium/bpf/include/linux/bpf.h": "34cf8b6c978854bb115dceaf330c9be0f1dcc7c34d557868e27e61ea13a357e5",
+    "vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h": "c8a6251487d57123d098bf325cfc4b049f58701cae4abb775f4685b7b32835ed",
+    "vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h": "93bffd9691f1564c03d7b778ce57b20b80d4cecf3183e2c57ba23e97e9769911",
+    "vendor/bpf/katran/katran/lib/linux_includes/bpf.h": "593e1d9e9dc2685c11da40e5b1b67e9026c5c4a7cad077ff5057f3607faf3746",
+    "vendor/bpf/native_compat.h": "906737856b4c533575095e11e090b125ed6bc95a676bd9087411234b44d74494",
+    "vendor/linux-framework/net/core/filter.c": "629e5372b2d239485e75fc5c3f5bee98be4bbe6201794d4480de68a4fcd6f542",
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/objects.json": "88fb43dfc6238b7b2e0fc8c157d620982126c24f57472232b71df46ba24e85f3",
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/programs.json": "6a23a92783d8195bc5f43cc9f9a845ebbc298ca1eeec9e72e7da0fe58995bdc7"
+  },
+  "scope": "Read actual DWARF/retained frontend IR from18 real Cilium/Katran objects, bothISAs. Canonical kernel BTF physical layout comparison and defined-call graph candidate reachability for176program rows; placeholder4rows explicitly not read. Selected packet types only, not socket or all contexts.",
+  "resources": "Controller/metadataCPU19, serial llvm-dis CPU16 under48GiB AS; BTF dumper CPU19. No P/compiler/image/root/guest builds.",
+  "rules": "Context-type names alone do not establish public vs physical view. xdp_md data member DWARF pointer kind distinguishes Katran physical from Cilium public. Field ordinal mapping requires equal LLVM top-level element and DWARF member counts; unresolved preserved. Anonymous/bit semantics, raw/zero-offset accesses, indirect/asm calls and entry-context pointer provenance remain separate. Offset match is not a semantic equality verdict.",
+  "known": "Cilium TC cb starts48, Katran native TC cb starts40; public kernel BPF cb pivots skb.cb40 + qdisc.data8. No Katran cb source use found yet, so no defect claim. Cilium public ingress field in retained old IR requires common6c8fdc70f load-time translation; not a new unfixed production claim.",
+  "next": "Launch one detached job, collect SAME next turn; only fix generally after actual selected-use/semantic evidence."
+}
