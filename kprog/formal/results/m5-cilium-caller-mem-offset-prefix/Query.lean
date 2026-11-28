@@ -1,0 +1,11 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerMemOffsetPrefix.source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerMemOffsetPrefix.source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerMemOffsetPrefix.temp_frame
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerMemOffsetPrefix.temp_frame
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerMemOffsetPrefix.values
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerMemOffsetPrefix.values
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerMemOffsetPrefix.execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerMemOffsetPrefix.execute
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerMemOffsetPrefix.advance
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerMemOffsetPrefix.advance

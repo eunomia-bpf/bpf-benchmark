@@ -1,0 +1,155 @@
+{
+  "scope": "actual original memory-offset flags/immediate/index prefix after real preindex SP write",
+  "source_sha256": "9fa1ecd034f017d3c146d56387286c65cd717b7c6a014fc87b544c41b195f6c7",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage3": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-mem-offset-prefix/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.038532257080078,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerMemOffsetPrefix"
+      ],
+      "exit": 0,
+      "seconds": 2.4121129512786865,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.740684986114502,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-mem-offset-prefix/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.2552852630615234,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "failed_stage1": {
+    "phase": "stage1",
+    "receipt": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-mem-offset-prefix/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 5.170391321182251,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "source_sha256": "8f228666d52976ac174cea6831b3fd326d744e3da17626622ad9b599d3c914cd",
+    "root_errors": [
+      "resultEnv dot-notation ambiguous Vint value type caused elaboration recovery and downstream frame/value errors",
+      "broad doEvalExpr unfolding bypassed complete expression lemmas and left semBinaryOperation One255255 in step goal"
+    ],
+    "repair": "explicit PTree.set/CC.Val constructors for same six updates; use temp_value and existing whole-expression facts before evaluation unfolding",
+    "source_or_step_count_changed": false,
+    "focus_full_public_publish_started": false
+  },
+  "failed_stage2": {
+    "phase": "stage2",
+    "receipt": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-mem-offset-prefix/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 3.967956781387329,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "source_sha256": "edb96fc4e3408351d87c3ceada6438ee9a557d9e14a485ea74a5c1ff6c04098f",
+    "root_errors": [
+      "conditional gso simplification did not close arbitrary-id frame",
+      "values used rfl although PTree.gss needs its proved lookup law for unknown input tree",
+      "final select_value read premise not discharged through imm/index writes"
+    ],
+    "repair": "explicit gso rewrites for frame, kernel-checked distinct keys plus gso/gss for values, unconditional final comparison derived from same values readback",
+    "source_or_step_count_changed": false,
+    "focus_full_public_publish_started": false
+  },
+  "focused_jobs": 289,
+  "full_jobs": 1556,
+  "root_queries": [
+    "source",
+    "temp_frame",
+    "values",
+    "execute",
+    "advance"
+  ],
+  "actual_linked_sp_preindex_commit": "5385d07e95e9de2ae87347dd664f10d33610a876",
+  "source": "private pieces extracted from original afterGroup AST; source equation kernel checks original loop/break/rest assembly; unselected indexed alternative retained",
+  "prefix": "25 pure internal steps; actual has_index0/isrc1/immediate-32/index0; skip original isrc0 branch without native premises",
+  "temps": "only six actual temporary assignments; every other lookup retained",
+  "composition": "original59 preindex +3 actual SP group-exit/sequence transitions +25 memory-offset prefix =87, SAME derived Store/newSP/frame/callerEnv/continuation",
+  "open": "numeric offset computation and real addressing/store/subsequent instruction; linked whole-entry/provider transport; whole native refinement",
+  "old_allocator_or_successful_store_oracle_used": false,
+  "native_whole_state_proved_here": false,
+  "resource_assignment": "user CPU17/timingSH restored after coordinator2026-11-28T11:20Z rotate-ended notice; run.py/j1/nice0/32GiB/unchanged proof settings/fullEX-nformal-full-check",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
