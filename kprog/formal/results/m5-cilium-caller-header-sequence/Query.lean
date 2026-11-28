@@ -1,0 +1,15 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderSequence.shape
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderSequence.shape
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderSequence.chain
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderSequence.chain
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderSequence.stored_prefix
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderSequence.stored_prefix
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderSequence.next_source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderSequence.next_source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderSequence.visit
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderSequence.visit
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderSequence.run_from
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderSequence.run_from
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderSequence.execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderSequence.execute
