@@ -1,0 +1,7 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerSPWriterExecute.layout
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerSPWriterExecute.layout
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerSPWriterExecute.execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerSPWriterExecute.execute
+#check KProgFormal.ClightRefinement.Arm64PointerWrite.execute_sp_store_layout
+#print axioms KProgFormal.ClightRefinement.Arm64PointerWrite.execute_sp_store_layout

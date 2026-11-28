@@ -401,4 +401,65 @@ theorem ValueResult.kept {m before after : CC.Mem} {entry : HeaderLocal m}
     (result : ValueResult storage i value tag after) : Arm64CacheLocalFrame.Kept m before after i :=
   result.local_load
 
+
+set_option hygiene false in
+/-- The actual SP32/STACK4 preindex writer consumes one derived signed64 store.
+This generic lemma has no caller-allocator or external-call assumption. -/
+theorem execute_sp_store_layout (world : CC.CGenv) (layout : GprLayout world)
+    (k : CC.Cont) (hk : CC.isCallCont k = true) (before after : CC.Mem)
+    (entry sp : CC.Block)
+    (pointerBefore : CC.Mem.load .Mint64 before entry 40 = some (.Vptr sp 0))
+    (pointerAfter : CC.Mem.load .Mint64 after entry 40 = some (.Vptr sp 0))
+    (oldSP : CC.Mem.load .Mint64 before sp 0 = some (.Vlong (0#64)))
+    (stored : CC.Mem.store .Mint64 before sp 0
+      (.Vlong (CC.Integers.Int64.repr (-32))) = some after) :
+    InternalRun world 42
+      (.Callstate (.Internal procedure)
+        [.Vptr entry 0,.Vlong (32#64),.Vlong (CC.Integers.Int64.repr (-32)),.Vint (4#32)] k before)
+      (.Returnstate .Vundef k after) := by
+  have rootBefore : CC.Mem.load CC.Mptr before entry 40 = some (.Vptr sp 0) := pointerBefore
+  have rootAfter : CC.Mem.load CC.Mptr after entry 40 = some (.Vptr sp 0) := pointerAfter
+  have newSP : CC.Mem.load .Mint64 after sp 0 =
+      some (.Vlong (CC.Integers.Int64.repr (-32))) := CC.Mem.load_store_same stored
+  simp only [CC.Integers.Int64.repr,CC.Integers.MI.repr] at stored newSP
+  have empty : (CC.PTree.empty : CC.Env).elements = [] := rfl
+  have selectedSP (memory : CC.Mem) :
+      CC.Cop.semBinaryOperation world.genv_cenv .Oeq (.Vlong (32#64)) CC.tulong
+        (.Vint (32#32)) CC.tuint memory = some (.Vint (1#32)) := rfl
+  have selectedStack (memory : CC.Mem) :
+      CC.Cop.semBinaryOperation world.genv_cenv .Oeq (.Vint (4#32)) CC.tuchar
+        (.Vint (4#32)) CC.tuint memory = some (.Vint (1#32)) := rfl
+  have noRelease (memory : CC.Mem) :
+      CC.Cop.semBinaryOperation world.genv_cenv .Ogt
+        (.Vlong (CC.Integers.Int64.repr (-32))) CC.tlong
+        (.Vlong (0#64)) CC.tlong memory = some (.Vint (0#32)) := rfl
+  run_tac do
+    let reduce ← `(tactic|
+      simp +decide only [body_eq,body,eager,regSet,pointerSet,tagSet,spTest,spAlternative,
+        releaseTest,releaseAlternative,CC.doStep,hk,CC.doFunctionEntry2,names,vars,params,result_type,
+        CC.doAllocVariables,CC.bindParameterTemps,CC.emptyEnv,CC.PTree.gss,CC.PTree.gso,
+        CC.doEvalExpr,CC.doEvalLvalue,CC.doDerefLoc,CC.doAssignLoc,CC.lvalOfField,
+        CC.Mem.loadv,CC.Mem.storev,CC.accessMode,CC.typeof,layout.entry,layout.sp,
+        rootBefore,rootAfter,oldSP,newSP,stored,selectedSP,selectedStack,noRelease,
+        CC.Cop.semCast,CC.Cop.classifyCast,CC.Cop.castIntInt,CC.Cop.castIntLong,
+        CC.Cop.boolVal,CC.Cop.classifyBool,CC.typeconv,CC.removeAttributes,CC.tattr,
+        CC.tuchar,CC.tuint,CC.tint,CC.tulong,CC.tlong,CC.tptr,CC.tvoid,
+        ptr_add_zero,ptr_literals.1,ptr_literals.2.1,ptr_literals.2.2.1,ptr_literals.2.2.2.1,ptr_literals.2.2.2.2,
+        CC.Val.ofBool,CC.Val.Vtrue,CC.Val.Vfalse,
+        CC.Integers.Int.eq,CC.Integers.Int64.eq,CC.Integers.MI.eq,
+        CC.Integers.Int.repr,CC.Integers.Int64.repr,CC.Integers.MI.repr,
+        CC.Integers.Int.zero_ext,CC.Integers.MI.zero_ext,CC.Integers.Int.signed,CC.Integers.MI.signed,
+        CC.Integers.Int64.unsigned,CC.Integers.Int.unsigned,CC.Integers.MI.unsigned,
+        CC.Integers.Int.zero,CC.Integers.MI.zero,
+        CC.E0,CC.Eapp,CC.blocksOfEnv,CC.Mem.freeList,CC.callCont,empty,
+        List.nil_append,List.append_nil,ite_false,ite_true,eq_self,Bool.false_eq_true,Bool.true_eq_false,
+        Bool.not_true,Bool.not_false,BitVec.zero_add,BitVec.ofInt_natCast,BitVec.ofNat_toNat] <;> try rfl)
+    for _ in [:41] do
+      Lean.Elab.Tactic.evalTactic (← `(tactic| apply InternalRun.step))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| trivial))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| apply CC.doStep_sound))
+      Lean.Elab.Tactic.evalTactic reduce
+    Lean.Elab.Tactic.evalTactic (← `(tactic|
+      exact InternalRun.step trivial (.skip_call _ _ _ _ _ _ hk rfl) (InternalRun.refl _)))
+
 end KProgFormal.ClightRefinement.Arm64PointerWrite

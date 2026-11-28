@@ -1,0 +1,174 @@
+{
+  "scope": "actual internal SP32 STACK4 preindex writer consumes same caller derived Mint64 store",
+  "source_sha256": "5f9175d846a1f8f9241c6e280103eb6c6fb67b00205a9ad0033ac244f8d924dd",
+  "generic_library_sha256": "3e9abbac588ba7b7f19069bbdc84e7e7bce38afbf8437daaa15963ad5229eade",
+  "generic_before_sha256": "d10db8358396a02fed16f79819614d0dee30d6ded59537585d55236490cadeca",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "generic2": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64PointerWrite"
+      ],
+      "exit": 0,
+      "seconds": 22.15599274635315,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-sp-writer-execute/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 34.46341562271118,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerSPWriterExecute"
+      ],
+      "exit": 0,
+      "seconds": 34.752092599868774,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 4007.767630338669,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-sp-writer-execute/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.136138916015625,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    }
+  },
+  "failed_generic1": {
+    "phase": "generic1",
+    "receipt": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64PointerWrite"
+      ],
+      "exit": 1,
+      "seconds": 18.05297541618347,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "source_sha256": "bcf16bdce357f4a64507862fb7dc6d2d65a16ec649c4f68a2a72a4e2373fb290",
+    "failure": "store-step target unfolded Int64.repr/MI.repr to BitVec.ofInt, while stored/newSP local facts were not normalized",
+    "next": "normalize stored and newSP with the same integer representation equations; no source/body/statement/budget change",
+    "caller_stage1_started": false
+  },
+  "failed_caller_stage1": {
+    "phase": "stage1",
+    "receipt": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-sp-writer-execute/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 34.48327565193176,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "source_sha256": "7fa994eb8dd183202b03e4d649ee10370b64a134d38583dc15c29467545f3aeb",
+    "failure": "constructor <;> decide +kernel for linked GprLayout exceeded existing200000 heartbeats at layout declaration line14",
+    "next": "same constructor, assign each layout equality Eq.refl RHS and let kernel compare actual linked layouts, matching existing LinkedProgram caller/writer lookup proofs",
+    "generic2_pass_retained": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64PointerWrite"
+      ],
+      "exit": 0,
+      "seconds": 22.15599274635315,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "focus_full_public_publish_started": false
+  },
+  "focused_jobs": 286,
+  "full_jobs": 1553,
+  "root_queries": [
+    "layout",
+    "execute",
+    "Arm64PointerWrite.execute_sp_store_layout"
+  ],
+  "actual_sp_memory_commit": "627c5ae19a448b29b8426bbd86b6e57dc83654f2",
+  "generic": "extend existing Arm64PointerWrite private actual-source pieces, entry checks and imported Clight steps, no cloned writer body/model",
+  "execution": "42 actual internal helper steps from Callstate reg32 rawpointerbits-32 tag4 to same original continuation Returnstate Vundef",
+  "store": "caller wrapper constructs actual Memory.Store from retained795-local rights, consumes same original/new header pointer and SP0/store/readback",
+  "path": "actual SP tag4 direct assignment and signed newSP -32 vs old0 false release condition, original loops/breaks/empty-locals free preserved",
+  "frame": "result is SAME Memory.Store witness carrying actual new borrowedSP and header/otherblock/caller/access/frontier frame",
+  "precheck": "only moved new docstring below local hygiene directive before first generic build; earlier unchecked snapshot retained",
+  "open": "linked whole-entry/provider trace transport and whole native refinement remain",
+  "whole_instruction_proved_here": false,
+  "native_whole_state_proved_here": false,
+  "native_global_universal_refinement_claimed": false,
+  "resource_assignment": "- COORDINATOR 2026-11-28T05:43Z: operator 05:40Z \"x86 \u91cd\u65b0\u6027\u80fd\u6d4b\u8bd5\u4e5f\u53ef\u4ee5? ...\": the coordinator started one x86 frozen-entry rotate (defaults, six apps, stats off then on) on the current image, kprog/results/x86-rotate-20261128/chain.sh; it holds the timing lock exclusive, the image lock shared and the batch lock for about six hours. Rebuild no x86 image and run no x86 timing until it ends; arm64 work on CPUs 16-19 and formal's builds outside the timing lock continue.",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
