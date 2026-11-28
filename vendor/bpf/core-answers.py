@@ -334,7 +334,8 @@ def scan(sources: list[Path], clang: str, flags: list[str],
          work: Path) -> tuple[list[tuple[str, str]], list[tuple[Path, set[tuple[str, str]]]], dict]:
     """Every (kind, query text) the compiled sources ask, per translation unit."""
     header = work / "scan.h"
-    header.write_text(SCAN_HEADER)
+    header.write_text(SCAN_HEADER.replace('"core-compat.h"',
+        json.dumps(str(Path(__file__).resolve().with_name("core-compat.h")))))
     found: set[tuple[str, str]] = set()
     per_tu: list[tuple[Path, set[tuple[str, str]]]] = []
     types: dict[tuple[str, str, str], list[tuple]] = {}

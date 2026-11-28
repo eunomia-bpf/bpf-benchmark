@@ -1,6 +1,6 @@
 """Use current producer flags on real affected translation units; write only diagnostic metadata/IR."""
 from pathlib import Path
-import datetime,fcntl,hashlib,json,os,re,resource,shlex,subprocess,traceback
+import datetime,fcntl,hashlib,json,os,re,resource,shlex,subprocess,sys,traceback
 ROOT=Path('/workspaces/repository');V=ROOT/'vendor/bpf';OUT=Path(__file__).resolve().parent
 os.sched_setaffinity(0,{16,18});resource.setrlimit(resource.RLIMIT_AS,(48*1024**3,48*1024**3))
 def now():return datetime.datetime.now(datetime.timezone.utc).isoformat()
@@ -9,9 +9,11 @@ def seal(p):
  with p.open('rb') as f:
   for b in iter(lambda:f.read(1024*1024),b''):h.update(b)
  return dict(path=str(p),bytes=p.stat().st_size,sha256=h.hexdigest())
-D=OUT/'real-source';D.mkdir(exist_ok=False)
+NAME=sys.argv[1] if len(sys.argv)>1 else 'real-source'
+assert re.fullmatch(r'real-source(?:-[a-z0-9]+)*',NAME)
+D=OUT/NAME;D.mkdir(exist_ok=False)
 r=dict(pid=os.getpid(),started_utc=now(),status='running',scope='Readonly source-query/Clang-layout generation and diagnostic native IR for existing affected BCC/Tetragon units, both architectures. Flags read from unchanged producer Makefile; canonical P/stage/app/image/benchmark untouched.',inputs=[seal(p) for p in [V/'Makefile',V/'core-answers.py',V/'core-compat.h',V/'native_compat.h',V/'native-helpers.h',Path(__file__)]],cases=[])
-def save():(OUT/'real-source-controller.json').write_text(json.dumps(r,indent=2)+'\n')
+def save():(OUT/(NAME+'-controller.json')).write_text(json.dumps(r,indent=2)+'\n')
 def run(args,stem,cwd=ROOT,env=None):
  with (D/(stem+'.stdout')).open('w') as stdout,(D/(stem+'.stderr')).open('w') as stderr:
   p=subprocess.run(args,cwd=cwd,env=env,stdin=subprocess.DEVNULL,stdout=stdout,stderr=stderr)

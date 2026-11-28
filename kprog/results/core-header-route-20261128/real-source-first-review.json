@@ -1,0 +1,122 @@
+{
+  "pid": 1567836,
+  "status": "complete",
+  "all_four_sources_compile": false,
+  "ended_utc": "2026-11-28T17:02:17.651098+00:00",
+  "cause": "scan.h include search does not include compatibility header sibling directory; all cases stop before CO-RE query resolution",
+  "input_checks": [
+    {
+      "path": "vendor/bpf/Makefile",
+      "sha256": "6bff8330daadd343b23ac88accdfa01e50e2a64fee3e6afdb9714626173314dd",
+      "verified_from_git": "d5fc4789d"
+    },
+    {
+      "path": "vendor/bpf/core-answers.py",
+      "sha256": "8534681617480cc2a6e89a1ab17fadbaddf46ed192ee582bb21814e221673f58",
+      "verified_from_git": "d5fc4789d"
+    },
+    {
+      "path": "vendor/bpf/core-compat.h",
+      "sha256": "72ea7f82497033602ae2129efae038f1f65298c443b1622aec16a03c3b29e75c",
+      "verified_from_git": "d5fc4789d"
+    },
+    {
+      "path": "vendor/bpf/native_compat.h",
+      "sha256": "906737856b4c533575095e11e090b125ed6bc95a676bd9087411234b44d74494",
+      "verified_from_git": "d5fc4789d"
+    },
+    {
+      "path": "vendor/bpf/native-helpers.h",
+      "sha256": "5a7c6c823c5e20a326aa0033adcd4cfaee146cd704cfb7690e81f4eae6dd18ef",
+      "verified_from_git": "d5fc4789d"
+    },
+    {
+      "path": "kprog/results/core-header-route-20261128/check_app_sources.py",
+      "sha256": "bb852d55d882fb939a4df91efee879d0218162afb57c5df27a81e83b4d4fc274",
+      "verified_from_git": "d5fc4789d"
+    },
+    {
+      "path": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c",
+      "bytes": 4457,
+      "sha256": "122b0835099ac0c299b1d003c6a8f046d547309347122a88cd674b241e6fc2d4"
+    },
+    {
+      "path": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h",
+      "bytes": 2885644,
+      "sha256": "6f117aadbcef7bf0e1be39edc7922d49ef2697444d560c9f9fced819ee12ef62"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+      "bytes": 408901736,
+      "sha256": "ef8733dbbfb41c1d1ea13f5704d7b1b95a12c5ca0a262f687fd1ff9db725c0de"
+    },
+    {
+      "path": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c",
+      "bytes": 5828,
+      "sha256": "7f7d5acc5612a1a3c193adffe73af928e6ac7deb2a4765c94bc85ac66e0e5db9"
+    },
+    {
+      "path": "/workspaces/repository/vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h",
+      "bytes": 2885686,
+      "sha256": "f0d8e6c608839fae26da7dbb0e1d663a0edec225d21a48e0428393f4ce846e05"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+      "bytes": 408901736,
+      "sha256": "ef8733dbbfb41c1d1ea13f5704d7b1b95a12c5ca0a262f687fd1ff9db725c0de"
+    },
+    {
+      "path": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c",
+      "bytes": 4457,
+      "sha256": "122b0835099ac0c299b1d003c6a8f046d547309347122a88cd674b241e6fc2d4"
+    },
+    {
+      "path": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/arm64/vmlinux.h",
+      "bytes": 2727969,
+      "sha256": "863ba8e4b938d2eb4964a1ec243b6977512e1192430cc2ef24330f1bef0c36e5"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+      "bytes": 457575688,
+      "sha256": "8407e20d8c8c198e06fc84cb0c338fdcdbb957001352f4116058a3ff7befda17"
+    },
+    {
+      "path": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c",
+      "bytes": 5828,
+      "sha256": "7f7d5acc5612a1a3c193adffe73af928e6ac7deb2a4765c94bc85ac66e0e5db9"
+    },
+    {
+      "path": "/workspaces/repository/vendor/bpf/tetragon/bpf/include/vmlinux_generated_arm64.h",
+      "bytes": 2728017,
+      "sha256": "740ae8f3a6dcf05f6b47bf4c6ea7103f9f3dc9e14784988c908264b838353062"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+      "bytes": 457575688,
+      "sha256": "8407e20d8c8c198e06fc84cb0c338fdcdbb957001352f4116058a3ff7befda17"
+    }
+  ],
+  "cases": [
+    {
+      "arch": "x86",
+      "app": "bcc",
+      "status": "failed"
+    },
+    {
+      "arch": "x86",
+      "app": "tetragon",
+      "status": "failed"
+    },
+    {
+      "arch": "arm64",
+      "app": "bcc",
+      "status": "failed"
+    },
+    {
+      "arch": "arm64",
+      "app": "tetragon",
+      "status": "failed"
+    }
+  ],
+  "production_activated": false
+}
