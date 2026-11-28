@@ -5,7 +5,7 @@ use iced_x86::{
     Register,
 };
 use object::{Object, ObjectSection, ObjectSymbol, RelocationFlags, RelocationTarget};
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet, VecDeque};
 
 use crate::*;
 
@@ -908,6 +908,101 @@ fn clear_x86_call_clobbered_registers<V>(registers: &mut HashMap<Register, V>) {
     }
 }
 
+/// Map identities at CFG joins are the intersection of every incoming path.
+/// A lookup returns its own inner-map template; native ABI calls preserve
+/// callee-saved identities, but subregister writes destroy pointer identity.
+fn x86_map_facts(
+    insns: &[Instruction],
+    map_loads: &HashMap<u64, String>,
+    lookup_calls: &HashSet<u64>,
+    lookup_maps: &HashMap<String, LookupSiteSpec>,
+) -> HashMap<u64, HashMap<Register, String>> {
+    if insns.is_empty() {
+        return HashMap::new();
+    }
+    let positions: HashMap<_, _> = insns.iter().enumerate().map(|(i, x)| (x.ip(), i)).collect();
+    let mut incoming: Vec<Option<HashMap<Register, String>>> = vec![None; insns.len()];
+    incoming[0] = Some(HashMap::new());
+    let mut queue = VecDeque::from([0]);
+    let mut factory = InstructionInfoFactory::new();
+    while let Some(index) = queue.pop_front() {
+        let insn = &insns[index];
+        let before = incoming[index].as_ref().unwrap();
+        let mut after = before.clone();
+        let copied = x86_mov_gpr64_to_gpr64(insn).and_then(|(dst, src)| {
+            if insn.op0_register() == dst && insn.op1_register() == src {
+                before.get(&src).map(|name| (dst, name.clone()))
+            } else {
+                None
+            }
+        });
+        let call = matches!(insn.flow_control(), FlowControl::Call | FlowControl::IndirectCall);
+        let inner = if lookup_calls.contains(&insn.ip()) {
+            before.get(&Register::RDI).map(|name| format!("{name}#inner"))
+                .filter(|name| lookup_maps.contains_key(name))
+        } else {
+            None
+        };
+        for reg in factory.info(insn).used_registers() {
+            if matches!(reg.access(), OpAccess::Write | OpAccess::CondWrite |
+                OpAccess::ReadWrite | OpAccess::ReadCondWrite) {
+                if let Some(family) = x86_gpr64_family(reg.register()) {
+                    after.remove(&family);
+                }
+            }
+        }
+        if call {
+            clear_x86_call_clobbered_registers(&mut after);
+            if let Some(inner) = inner {
+                after.insert(Register::RAX, inner);
+            }
+        } else if let Some((dst, name)) = copied {
+            after.insert(dst, name);
+        }
+        if let Some(name) = map_loads.get(&insn.ip()) {
+            if let Some(dst) = x86_gpr64_family(insn.op0_register()) {
+                after.insert(dst, name.clone());
+            }
+        }
+        let mut successors = Vec::new();
+        match insn.flow_control() {
+            FlowControl::Return | FlowControl::Exception => {}
+            FlowControl::IndirectBranch => {
+                after.clear();
+                successors.extend(0..insns.len());
+            }
+            FlowControl::UnconditionalBranch => {
+                if let Some(&target) = positions.get(&insn.near_branch_target()) {
+                    successors.push(target);
+                }
+            }
+            _ => {
+                if index + 1 < insns.len() {
+                    successors.push(index + 1);
+                }
+                if insn.flow_control() == FlowControl::ConditionalBranch {
+                    if let Some(&target) = positions.get(&insn.near_branch_target()) {
+                        successors.push(target);
+                    }
+                }
+            }
+        }
+        for target in successors {
+            let merged = if let Some(old) = &incoming[target] {
+                old.iter().filter(|(reg, name)| after.get(*reg) == Some(*name))
+                    .map(|(reg, name)| (*reg, name.clone())).collect()
+            } else {
+                after.clone()
+            };
+            if incoming[target].as_ref() != Some(&merged) {
+                incoming[target] = Some(merged);
+                queue.push_back(target);
+            }
+        }
+    }
+    insns.iter().zip(incoming).filter_map(|(insn, facts)| facts.map(|f| (insn.ip(), f))).collect()
+}
+
 fn scan_x86_got_relocations(
     elf: &object::File,
     included: &[SymInfo],
@@ -1064,21 +1159,41 @@ pub(super) fn rewrite_x86(
         // is meaningful in the ELF address space and we can identify
         // inter-symbol call targets. Below we re-anchor each instruction
         // to a per-symbol IP=0 layout before encoding.
-        // The map a register holds is known only along straight-line code: at a branch
-        // target another path may bring another map (a jump table may land anywhere).
+        // Straight-line tracking below uses CFG-agreed map identities at joins.
+        // An unknown jump target may land anywhere.
         let mut join_ips: HashSet<u64> = HashSet::new();
         let mut any_join = false;
-        let mut scan = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE);
-        while scan.can_decode() {
-            let i = scan.decode();
-            match i.flow_control() {
+        let mut map_loads = HashMap::new();
+        let mut lookup_calls = HashSet::new();
+        let mut map_insns = Vec::new();
+        for mut insn in Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE) {
+            match insn.flow_control() {
                 FlowControl::ConditionalBranch | FlowControl::UnconditionalBranch => {
-                    join_ips.insert(i.near_branch_target());
+                    join_ips.insert(insn.near_branch_target());
                 }
                 FlowControl::IndirectBranch => any_join = true,
                 _ => {}
             }
+            let local_ip = insn.ip() - sym.address;
+            if is_entry {
+                remap_x86_entry_registers(&mut insn, &entry_abi_strip.register_renames)?;
+            }
+            if helper_call_sites.get(&local_site_key(sym, local_ip)).map(String::as_str)
+                == Some("bpf_map_lookup_elem") {
+                lookup_calls.insert(insn.ip());
+            }
+            if insn.mnemonic() == Mnemonic::Mov && insn.op0_kind() == OpKind::Register
+                && insn.is_ip_rel_memory_operand() {
+                if let Some(name) = got_relocations.get(
+                    &local_site_key(sym, local_ip + insn.len() as u64 - 4)) {
+                    if map_addrs.contains_key(name) {
+                        map_loads.insert(insn.ip(), name.clone());
+                    }
+                }
+            }
+            map_insns.push(insn);
         }
+        let map_facts = x86_map_facts(&map_insns, &map_loads, &lookup_calls, lookup_maps);
         let mut decoder = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE);
         let mut helper_got_registers: HashMap<Register, String> = HashMap::new();
         let mut map_symbol_registers: HashMap<Register, String> = HashMap::new();
@@ -1105,7 +1220,11 @@ pub(super) fn rewrite_x86(
                 continue;
             }
             if any_join || join_ips.contains(&insn.ip()) {
-                map_symbol_registers.clear();
+                if let Some(facts) = map_facts.get(&insn.ip()) {
+                    map_symbol_registers.clone_from(facts);
+                } else {
+                    map_symbol_registers.clear();
+                }
             }
             let local_ip = insn.ip() - sym.address;
             let site_key = local_site_key(sym, local_ip);
@@ -3987,6 +4106,63 @@ mod tests {
             assert_eq!(output.callee_saved_mask, if preserve { 0 } else { 1 });
             assert_eq!(output.callee_saved_mask, if preserve { 0 } else { 1 });
         }
+        Ok(())
+    }
+
+    #[test]
+    fn map_join_preserves_inner_identity_only_when_every_path_agrees() -> Result<()> {
+        for overwrite in [None, Some(Register::R15), Some(Register::R15D)] {
+            let mut insns = vec![
+                Instruction::with2(Code::Mov_r64_imm64, Register::RDI, 0u64)?,
+                Instruction::with_branch(Code::Call_rel32_64, 100)?,
+                Instruction::with2(Code::Mov_r64_rm64, Register::R15, Register::RAX)?,
+                Instruction::with2(Code::Test_rm64_r64, Register::RAX, Register::RAX)?,
+                Instruction::with_branch(Code::Je_rel32_64, 7)?,
+                Instruction::with_branch(Code::Call_rel32_64, 100)?,
+                Instruction::with_branch(Code::Jmp_rel32_64, 8)?,
+                match overwrite {
+                    Some(Register::R15D) =>
+                        Instruction::with2(Code::Mov_r32_rm32, Register::R15D, Register::EDX)?,
+                    Some(_) =>
+                        Instruction::with2(Code::Mov_r64_rm64, Register::R15, Register::RDX)?,
+                    None => Instruction::with(Code::Nopd),
+                },
+                Instruction::with2(Code::Mov_r64_rm64, Register::RDI, Register::R15)?,
+                Instruction::with_branch(Code::Call_rel32_64, 100)?,
+                Instruction::with(Code::Retnq),
+            ];
+            for (ip, insn) in insns.iter_mut().enumerate() { insn.set_ip(ip as u64); }
+            let maps = HashMap::from([("outer#inner".to_string(),
+                generic_lookup_site(1, Some("outer#inner")).unwrap())]);
+            let facts = x86_map_facts(&insns, &HashMap::from([(0, "outer".to_string())]),
+                &HashSet::from([1, 9]), &maps);
+            assert_eq!(facts[&9].get(&Register::RDI).map(String::as_str),
+                overwrite.is_none().then_some("outer#inner"));
+            // The unrelated helper on one path clobbers RAX, not the saved R15.
+            assert!(!facts[&8].contains_key(&Register::RAX));
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn map_join_intersects_loop_backedge_and_ignores_unreachable_load() -> Result<()> {
+        let mut insns = vec![
+            Instruction::with2(Code::Mov_r64_imm64, Register::R15, 0u64)?,
+            Instruction::with_branch(Code::Jmp_rel32_64, 3)?,
+            Instruction::with2(Code::Mov_r64_imm64, Register::R15, 0u64)?,
+            Instruction::with2(Code::Test_rm64_r64, Register::RAX, Register::RAX)?,
+            Instruction::with_branch(Code::Je_rel32_64, 7)?,
+            Instruction::with2(Code::Mov_r64_imm64, Register::R15, 0u64)?,
+            Instruction::with_branch(Code::Jmp_rel32_64, 3)?,
+            Instruction::with(Code::Retnq),
+        ];
+        for (ip, insn) in insns.iter_mut().enumerate() { insn.set_ip(ip as u64); }
+        let loads = HashMap::from([(0, "first".to_string()), (2, "unreachable".to_string()),
+            (5, "second".to_string())]);
+        let facts = x86_map_facts(&insns, &loads, &HashSet::new(), &HashMap::new());
+        assert!(!facts[&3].contains_key(&Register::R15));
+        assert!(!facts[&7].contains_key(&Register::R15));
+        assert!(!facts.contains_key(&2));
         Ok(())
     }
 
