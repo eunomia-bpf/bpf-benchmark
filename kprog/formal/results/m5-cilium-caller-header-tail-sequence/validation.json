@@ -1,0 +1,99 @@
+{
+  "scope": "all sixteen original mixed-width header tail assignments execute sequentially in48 internal steps",
+  "source_sha256": "4fcf3c71d76896ed9c1c9b8fc339e72282445ef766e45bdc30c9f55023b82bb6",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-header-tail-sequence/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.7707643508911133,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderTailSequence"
+      ],
+      "exit": 0,
+      "seconds": 2.0827548503875732,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.7783396244049072,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-header-tail-sequence/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.374521255493164,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 239,
+  "full_jobs": 1529,
+  "root_queries": [
+    "stored_prefix",
+    "next_source",
+    "visit",
+    "run_from",
+    "execute"
+  ],
+  "actual_tail_memory_commit": "c30ce65ab788fa1061027dc55f6954bc3533616e",
+  "actual_assignment_visits": 16,
+  "actual_internal_steps": 48,
+  "execution": "same genuine Mint32/Mint64 stores extend initialized prefix0..16 with actual RHS/cast values; original Source shape and15chains reused",
+  "same_header_frame": "cumulative byte nonoverlap retains all preceding76 Mint64 pointer-field loads in0..608 within SAME header block",
+  "preserves": "all other blocks, caller frame, access/frontier and unchanged temporary environment",
+  "precheck_history": "draft1 lacked explicit Storage argument in visit; own precheck corrected it in draft2 before any Lean check; no failed draft receipt invented",
+  "whole_entry_composition_proved_here": false,
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
