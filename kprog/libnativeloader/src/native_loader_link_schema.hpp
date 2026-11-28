@@ -218,10 +218,11 @@ NativeLinkArgs build_native_link_args(
                 add_name_addr(out.helpers, "bpf_map_delete_elem@" + kv.first, del);
             }
         }
-        out.lookup_maps.push_back(NativeLinkArgs::LookupMap{
-            kv.first,
-            make_link_lookup_site(site),
-        });
+        auto link_site = make_link_lookup_site(site);
+        // Preserve the actual loaded type through kernel-stage IR re-emission.
+        // The C implementation reads its shape from the bound map and boot BTF.
+        if (meta->type == BPF_MAP_TYPE_LPM_TRIE) link_site.kind = "lpm_trie";
+        out.lookup_maps.push_back(NativeLinkArgs::LookupMap{kv.first, link_site});
         // A lookup on the value of a map-in-map lookup reaches an inner map: the verifier gives
         // it the form of the outer map's inner template; native-link names it `<map>#inner`.
         if (auto inner = inner_templates.find(meta->kernel_id); inner != inner_templates.end()) {

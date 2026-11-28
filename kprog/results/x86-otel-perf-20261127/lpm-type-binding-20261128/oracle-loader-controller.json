@@ -1,0 +1,80 @@
+{
+  "pid": 1223735,
+  "started_utc": "2026-11-28T03:25:01Z",
+  "phase": "finished",
+  "controller_status": 0,
+  "build": {
+    "pid": 1219513,
+    "started_utc": "2026-11-28T03:16:35Z",
+    "source_revision": "1b118ef258f62292e1474763f51650e54fe51259",
+    "source_sha256": {
+      "kprog/libnativeloader/src/native_loader_link_schema.hpp": "8ed8b287f18be964921fabde04d2deef75d7dcea40e0993d5240f34927391548",
+      "kprog/x86/perf_context_lto.cpp": "60cde900535d356107f5bc317991a05e2a848aa41f651a2788e8239f9d5cb1e0",
+      "kprog/x86/native_lab/native_link/src/main.rs": "1faf56423aa83f2d638a0534dde4064e2e98657f5e2974f44bd5a68382e4924b",
+      "kprog/x86/native_lab/native_link/src/x86.rs": "072aa4fafd051dac1f464a5d9b256418c2b777a83cfebe243fb58bf5e0721e79",
+      "kprog/x86/native_lab/native_link/src/frozen_ir.rs": "475f5e70ecb03e19314ea12a6c5db563b591289b04d4dd295f95c9ce9881ec62"
+    },
+    "result": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/lpm-type-binding-20261128",
+    "script": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/lpm-type-binding-20261128/build.sh",
+    "script_sha256": "d3842cd40936df5818e075557e1f2129851eacf0be8b54ddf44d6e7456db4f96",
+    "log": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/lpm-type-binding-20261128/build.log",
+    "scope": "Validate current source after normal map-helper plan fixture and production re-proof plan preservation; compiler unchanged so normal incremental make, Rust release/alltests; 48GiB/build-only/CPU16,18/max2. No guest/image/P/kernel change.",
+    "launch": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/lpm-type-binding-20261128/build-launch-20261128T031635Z.json"
+  },
+  "raw": "/workspaces/kprog-raw/perf/lpm-type-binding-20261128",
+  "build_returncode": 0,
+  "returncode": 0,
+  "oracle_report": {
+    "layout": {
+      "ROOT_OFF": 288,
+      "SIZE_OFF": 392,
+      "MAX_OFF": 384,
+      "CHILD_OFF": 0,
+      "PREFIX_OFF": 16,
+      "FLAGS_OFF": 20,
+      "DATA_OFF": 24
+    },
+    "cases": [
+      {
+        "name": "fixed",
+        "cases": 112917,
+        "generic_calls": 0,
+        "lpm_lowered_per_entry": 1
+      },
+      {
+        "name": "dynamic",
+        "cases": 692913,
+        "generic_calls": 0,
+        "lpm_lowered_per_entry": 1
+      },
+      {
+        "name": "mixed",
+        "cases": 692913,
+        "generic_calls": 692913,
+        "lpm_lowered_per_entry": 0
+      },
+      {
+        "name": "unknown",
+        "cases": 692913,
+        "generic_calls": 1385826,
+        "lpm_lowered_per_entry": 0
+      }
+    ],
+    "scope": "host machine-code semantics; installed application performance pending"
+  },
+  "products": {
+    "vendor/build/native-bpf/x86/stage/kprog-perf-context-lto": {
+      "bytes": 53101056,
+      "sha256": "c5d078f42f6e98475b93c336cb97d1bc6eadd04a7ccd837056af04f16350e3b6"
+    },
+    "kprog/x86/native_lab/native_link/target/release/native-link": {
+      "bytes": 2761720,
+      "sha256": "67bb943935ea7f430219d020203e34b8e1aa19d96e475a26383d5d0d91397eca"
+    },
+    "runner/build-llvmbpf/native_loader/libnative_loader.so": {
+      "bytes": 1106704,
+      "sha256": "a19196719b1aeeeb09d8b6d39d5156f670bb8996953fb91fdaff6f910d5535bf"
+    }
+  },
+  "ended_utc": "2026-11-28T03:25:14Z"
+}

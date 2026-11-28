@@ -1,0 +1,38 @@
+{
+  "layout": {
+    "ROOT_OFF": 288,
+    "SIZE_OFF": 392,
+    "MAX_OFF": 384,
+    "CHILD_OFF": 0,
+    "PREFIX_OFF": 16,
+    "FLAGS_OFF": 20,
+    "DATA_OFF": 24
+  },
+  "cases": [
+    {
+      "name": "fixed",
+      "cases": 112917,
+      "generic_calls": 0,
+      "lpm_lowered_per_entry": 1
+    },
+    {
+      "name": "dynamic",
+      "cases": 692913,
+      "generic_calls": 0,
+      "lpm_lowered_per_entry": 1
+    },
+    {
+      "name": "mixed",
+      "cases": 692913,
+      "generic_calls": 692913,
+      "lpm_lowered_per_entry": 0
+    },
+    {
+      "name": "unknown",
+      "cases": 692913,
+      "generic_calls": 1385826,
+      "lpm_lowered_per_entry": 0
+    }
+  ],
+  "scope": "host machine-code semantics; installed application performance pending"
+}
