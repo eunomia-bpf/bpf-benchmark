@@ -1,0 +1,12 @@
+{
+  "arm64_stage_compiler": "vendor/build/native-bpf/arm64/stage/kprog-perf-context-lto",
+  "file": "/workspaces/repository/vendor/build/native-bpf/arm64/stage/kprog-perf-context-lto: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=5434e7770ec1bb635d01d30c73c8045385f53e35, for GNU/Linux 3.2.0, not stripped",
+  "bytes": 53100944,
+  "sha256": "d9905543cc045e75c64772a28c8181901be670390cdce60bd2579dba1df9bde5",
+  "source_sha256": {
+    "kprog/x86/perf_context_lto.cpp": "9f3750399215f1626024694f7ead27d3e130c43f166a4cd7ea5f448d0008cefb",
+    "vendor/bpf/Makefile": "c7cc1e3a6a9541d5977fa15d168d16274527bd536d9eefec9b3a21449e8d305e",
+    "kprog/x86/native_lab/native_link/src/main.rs": "c08e017cc069322d1c7665adcc2a85bfa4c50c089e8da032e19161e01f3b249b",
+    "kprog/x86/native_lab/native_link/src/frozen_ir.rs": "996d63e3c67b6a1cb9076e32db3b5cccc4a19f9d0161e304c93ee8ae153f66a9"
+  }
+}
