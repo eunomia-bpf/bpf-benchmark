@@ -1,0 +1,2592 @@
+{
+  "other_call_instructions": [
+    {
+      "function": "bpf_barrier",
+      "line": 29737,
+      "ir": "  call void asm sideeffect \"\", \"~{memory}\"() #15, !dbg !11552, !srcloc !11553",
+      "kind": "inline-asm"
+    },
+    {
+      "function": "snat_v4_nat_handle_mapping",
+      "line": 32128,
+      "ir": "  call void asm sideeffect \"\", \"r,~{memory}\"(ptr %159) #15, !dbg !12992, !srcloc !12993",
+      "kind": "inline-asm"
+    }
+  ],
+  "defined_calls": {
+    "__check_cluster_id_bits": [],
+    "tail_drop_notify": [
+      "compute_capture_len",
+      "ctx_classify",
+      "ctx_full_len",
+      "ctx_get_ifindex",
+      "ctx_load_meta",
+      "load_ip_trace_id",
+      "ratelimit_check_and_take"
+    ],
+    "ctx_load_meta": [],
+    "load_ip_trace_id": [
+      "bpf_trace_id_get"
+    ],
+    "ctx_full_len": [],
+    "ratelimit_check_and_take": [],
+    "ctx_classify": [
+      "can_observe_overlay_hdr",
+      "can_observe_overlay_mark",
+      "cls_flag_tunnel",
+      "ctx_get_protocol",
+      "ctx_is_encrypted_by_point",
+      "ctx_is_overlay",
+      "ctx_is_overlay_hdr"
+    ],
+    "compute_capture_len": [
+      "can_observe_overlay_hdr",
+      "can_observe_overlay_mark",
+      "cls_flag_tunnel",
+      "ctx_full_len"
+    ],
+    "ctx_get_ifindex": [],
+    "tail_icmp6_send_time_exceeded": [
+      "__icmp6_send_time_exceeded",
+      "__id_for_file",
+      "_send_drop_notify",
+      "ctx_load_and_clear_meta",
+      "ctx_load_meta"
+    ],
+    "ctx_load_and_clear_meta": [
+      "ctx_load_meta",
+      "ctx_store_meta"
+    ],
+    "__icmp6_send_time_exceeded": [
+      "cilium_dbg",
+      "compute_icmp6_csum",
+      "ctx_full_len",
+      "icmp6_send_reply",
+      "ipv6_store_nexthdr",
+      "ipv6_store_paylen"
+    ],
+    "_send_drop_notify": [
+      "_update_metrics",
+      "ctx_full_len",
+      "ctx_store_meta",
+      "tail_call_internal"
+    ],
+    "__id_for_file": [],
+    "tail_no_service_ipv4": [
+      "__id_for_file",
+      "_send_drop_notify",
+      "cilium_dbg_capture",
+      "ctx_get_ifindex",
+      "ctx_load_meta",
+      "generate_icmp4_reply",
+      "redirect_self"
+    ],
+    "generate_icmp4_reply": [
+      "__revalidate_data_pull",
+      "csum_diff",
+      "csum_fold",
+      "ctx_adjust_troom",
+      "ctx_data",
+      "ctx_data_end",
+      "ctx_full_len",
+      "eth_load_daddr",
+      "eth_load_saddr",
+      "icmp_wsum_accumulate",
+      "memcpy"
+    ],
+    "cilium_dbg_capture": [],
+    "redirect_self": [
+      "ctx_get_ifindex",
+      "ctx_redirect"
+    ],
+    "__check_device_mtu": [],
+    "tail_nodeport_ipv4_dsr": [
+      "__id_for_file",
+      "__revalidate_data_pull",
+      "_send_drop_notify",
+      "ctx_load_meta",
+      "ctx_redirect",
+      "dsr_fail_needs_reply",
+      "dsr_reply_icmp4",
+      "dsr_set_opt4",
+      "fib_ok",
+      "fib_redirect_v4"
+    ],
+    "__revalidate_data_pull": [
+      "ctx_data",
+      "ctx_data_end"
+    ],
+    "dsr_set_opt4": [
+      "csum_diff",
+      "ctx_adjust_hroom_flags",
+      "dsr_is_too_big",
+      "ipv4_csum_update_by_diff",
+      "ipv4_hdrlen",
+      "l4_load_tcp_flags"
+    ],
+    "ctx_redirect": [],
+    "dsr_fail_needs_reply": [],
+    "dsr_reply_icmp4": [
+      "__id_for_file",
+      "_send_drop_notify",
+      "_update_metrics",
+      "csum_diff",
+      "csum_fold",
+      "ctx_adjust_hroom_flags",
+      "ctx_adjust_troom",
+      "ctx_full_len",
+      "ctx_get_ifindex",
+      "ctx_redirect",
+      "eth_load_daddr",
+      "eth_load_saddr",
+      "eth_store_daddr",
+      "eth_store_saddr",
+      "ipv4_hdrlen",
+      "memcpy",
+      "memset"
+    ],
+    "fib_redirect_v4": [
+      "fib_do_redirect",
+      "fib_lookup_v4",
+      "ipv4_l3"
+    ],
+    "fib_ok": [],
+    "tail_nodeport_rev_dnat_ipv4": [
+      "__id_for_file",
+      "_send_drop_notify",
+      "ctx_skip_nodeport_set",
+      "edt_set_aggregate",
+      "nodeport_rev_dnat_ipv4",
+      "tail_call_internal"
+    ],
+    "nodeport_rev_dnat_ipv4": [
+      "__revalidate_data_pull",
+      "ct_lazy_lookup4",
+      "ctx_get_ifindex",
+      "ctx_redirect",
+      "ctx_snat_done_set",
+      "fib_redirect",
+      "get_ct_map4",
+      "ipcache_lookup4",
+      "ipfrag_encode_ipv4",
+      "ipfrag_has_l4_header",
+      "ipv4_hdrlen",
+      "ipv4_l3",
+      "lb4_extract_tuple",
+      "lb4_rev_nat",
+      "nodeport_add_tunnel_encap",
+      "tunnel_gen_src_port_v4"
+    ],
+    "ctx_skip_nodeport_set": [],
+    "tail_call_internal": [],
+    "edt_set_aggregate": [],
+    "tail_nodeport_nat_ingress_ipv4": [
+      "__id_for_file",
+      "_send_drop_notify",
+      "ctx_load_meta",
+      "ctx_skip_nodeport_set",
+      "ctx_snat_done_set",
+      "edt_set_aggregate",
+      "nodeport_rev_dnat_ipv4",
+      "snat_v4_rev_nat",
+      "tail_call_internal"
+    ],
+    "snat_v4_rev_nat": [
+      "__revalidate_data_pull",
+      "ipfrag_encode_ipv4",
+      "ipfrag_has_l4_header",
+      "ipfrag_is_fragment",
+      "ipv4_ct_tuple_swap_ports",
+      "ipv4_hdrlen",
+      "ipv4_load_l4_ports",
+      "snat_v4_init_tuple",
+      "snat_v4_rev_nat_can_skip",
+      "snat_v4_rev_nat_handle_icmp_error",
+      "snat_v4_rev_nat_handle_mapping",
+      "snat_v4_rewrite_headers"
+    ],
+    "ctx_snat_done_set": [],
+    "tail_nodeport_nat_egress_ipv4": [
+      "__id_for_file",
+      "__revalidate_data_pull",
+      "__snat_v4_nat",
+      "_send_drop_notify",
+      "ctx_get_ifindex",
+      "ctx_load_meta",
+      "ctx_redirect",
+      "ctx_snat_done_set",
+      "fib_lookup_src_v4",
+      "fib_ok",
+      "fib_redirect",
+      "ipcache_lookup4",
+      "ipfrag_encode_ipv4",
+      "ipv4_ct_tuple_swap_ports",
+      "ipv4_hdrlen",
+      "ipv4_l3",
+      "lb4_extract_tuple",
+      "nodeport_add_tunnel_encap",
+      "tunnel_gen_src_port_v4"
+    ],
+    "ipfrag_encode_ipv4": [],
+    "ipv4_hdrlen": [],
+    "ipcache_lookup4": [],
+    "fib_lookup_src_v4": [
+      "fib_lookup_v4"
+    ],
+    "lb4_extract_tuple": [
+      "ipv4_load_l4_ports"
+    ],
+    "ipv4_ct_tuple_swap_ports": [],
+    "ipv4_l3": [
+      "eth_store_daddr",
+      "eth_store_saddr",
+      "ipv4_dec_ttl"
+    ],
+    "__snat_v4_nat": [
+      "ipfrag_has_l4_header",
+      "snat_v4_nat_handle_mapping",
+      "snat_v4_rewrite_headers"
+    ],
+    "tunnel_gen_src_port_v4": [],
+    "nodeport_add_tunnel_encap": [
+      "nodeport_add_tunnel_encap_opt"
+    ],
+    "fib_redirect": [
+      "fib_do_redirect",
+      "fib_lookup_skip_neigh"
+    ],
+    "tail_handle_snat_fwd_ipv4": [
+      "__id_for_file",
+      "_send_drop_notify",
+      "_send_trace_notify4",
+      "ctx_load_and_clear_meta",
+      "nodeport_snat_fwd_ipv4"
+    ],
+    "nodeport_snat_fwd_ipv4": [
+      "__revalidate_data_pull",
+      "ipfrag_encode_ipv4",
+      "ipv4_hdrlen",
+      "lb_is_svc_proto",
+      "nodeport_has_nat_conflict_ipv4",
+      "snat_v4_init_tuple",
+      "snat_v4_nat",
+      "snat_v4_needs_masquerade"
+    ],
+    "_send_trace_notify4": [
+      "_update_trace_metrics"
+    ],
+    "tail_handle_nat_fwd_ipv4": [
+      "__id_for_file",
+      "_send_drop_notify",
+      "_send_trace_notify",
+      "ctx_load_and_clear_meta",
+      "handle_nat_fwd_ipv4"
+    ],
+    "handle_nat_fwd_ipv4": [
+      "__handle_nat_fwd_ipv4"
+    ],
+    "_send_trace_notify": [
+      "_update_trace_metrics"
+    ],
+    "tail_handle_ipv4": [
+      "__id_for_file",
+      "_send_drop_notify",
+      "ctx_load_and_clear_meta",
+      "handle_ipv4"
+    ],
+    "handle_ipv4": [
+      "__revalidate_data_pull",
+      "ctx_skip_nodeport",
+      "identity_is_remote_node",
+      "identity_is_world_ipv4",
+      "ipcache_lookup4",
+      "ipfrag_encode_ipv4",
+      "ipfrag_is_fragment",
+      "ipv4_host_delivery",
+      "ipv4_local_delivery",
+      "lookup_ip4_endpoint",
+      "nodeport_lb4",
+      "set_identity_mark"
+    ],
+    "cil_from_overlay": [
+      "__id_for_file",
+      "_send_drop_notify",
+      "_send_trace_notify",
+      "bpf_clear_meta",
+      "check_and_store_ip_trace_id",
+      "cilium_dbg",
+      "ctx_skip_nodeport_clear",
+      "ctx_store_meta",
+      "get_id_from_tunnel_id",
+      "get_tunnel_key",
+      "tail_call_internal",
+      "validate_ethertype"
+    ],
+    "bpf_clear_meta": [
+      "bpf_barrier"
+    ],
+    "ctx_skip_nodeport_clear": [],
+    "check_and_store_ip_trace_id": [
+      "bpf_trace_id_set",
+      "trace_id_from_ctx"
+    ],
+    "validate_ethertype": [
+      "ctx_data",
+      "ctx_data_end",
+      "eth_is_supported_ethertype"
+    ],
+    "get_tunnel_key": [],
+    "cilium_dbg": [],
+    "get_id_from_tunnel_id": [],
+    "ctx_store_meta": [],
+    "cil_to_overlay": [
+      "__id_for_file",
+      "_send_drop_notify",
+      "bpf_clear_meta",
+      "check_and_store_ip_trace_id",
+      "ctx_get_protocol",
+      "ctx_snat_done",
+      "get_id_from_tunnel_id",
+      "handle_nat_fwd",
+      "set_identity_mark",
+      "validate_ethertype"
+    ],
+    "ctx_snat_done": [],
+    "ctx_get_protocol": [],
+    "set_identity_mark": [
+      "format_cluster_id_mark"
+    ],
+    "handle_nat_fwd": [
+      "ctx_store_meta",
+      "handle_nat_fwd_ipv4",
+      "tail_call_internal"
+    ],
+    "bpf_trace_id_get": [],
+    "ctx_is_encrypted_by_point": [],
+    "can_observe_overlay_mark": [
+      "ctx_is_xdp"
+    ],
+    "ctx_is_overlay": [],
+    "can_observe_overlay_hdr": [],
+    "ctx_is_overlay_hdr": [
+      "__revalidate_data_pull",
+      "ipv4_hdrlen",
+      "is_tunnel_port",
+      "l4_load_port"
+    ],
+    "ctx_is_xdp": [],
+    "cls_flag_tunnel": [],
+    "l4_load_port": [],
+    "is_tunnel_port": [],
+    "ipv6_store_nexthdr": [],
+    "compute_icmp6_csum": [
+      "csum_diff",
+      "ipv6_pseudohdr_checksum"
+    ],
+    "ipv6_store_paylen": [],
+    "icmp6_send_reply": [
+      "cilium_dbg_capture",
+      "csum_diff",
+      "ctx_get_ifindex",
+      "eth_load_saddr",
+      "eth_store_daddr",
+      "eth_store_saddr",
+      "ipv6_load_daddr",
+      "ipv6_load_saddr",
+      "ipv6_store_daddr",
+      "ipv6_store_saddr",
+      "redirect_self"
+    ],
+    "csum_diff": [
+      "csum_add"
+    ],
+    "ipv6_pseudohdr_checksum": [
+      "csum_diff"
+    ],
+    "csum_add": [],
+    "ipv6_load_saddr": [],
+    "ipv6_load_daddr": [],
+    "ipv6_store_saddr": [],
+    "ipv6_store_daddr": [],
+    "eth_load_saddr": [],
+    "eth_store_daddr": [
+      "eth_store_daddr_aligned"
+    ],
+    "eth_store_saddr": [
+      "eth_store_saddr_aligned"
+    ],
+    "eth_store_daddr_aligned": [],
+    "eth_store_saddr_aligned": [],
+    "_update_metrics": [],
+    "eth_load_daddr": [],
+    "ctx_adjust_troom": [],
+    "ctx_data": [],
+    "ctx_data_end": [],
+    "icmp_wsum_accumulate": [],
+    "memcpy": [
+      "__bpf_memcpy"
+    ],
+    "csum_fold": [],
+    "__bpf_memcpy": [],
+    "l4_load_tcp_flags": [],
+    "dsr_is_too_big": [],
+    "ctx_adjust_hroom_flags": [],
+    "ipv4_csum_update_by_diff": [],
+    "memset": [
+      "__bpf_memset_builtin",
+      "__bpf_memzero"
+    ],
+    "__bpf_memzero": [],
+    "__bpf_memset_builtin": [],
+    "fib_lookup_v4": [
+      "ctx_get_ifindex",
+      "fib_lookup_skip_neigh"
+    ],
+    "fib_do_redirect": [
+      "__bpf_memcpy_builtin",
+      "ctx_redirect",
+      "device_mac",
+      "eth_store_daddr",
+      "eth_store_daddr_aligned",
+      "eth_store_saddr",
+      "eth_store_saddr_aligned",
+      "maybe_add_l2_hdr",
+      "neigh_lookup_ip4",
+      "neigh_lookup_ip6",
+      "neigh_resolver_available",
+      "neigh_resolver_without_nh_available"
+    ],
+    "fib_lookup_skip_neigh": [
+      "neigh_resolver_available"
+    ],
+    "neigh_resolver_available": [],
+    "maybe_add_l2_hdr": [
+      "device_is_l3"
+    ],
+    "__bpf_memcpy_builtin": [],
+    "device_mac": [
+      "device_state_lookup"
+    ],
+    "neigh_lookup_ip4": [],
+    "neigh_lookup_ip6": [],
+    "device_is_l3": [
+      "device_state_lookup"
+    ],
+    "device_state_lookup": [],
+    "neigh_resolver_without_nh_available": [],
+    "ct_lazy_lookup4": [
+      "__ct_lookup4",
+      "ct_lookup_select_tuple_type"
+    ],
+    "get_ct_map4": [],
+    "lb4_rev_nat": [
+      "__lb4_rev_nat",
+      "lb4_lookup_rev_nat_entry"
+    ],
+    "ipfrag_has_l4_header": [],
+    "ct_lookup_select_tuple_type": [],
+    "__ct_lookup4": [
+      "__ct_lookup",
+      "__id_for_file",
+      "_update_metrics",
+      "cilium_dbg",
+      "cilium_dbg3",
+      "ct_tcp_select_action",
+      "ct_to_metrics_dir",
+      "ctx_full_len",
+      "ipfrag_has_l4_header",
+      "ipfrag_is_fragment",
+      "ipv4_ct_tuple_reverse",
+      "l4_load_tcp_flags"
+    ],
+    "ipfrag_is_fragment": [],
+    "ct_to_metrics_dir": [],
+    "ct_tcp_select_action": [],
+    "cilium_dbg3": [],
+    "__ct_lookup": [
+      "__ct_update_timeout",
+      "bpf_sec_to_mono",
+      "cilium_dbg",
+      "ct_entry_alive",
+      "ct_entry_closing",
+      "ct_entry_expired_rebalance",
+      "ct_entry_matches_types",
+      "ct_entry_seen_both_syns",
+      "ct_lookup_fill_state",
+      "ct_reset_closing",
+      "ct_reset_seen_flags",
+      "ct_update_timeout",
+      "ctx_full_len"
+    ],
+    "ipv4_ct_tuple_reverse": [
+      "__ipv4_ct_tuple_reverse",
+      "ct_flip_tuple_dir4"
+    ],
+    "ct_entry_matches_types": [],
+    "ct_entry_closing": [],
+    "ct_entry_expired_rebalance": [
+      "bpf_barrier",
+      "bpf_mono_now",
+      "bpf_sec_to_mono"
+    ],
+    "ct_entry_alive": [],
+    "ct_update_timeout": [
+      "__ct_update_timeout",
+      "bpf_sec_to_mono"
+    ],
+    "ct_reset_closing": [],
+    "ct_reset_seen_flags": [],
+    "ct_entry_seen_both_syns": [],
+    "__ct_update_timeout": [
+      "bpf_barrier",
+      "bpf_mono_now",
+      "bpf_sec_to_mono"
+    ],
+    "bpf_sec_to_mono": [],
+    "ct_lookup_fill_state": [
+      "ipv6_addr_copy"
+    ],
+    "bpf_barrier": [],
+    "bpf_mono_now": [
+      "bpf_ktime_get_sec"
+    ],
+    "bpf_ktime_get_sec": [],
+    "ipv6_addr_copy": [
+      "memcpy"
+    ],
+    "__ipv4_ct_tuple_reverse": [
+      "ipv4_ct_tuple_swap_addrs",
+      "ipv4_ct_tuple_swap_ports"
+    ],
+    "ct_flip_tuple_dir4": [],
+    "ipv4_ct_tuple_swap_addrs": [],
+    "lb4_lookup_rev_nat_entry": [
+      "cilium_dbg_lb"
+    ],
+    "__lb4_rev_nat": [
+      "cilium_dbg_lb",
+      "csum_diff",
+      "csum_l4_offset_and_flags",
+      "csum_l4_replace",
+      "ipv4_csum_update_by_diff",
+      "reverse_map_l4_port"
+    ],
+    "cilium_dbg_lb": [
+      "cilium_dbg"
+    ],
+    "csum_l4_offset_and_flags": [],
+    "reverse_map_l4_port": [
+      "l4_modify_port"
+    ],
+    "csum_l4_replace": [],
+    "l4_modify_port": [
+      "csum_l4_replace"
+    ],
+    "snat_v4_init_tuple": [],
+    "ipv4_load_l4_ports": [
+      "ipfrag_has_l4_header",
+      "ipv4_handle_fragmentation",
+      "l4_load_ports"
+    ],
+    "snat_v4_rev_nat_can_skip": [],
+    "snat_v4_rev_nat_handle_icmp_error": [
+      "ctx_full_len",
+      "ipv4_hdrlen",
+      "l4_load_ports",
+      "snat_v4_calc_icmp_error_csum_diff",
+      "snat_v4_lookup",
+      "snat_v4_rewrite_headers"
+    ],
+    "snat_v4_rev_nat_handle_mapping": [
+      "__snat_create",
+      "__snat_lookup",
+      "bpf_mono_now",
+      "ct_lazy_lookup4",
+      "get_cluster_snat_map_v4",
+      "get_ct_map4",
+      "ipv4_ct_tuple_swap_ports",
+      "memcpy",
+      "memset"
+    ],
+    "snat_v4_rewrite_headers": [
+      "csum_diff",
+      "csum_l4_offset_and_flags",
+      "csum_l4_replace",
+      "ipv4_csum_update_by_diff",
+      "l4_modify_port"
+    ],
+    "ipv4_handle_fragmentation": [
+      "__id_for_file",
+      "_update_metrics",
+      "ct_to_metrics_dir",
+      "ctx_full_len",
+      "ipfrag_get_id",
+      "ipfrag_get_protocol",
+      "ipfrag_has_l4_header",
+      "ipfrag_is_fragment",
+      "ipv4_frag_get_l4ports",
+      "l4_load_ports"
+    ],
+    "l4_load_ports": [],
+    "ipfrag_get_id": [],
+    "ipfrag_get_protocol": [],
+    "ipv4_frag_get_l4ports": [
+      "memcpy"
+    ],
+    "snat_v4_lookup": [
+      "__snat_lookup"
+    ],
+    "snat_v4_calc_icmp_error_csum_diff": [
+      "csum_diff"
+    ],
+    "__snat_lookup": [],
+    "get_cluster_snat_map_v4": [],
+    "__snat_create": [],
+    "ipv4_dec_ttl": [
+      "ipv4_csum_update_by_value"
+    ],
+    "ipv4_csum_update_by_value": [],
+    "snat_v4_nat_handle_mapping": [
+      "__snat_create",
+      "__snat_delete",
+      "__snat_lookup",
+      "bpf_mono_now",
+      "ct_create4",
+      "ct_lazy_lookup4",
+      "get_cluster_snat_map_v4",
+      "get_ct_map4",
+      "ipv4_ct_tuple_swap_addrs",
+      "memcpy",
+      "memset",
+      "set_v4_rtuple",
+      "snat_v4_new_mapping"
+    ],
+    "ct_create4": [
+      "cilium_dbg3",
+      "ct_create_fill_entry",
+      "ct_update_timeout",
+      "ctx_full_len"
+    ],
+    "set_v4_rtuple": [],
+    "__snat_delete": [],
+    "snat_v4_new_mapping": [
+      "__snat_clamp_port_range",
+      "__snat_create",
+      "__snat_try_keep_port",
+      "bpf_mono_now",
+      "memset",
+      "send_signal_nat_fill_up",
+      "set_v4_rtuple"
+    ],
+    "ct_create_fill_entry": [
+      "ipv6_addr_copy"
+    ],
+    "__snat_try_keep_port": [
+      "__snat_clamp_port_range"
+    ],
+    "__snat_clamp_port_range": [],
+    "send_signal_nat_fill_up": [],
+    "nodeport_add_tunnel_encap_opt": [
+      "__encap_with_nodeid",
+      "ctx_is_skb",
+      "fib_lookup_src_v4"
+    ],
+    "ctx_is_skb": [],
+    "__encap_with_nodeid": [
+      "__id_for_file",
+      "_send_trace_notify",
+      "cilium_dbg",
+      "ctx_set_encap_info4",
+      "ctx_set_encap_info6"
+    ],
+    "ctx_set_encap_info6": [
+      "get_tunnel_id"
+    ],
+    "ctx_set_encap_info4": [
+      "get_tunnel_id"
+    ],
+    "get_tunnel_id": [],
+    "lb_is_svc_proto": [],
+    "nodeport_has_nat_conflict_ipv4": [],
+    "snat_v4_needs_masquerade": [],
+    "snat_v4_nat": [
+      "__snat_v4_nat",
+      "ipfrag_is_fragment",
+      "ipv4_ct_tuple_swap_ports",
+      "ipv4_load_l4_ports",
+      "snat_v4_nat_can_skip",
+      "snat_v4_nat_handle_icmp_error"
+    ],
+    "snat_v4_nat_can_skip": [
+      "nat_min_egress"
+    ],
+    "snat_v4_nat_handle_icmp_error": [
+      "ctx_full_len",
+      "ipv4_hdrlen",
+      "l4_load_ports",
+      "snat_v4_lookup",
+      "snat_v4_rewrite_headers"
+    ],
+    "nat_min_egress": [],
+    "_update_trace_metrics": [
+      "_update_metrics",
+      "ctx_full_len"
+    ],
+    "__handle_nat_fwd_ipv4": [
+      "ctx_store_meta",
+      "nodeport_rev_dnat_fwd_ipv4",
+      "tail_call_internal"
+    ],
+    "nodeport_rev_dnat_fwd_ipv4": [
+      "__lb4_rev_nat",
+      "__revalidate_data_pull",
+      "ct_lazy_lookup4",
+      "get_ct_map4",
+      "ipfrag_encode_ipv4",
+      "ipfrag_has_l4_header",
+      "ipv4_hdrlen",
+      "lb4_extract_tuple",
+      "nodeport_rev_dnat_get_info_ipv4"
+    ],
+    "nodeport_rev_dnat_get_info_ipv4": [
+      "ct_get_nodeport_egress_entry4",
+      "get_ct_map4",
+      "lb4_lookup_rev_nat_entry",
+      "nodeport_dsr_lookup_v4_nat_entry"
+    ],
+    "ct_get_nodeport_egress_entry4": [],
+    "nodeport_dsr_lookup_v4_nat_entry": [
+      "snat_v4_lookup"
+    ],
+    "ctx_skip_nodeport": [],
+    "nodeport_lb4": [
+      "ctx_set_xfer",
+      "ctx_store_meta",
+      "ipfrag_encode_ipv4",
+      "ipv4_hdrlen",
+      "lb4_extract_tuple",
+      "lb4_fill_key",
+      "lb4_lookup_service",
+      "lb4_to_lb6",
+      "nodeport_svc_lb4",
+      "snat_v6_has_v4_match",
+      "tail_call_internal"
+    ],
+    "identity_is_remote_node": [],
+    "identity_is_world_ipv4": [],
+    "lookup_ip4_endpoint": [
+      "__lookup_ip4_endpoint"
+    ],
+    "ipv4_local_delivery": [
+      "cilium_dbg",
+      "ipv4_l3",
+      "local_delivery"
+    ],
+    "ipv4_host_delivery": [
+      "cilium_dbg_capture",
+      "ctx_redirect",
+      "ipv4_l3"
+    ],
+    "ctx_set_xfer": [],
+    "lb4_fill_key": [],
+    "lb4_lookup_service": [
+      "__lb4_lookup_service",
+      "lb4_key_to_wildcard",
+      "lb4_svc_is_two_scopes",
+      "lb4_wildcard_to_key"
+    ],
+    "nodeport_svc_lb4": [
+      "__ipv4_ct_tuple_reverse",
+      "__lookup_ip4_endpoint",
+      "ct_create4",
+      "ct_lazy_lookup4",
+      "ctx_set_xfer",
+      "ctx_store_meta",
+      "edt_set_aggregate",
+      "get_ct_map4",
+      "handle_nonroutable_endpoints_v4",
+      "lb4_dnat_request",
+      "lb4_key_is_wildcard",
+      "lb4_local",
+      "lb4_src_range_ok",
+      "lb4_svc_is_etp_local",
+      "lb4_svc_is_hostport",
+      "lb4_svc_is_l7_punt_proxy",
+      "lb4_svc_is_routable",
+      "lb4_to_lb6_service",
+      "lb_punt_etp_local",
+      "neigh_record_ip4",
+      "nodeport_skip_xlate4",
+      "nodeport_uses_dsr4",
+      "tail_call_internal"
+    ],
+    "snat_v6_has_v4_match": [],
+    "lb4_to_lb6": [],
+    "__lb4_lookup_service": [],
+    "lb4_key_to_wildcard": [],
+    "lb4_wildcard_to_key": [],
+    "lb4_svc_is_two_scopes": [],
+    "lb4_key_is_wildcard": [],
+    "lb4_src_range_ok": [
+      "lb4_svc_has_src_range_check"
+    ],
+    "lb4_svc_is_routable": [
+      "__lb_svc_is_routable"
+    ],
+    "lb_punt_etp_local": [],
+    "lb4_svc_is_etp_local": [],
+    "lb4_to_lb6_service": [],
+    "lb4_local": [
+      "ct_create4",
+      "ct_lazy_lookup4",
+      "ct_update_svc_entry",
+      "lb4_affinity_backend_id_by_addr",
+      "lb4_lookup_backend",
+      "lb4_select_backend_id",
+      "lb4_svc_is_affinity",
+      "lb4_update_affinity_by_addr"
+    ],
+    "handle_nonroutable_endpoints_v4": [
+      "lb4_svc_is_etp_local",
+      "lb4_svc_is_external",
+      "lb4_svc_is_itp_local"
+    ],
+    "__lookup_ip4_endpoint": [],
+    "lb4_svc_is_hostport": [],
+    "lb4_svc_is_l7_punt_proxy": [
+      "lb4_svc_is_hostport"
+    ],
+    "nodeport_skip_xlate4": [
+      "nodeport_uses_dsr4"
+    ],
+    "lb4_dnat_request": [
+      "ipfrag_has_l4_header",
+      "lb4_xlate"
+    ],
+    "nodeport_uses_dsr4": [
+      "nodeport_uses_dsr"
+    ],
+    "neigh_record_ip4": [
+      "__revalidate_data_pull",
+      "eth_addrcmp",
+      "eth_load_saddr"
+    ],
+    "lb4_svc_has_src_range_check": [],
+    "__lb_svc_is_routable": [],
+    "lb4_svc_is_affinity": [],
+    "lb4_affinity_backend_id_by_addr": [
+      "__lb4_affinity_backend_id"
+    ],
+    "lb4_lookup_backend": [
+      "__lb4_lookup_backend",
+      "cilium_dbg_lb"
+    ],
+    "lb4_select_backend_id": [
+      "lb4_algorithm",
+      "lb4_select_backend_id_maglev",
+      "lb4_select_backend_id_random"
+    ],
+    "ct_update_svc_entry": [],
+    "lb4_update_affinity_by_addr": [
+      "__lb4_update_affinity"
+    ],
+    "__lb4_affinity_backend_id": [
+      "bpf_barrier",
+      "bpf_mono_now",
+      "bpf_sec_to_mono",
+      "lb4_affinity_timeout"
+    ],
+    "lb4_affinity_timeout": [],
+    "__lb4_lookup_backend": [],
+    "lb4_algorithm": [],
+    "lb4_select_backend_id_maglev": [
+      "__hash_from_tuple_v4",
+      "lb4_svc_is_affinity",
+      "map_array_get_32"
+    ],
+    "lb4_select_backend_id_random": [
+      "lb4_lookup_backend_slot"
+    ],
+    "__hash_from_tuple_v4": [
+      "jhash_3words"
+    ],
+    "map_array_get_32": [],
+    "jhash_3words": [
+      "__jhash_nwords"
+    ],
+    "__jhash_nwords": [
+      "rol32"
+    ],
+    "rol32": [],
+    "lb4_lookup_backend_slot": [
+      "__lb4_lookup_backend_slot",
+      "cilium_dbg_lb"
+    ],
+    "__lb4_lookup_backend_slot": [
+      "__lb4_lookup_service"
+    ],
+    "__lb4_update_affinity": [
+      "bpf_mono_now"
+    ],
+    "lb4_svc_is_external": [],
+    "lb4_svc_is_itp_local": [],
+    "lb4_xlate": [
+      "csum_diff",
+      "csum_l4_offset_and_flags",
+      "csum_l4_replace",
+      "ipv4_csum_update_by_diff",
+      "lb_l4_xlate"
+    ],
+    "lb_l4_xlate": [
+      "l4_modify_port"
+    ],
+    "nodeport_uses_dsr": [],
+    "eth_addrcmp": [
+      "memcmp"
+    ],
+    "memcmp": [
+      "__bpf_memcmp"
+    ],
+    "__bpf_memcmp": [],
+    "local_delivery": [
+      "accept",
+      "local_delivery_fill_meta",
+      "should_redirect_peer",
+      "tail_call_policy"
+    ],
+    "accept": [],
+    "should_redirect_peer": [],
+    "local_delivery_fill_meta": [
+      "ctx_store_meta"
+    ],
+    "tail_call_policy": [
+      "tail_call_dynamic"
+    ],
+    "tail_call_dynamic": [],
+    "trace_id_from_ctx": [
+      "__revalidate_data_pull",
+      "trace_id_from_ip4",
+      "validate_ethertype"
+    ],
+    "bpf_trace_id_set": [],
+    "trace_id_from_ip4": [],
+    "eth_is_supported_ethertype": [],
+    "format_cluster_id_mark": []
+  },
+  "typed_field_geps": [
+    {
+      "function": "tail_drop_notify",
+      "line": 407,
+      "ir": "  %61 = getelementptr inbounds %struct.__sk_buff, ptr %60, i32 0, i32 20, !dbg !2235",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 20,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "hash",
+            "offset": 152,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "hash",
+              "expected_offsets": [],
+              "native_offset": 152,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "hash",
+            "expected_offsets": [],
+            "native_offset": 152,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_load_meta",
+      "line": 510,
+      "ir": "  %6 = getelementptr inbounds %struct.__sk_buff, ptr %5, i32 0, i32 6, !dbg !2291",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 6,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "cb",
+            "offset": 48,
+            "type_kind": "DW_TAG_array_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "sk_buff",
+              "kernel_field": "cb",
+              "expected_offsets": [
+                48
+              ],
+              "native_offset": 48,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "cb",
+            "expected_offsets": [
+              48
+            ],
+            "native_offset": 48,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_full_len",
+      "line": 546,
+      "ir": "  %4 = getelementptr inbounds %struct.__sk_buff, ptr %3, i32 0, i32 8, !dbg !2312",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 8,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "len",
+            "offset": 112,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "sk_buff",
+              "kernel_field": "len",
+              "expected_offsets": [
+                112
+              ],
+              "native_offset": 112,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "len",
+            "expected_offsets": [
+              112
+            ],
+            "native_offset": 112,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_get_ifindex",
+      "line": 1009,
+      "ir": "  %5 = getelementptr inbounds %struct.__sk_buff, ptr %4, i32 0, i32 2, !dbg !2598",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 2,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "dev",
+            "offset": 16,
+            "type_kind": "DW_TAG_pointer_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "dev",
+              "expected_offsets": [],
+              "native_offset": 16,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "dev",
+            "expected_offsets": [],
+            "native_offset": 16,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_get_ifindex",
+      "line": 1020,
+      "ir": "  %11 = getelementptr inbounds %struct.__sk_buff, ptr %10, i32 0, i32 2, !dbg !2603",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 2,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "dev",
+            "offset": 16,
+            "type_kind": "DW_TAG_pointer_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "dev",
+              "expected_offsets": [],
+              "native_offset": 16,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "dev",
+            "expected_offsets": [],
+            "native_offset": 16,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_get_ifindex",
+      "line": 1022,
+      "ir": "  %13 = getelementptr inbounds %struct.__native_skb_net_device, ptr %12, i32 0, i32 1, !dbg !2604",
+      "llvm_type": "%struct.__native_skb_net_device",
+      "llvm_element_count": 2,
+      "field_index": 1,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "ifindex",
+            "offset": 224,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "net_device",
+              "kernel_field": "ifindex",
+              "expected_offsets": [
+                224
+              ],
+              "native_offset": 224,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 228,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "net_device",
+            "kernel_field": "ifindex",
+            "expected_offsets": [
+              224
+            ],
+            "native_offset": 224,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_skip_nodeport_set",
+      "line": 4379,
+      "ir": "  %4 = getelementptr inbounds %struct.__sk_buff, ptr %3, i32 0, i32 14, !dbg !4499",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 14,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "tc_index",
+            "offset": 134,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "tc_index",
+              "expected_offsets": [],
+              "native_offset": 134,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "tc_index",
+            "expected_offsets": [],
+            "native_offset": 134,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_snat_done_set",
+      "line": 4991,
+      "ir": "  %4 = getelementptr inbounds %struct.__sk_buff, ptr %3, i32 0, i32 24, !dbg !4828",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 24,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "mark",
+            "offset": 168,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "mark",
+              "expected_offsets": [],
+              "native_offset": 168,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "mark",
+            "expected_offsets": [],
+            "native_offset": 168,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_snat_done_set",
+      "line": 4996,
+      "ir": "  %8 = getelementptr inbounds %struct.__sk_buff, ptr %7, i32 0, i32 24, !dbg !4832",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 24,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "mark",
+            "offset": 168,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "mark",
+              "expected_offsets": [],
+              "native_offset": 168,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "mark",
+            "expected_offsets": [],
+            "native_offset": 168,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "cil_from_overlay",
+      "line": 7471,
+      "ir": "  %59 = getelementptr inbounds %struct.__sk_buff, ptr %58, i32 0, i32 19, !dbg !6076",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 19,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "ingress_ifindex",
+            "offset": 148,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "skb_iif",
+              "expected_offsets": [],
+              "native_offset": 148,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "skb_iif",
+            "expected_offsets": [],
+            "native_offset": 148,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "bpf_clear_meta",
+      "line": 7623,
+      "ir": "  %17 = getelementptr inbounds %struct.__sk_buff, ptr %16, i32 0, i32 6, !dbg !6116",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 6,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "cb",
+            "offset": 48,
+            "type_kind": "DW_TAG_array_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "sk_buff",
+              "kernel_field": "cb",
+              "expected_offsets": [
+                48
+              ],
+              "native_offset": 48,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "cb",
+            "expected_offsets": [
+              48
+            ],
+            "native_offset": 48,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "bpf_clear_meta",
+      "line": 7637,
+      "ir": "  %24 = getelementptr inbounds %struct.__sk_buff, ptr %23, i32 0, i32 6, !dbg !6118",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 6,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "cb",
+            "offset": 48,
+            "type_kind": "DW_TAG_array_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "sk_buff",
+              "kernel_field": "cb",
+              "expected_offsets": [
+                48
+              ],
+              "native_offset": 48,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "cb",
+            "expected_offsets": [
+              48
+            ],
+            "native_offset": 48,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "bpf_clear_meta",
+      "line": 7651,
+      "ir": "  %31 = getelementptr inbounds %struct.__sk_buff, ptr %30, i32 0, i32 6, !dbg !6120",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 6,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "cb",
+            "offset": 48,
+            "type_kind": "DW_TAG_array_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "sk_buff",
+              "kernel_field": "cb",
+              "expected_offsets": [
+                48
+              ],
+              "native_offset": 48,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "cb",
+            "expected_offsets": [
+              48
+            ],
+            "native_offset": 48,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "bpf_clear_meta",
+      "line": 7665,
+      "ir": "  %38 = getelementptr inbounds %struct.__sk_buff, ptr %37, i32 0, i32 6, !dbg !6122",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 6,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "cb",
+            "offset": 48,
+            "type_kind": "DW_TAG_array_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "sk_buff",
+              "kernel_field": "cb",
+              "expected_offsets": [
+                48
+              ],
+              "native_offset": 48,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "cb",
+            "expected_offsets": [
+              48
+            ],
+            "native_offset": 48,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "bpf_clear_meta",
+      "line": 7679,
+      "ir": "  %45 = getelementptr inbounds %struct.__sk_buff, ptr %44, i32 0, i32 6, !dbg !6124",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 6,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "cb",
+            "offset": 48,
+            "type_kind": "DW_TAG_array_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "sk_buff",
+              "kernel_field": "cb",
+              "expected_offsets": [
+                48
+              ],
+              "native_offset": 48,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "cb",
+            "expected_offsets": [
+              48
+            ],
+            "native_offset": 48,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_skip_nodeport_clear",
+      "line": 7697,
+      "ir": "  %4 = getelementptr inbounds %struct.__sk_buff, ptr %3, i32 0, i32 14, !dbg !6132",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 14,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "tc_index",
+            "offset": 134,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "tc_index",
+              "expected_offsets": [],
+              "native_offset": 134,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "tc_index",
+            "expected_offsets": [],
+            "native_offset": 134,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_store_meta",
+      "line": 7931,
+      "ir": "  %9 = getelementptr inbounds %struct.__sk_buff, ptr %8, i32 0, i32 6, !dbg !6264",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 6,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "cb",
+            "offset": 48,
+            "type_kind": "DW_TAG_array_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "sk_buff",
+              "kernel_field": "cb",
+              "expected_offsets": [
+                48
+              ],
+              "native_offset": 48,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "cb",
+            "expected_offsets": [
+              48
+            ],
+            "native_offset": 48,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_snat_done",
+      "line": 8131,
+      "ir": "  %4 = getelementptr inbounds %struct.__sk_buff, ptr %3, i32 0, i32 24, !dbg !6353",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 24,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "mark",
+            "offset": 168,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "mark",
+              "expected_offsets": [],
+              "native_offset": 168,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "mark",
+            "expected_offsets": [],
+            "native_offset": 168,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_get_protocol",
+      "line": 8146,
+      "ir": "  %4 = getelementptr inbounds %struct.__sk_buff, ptr %3, i32 0, i32 29, !dbg !6364",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 29,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "protocol",
+            "offset": 180,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "protocol",
+              "expected_offsets": [],
+              "native_offset": 180,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "protocol",
+            "expected_offsets": [],
+            "native_offset": 180,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "set_identity_mark",
+      "line": 8177,
+      "ir": "  %19 = getelementptr inbounds %struct.__sk_buff, ptr %18, i32 0, i32 24, !dbg !6389",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 24,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "mark",
+            "offset": 168,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "mark",
+              "expected_offsets": [],
+              "native_offset": 168,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "mark",
+            "expected_offsets": [],
+            "native_offset": 168,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "set_identity_mark",
+      "line": 8182,
+      "ir": "  %23 = getelementptr inbounds %struct.__sk_buff, ptr %22, i32 0, i32 24, !dbg !6394",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 24,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "mark",
+            "offset": 168,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "mark",
+              "expected_offsets": [],
+              "native_offset": 168,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "mark",
+            "expected_offsets": [],
+            "native_offset": 168,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "set_identity_mark",
+      "line": 8194,
+      "ir": "  %34 = getelementptr inbounds %struct.__sk_buff, ptr %33, i32 0, i32 24, !dbg !6401",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 24,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "mark",
+            "offset": 168,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "mark",
+              "expected_offsets": [],
+              "native_offset": 168,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "mark",
+            "expected_offsets": [],
+            "native_offset": 168,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_is_overlay",
+      "line": 8390,
+      "ir": "  %4 = getelementptr inbounds %struct.__sk_buff, ptr %3, i32 0, i32 24, !dbg !6517",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 24,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "mark",
+            "offset": 168,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "mark",
+              "expected_offsets": [],
+              "native_offset": 168,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "mark",
+            "expected_offsets": [],
+            "native_offset": 168,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_adjust_troom",
+      "line": 9379,
+      "ir": "  %7 = getelementptr inbounds %struct.__sk_buff, ptr %6, i32 0, i32 8, !dbg !7135",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 8,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "len",
+            "offset": 112,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "sk_buff",
+              "kernel_field": "len",
+              "expected_offsets": [
+                112
+              ],
+              "native_offset": 112,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "len",
+            "expected_offsets": [
+              112
+            ],
+            "native_offset": 112,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_data",
+      "line": 9393,
+      "ir": "  %4 = getelementptr inbounds %struct.__sk_buff, ptr %3, i32 0, i32 37, !dbg !7147",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 37,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "data",
+            "offset": 208,
+            "type_kind": "DW_TAG_pointer_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "sk_buff",
+              "kernel_field": "data",
+              "expected_offsets": [
+                208
+              ],
+              "native_offset": 208,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "data",
+            "expected_offsets": [
+              208
+            ],
+            "native_offset": 208,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_data_end",
+      "line": 9404,
+      "ir": "  %4 = getelementptr inbounds %struct.__sk_buff, ptr %3, i32 0, i32 37, !dbg !7155",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 37,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "data",
+            "offset": 208,
+            "type_kind": "DW_TAG_pointer_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "sk_buff",
+              "kernel_field": "data",
+              "expected_offsets": [
+                208
+              ],
+              "native_offset": 208,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "data",
+            "expected_offsets": [
+              208
+            ],
+            "native_offset": 208,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_data_end",
+      "line": 9407,
+      "ir": "  %7 = getelementptr inbounds %struct.__sk_buff, ptr %6, i32 0, i32 8, !dbg !7157",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 8,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "len",
+            "offset": 112,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "sk_buff",
+              "kernel_field": "len",
+              "expected_offsets": [
+                112
+              ],
+              "native_offset": 112,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "len",
+            "expected_offsets": [
+              112
+            ],
+            "native_offset": 112,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_data_end",
+      "line": 9410,
+      "ir": "  %10 = getelementptr inbounds %struct.__sk_buff, ptr %9, i32 0, i32 9, !dbg !7159",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 9,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "data_len",
+            "offset": 116,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "sk_buff",
+              "kernel_field": "data_len",
+              "expected_offsets": [
+                116
+              ],
+              "native_offset": 116,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "data_len",
+            "expected_offsets": [
+              116
+            ],
+            "native_offset": 116,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_skip_nodeport",
+      "line": 34926,
+      "ir": "  %5 = getelementptr inbounds %struct.__sk_buff, ptr %4, i32 0, i32 14, !dbg !14596",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 14,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "tc_index",
+            "offset": 134,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "tc_index",
+              "expected_offsets": [],
+              "native_offset": 134,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "tc_index",
+            "expected_offsets": [],
+            "native_offset": 134,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_skip_nodeport",
+      "line": 34931,
+      "ir": "  %9 = getelementptr inbounds %struct.__sk_buff, ptr %8, i32 0, i32 14, !dbg !14598",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 39,
+      "field_index": 14,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "tc_index",
+            "offset": 134,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "tc_index",
+              "expected_offsets": [],
+              "native_offset": 134,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "tc_index",
+            "expected_offsets": [],
+            "native_offset": 134,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    }
+  ],
+  "unresolved_ordinal_maps": [],
+  "llvm_struct_element_counts": {
+    "%struct.__sk_buff": 39,
+    "%struct.__native_skb_net_device": 2
+  },
+  "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o",
+  "sha256": "86578195b5d0075c8104dc176dd30a6fb72652dd1b29d2e26bef95de054005e8",
+  "architecture": "arm64",
+  "app": "cilium",
+  "declared_layouts": [
+    {
+      "name": "__native_skb_net_device",
+      "size": 228,
+      "fields": [
+        {
+          "name": "__pad",
+          "offset": 0,
+          "type_kind": "DW_TAG_array_type",
+          "kernel_comparison": {
+            "status": "private-padding"
+          }
+        },
+        {
+          "name": "ifindex",
+          "offset": 224,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "net_device",
+            "kernel_field": "ifindex",
+            "expected_offsets": [
+              224
+            ],
+            "native_offset": 224,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "name": "__sk_buff",
+      "size": 224,
+      "fields": [
+        {
+          "name": "next",
+          "offset": 0,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "next",
+            "expected_offsets": [],
+            "native_offset": 0,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "prev",
+          "offset": 8,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "prev",
+            "expected_offsets": [],
+            "native_offset": 8,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "dev",
+          "offset": 16,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "dev",
+            "expected_offsets": [],
+            "native_offset": 16,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "sk",
+          "offset": 24,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "sk",
+            "expected_offsets": [
+              24
+            ],
+            "native_offset": 24,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "tstamp",
+          "offset": 32,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "tstamp",
+            "expected_offsets": [],
+            "native_offset": 32,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "__native_qdisc_cb_pad",
+          "offset": 40,
+          "type_kind": "DW_TAG_array_type",
+          "kernel_comparison": {
+            "status": "private-padding"
+          }
+        },
+        {
+          "name": "cb",
+          "offset": 48,
+          "type_kind": "DW_TAG_array_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "cb",
+            "expected_offsets": [
+              48
+            ],
+            "native_offset": 48,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "__native_pad88",
+          "offset": 88,
+          "type_kind": "DW_TAG_array_type",
+          "kernel_comparison": {
+            "status": "private-padding"
+          }
+        },
+        {
+          "name": "len",
+          "offset": 112,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "len",
+            "expected_offsets": [
+              112
+            ],
+            "native_offset": 112,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "data_len",
+          "offset": 116,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "data_len",
+            "expected_offsets": [
+              116
+            ],
+            "native_offset": 116,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "mac_len",
+          "offset": 120,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "mac_len",
+            "expected_offsets": [
+              120
+            ],
+            "native_offset": 120,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "hdr_len",
+          "offset": 122,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "hdr_len",
+            "expected_offsets": [
+              122
+            ],
+            "native_offset": 122,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "queue_mapping",
+          "offset": 124,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "queue_mapping",
+            "expected_offsets": [
+              124
+            ],
+            "native_offset": 124,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "__native_pad126",
+          "offset": 126,
+          "type_kind": "DW_TAG_array_type",
+          "kernel_comparison": {
+            "status": "private-padding"
+          }
+        },
+        {
+          "name": "tc_index",
+          "offset": 134,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "tc_index",
+            "expected_offsets": [],
+            "native_offset": 134,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "alloc_cpu",
+          "offset": 136,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "alloc_cpu",
+            "expected_offsets": [],
+            "native_offset": 136,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "__native_pad138",
+          "offset": 138,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "private-padding"
+          }
+        },
+        {
+          "name": null,
+          "offset": 140,
+          "type_kind": "DW_TAG_union_type",
+          "kernel_comparison": {
+            "status": "anonymous-container-not-a-semantic-field"
+          }
+        },
+        {
+          "name": "priority",
+          "offset": 144,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "priority",
+            "expected_offsets": [],
+            "native_offset": 144,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "ingress_ifindex",
+          "offset": 148,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "skb_iif",
+            "expected_offsets": [],
+            "native_offset": 148,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "hash",
+          "offset": 152,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "hash",
+            "expected_offsets": [],
+            "native_offset": 152,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": null,
+          "offset": 156,
+          "type_kind": "DW_TAG_union_type",
+          "kernel_comparison": {
+            "status": "anonymous-container-not-a-semantic-field"
+          }
+        },
+        {
+          "name": "napi_id",
+          "offset": 160,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "napi_id",
+            "expected_offsets": [],
+            "native_offset": 160,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "secmark",
+          "offset": 164,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "secmark",
+            "expected_offsets": [],
+            "native_offset": 164,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "mark",
+          "offset": 168,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "mark",
+            "expected_offsets": [],
+            "native_offset": 168,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": null,
+          "offset": 172,
+          "type_kind": "DW_TAG_union_type",
+          "kernel_comparison": {
+            "status": "anonymous-container-not-a-semantic-field"
+          }
+        },
+        {
+          "name": "inner_transport_header",
+          "offset": 174,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "inner_transport_header",
+            "expected_offsets": [],
+            "native_offset": 174,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "inner_network_header",
+          "offset": 176,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "inner_network_header",
+            "expected_offsets": [],
+            "native_offset": 176,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "inner_mac_header",
+          "offset": 178,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "inner_mac_header",
+            "expected_offsets": [],
+            "native_offset": 178,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "protocol",
+          "offset": 180,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "protocol",
+            "expected_offsets": [],
+            "native_offset": 180,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "transport_header",
+          "offset": 182,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "transport_header",
+            "expected_offsets": [],
+            "native_offset": 182,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "network_header",
+          "offset": 184,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "network_header",
+            "expected_offsets": [],
+            "native_offset": 184,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "mac_header",
+          "offset": 186,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "mac_header",
+            "expected_offsets": [],
+            "native_offset": 186,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "tail",
+          "offset": 188,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "tail",
+            "expected_offsets": [
+              188
+            ],
+            "native_offset": 188,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "end",
+          "offset": 192,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "end",
+            "expected_offsets": [
+              192
+            ],
+            "native_offset": 192,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "__native_pad196",
+          "offset": 196,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "private-padding"
+          }
+        },
+        {
+          "name": "head",
+          "offset": 200,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "head",
+            "expected_offsets": [
+              200
+            ],
+            "native_offset": 200,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "data",
+          "offset": 208,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "data",
+            "expected_offsets": [
+              208
+            ],
+            "native_offset": 208,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "truesize",
+          "offset": 216,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "truesize",
+            "expected_offsets": [
+              216
+            ],
+            "native_offset": 216,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    }
+  ],
+  "frontend_ir_sha256": "91e38b6fb092003ea5d9d6e28e79169ecc81f1c6608d4ef20ff96a2e400eb987"
+}

@@ -1,0 +1,192 @@
+{
+  "prepared_utc": "2026-11-28T09:10:29Z",
+  "original_job_launcher": 1398321,
+  "original_controller": 1398323,
+  "original_ended_utc": "2026-11-28T09:06:22Z",
+  "original_recipe_commit": "170b841562b2c5ceaccb1e9c01f6878b4b5e22ae",
+  "original_recipe_sha256": "1e4514540f8ef56c446fe16c4708fd407e8f821023d009b44475fd672abf48e4",
+  "raw_outputs": {
+    "controller.json": {
+      "bytes": 11642,
+      "sha256": "aa8604e0a7a1d14ed31be2dcc1c9a131486ef768b6db390d12cd165575791604"
+    },
+    "job.log": {
+      "bytes": 262,
+      "sha256": "04ce77ce67c29e83ea8bbb8dddd71247b64d3750a5b75121e57e06024e57091a"
+    },
+    "per-program.json": {
+      "bytes": 546593,
+      "sha256": "cfa1c48c44f81d4bf867358ee87fbebefb3554189d7fe731d236e117c0135b4d"
+    },
+    "x86-btf.json": {
+      "bytes": 59669,
+      "sha256": "4cf70bd55e64c269fd5b165c35b5e5ce91c9c85c1410e6913cc8ade57f0587a9"
+    },
+    "arm64-btf.json": {
+      "bytes": 59654,
+      "sha256": "a0cded4df45b2baf46bfb02aeb43af678ad166a3b3f7e87372a3e36739a2a891"
+    },
+    "x86-cilium-bpf_lxc.native.json": {
+      "bytes": 97484,
+      "sha256": "1b634b542d463ed8e86d45d60ec67d87988701dd50f1411acb7ee7e110795396"
+    },
+    "x86-cilium-bpf_host.native.json": {
+      "bytes": 107078,
+      "sha256": "5b5c18d6413286649992ad8385e0640fd2e9f398139c8e6269dcf926e051f9fb"
+    },
+    "x86-cilium-bpf_overlay.native.json": {
+      "bytes": 78759,
+      "sha256": "069241324aad0889b4df6720e6e3721e5e977455fa858e36daefbd2316ee3fcd"
+    },
+    "x86-cilium-bpf_wireguard.native.json": {
+      "bytes": 82170,
+      "sha256": "c80a81138b61148420354571612a6ee7a5cfda971d0cc5811d5b095c4c5acfd3"
+    },
+    "x86-cilium-bpf_sock.native.json": {
+      "bytes": 11087,
+      "sha256": "6af515c7937714c4e83e57fe9c55092a0d7cc84d1b265daeac35521d2a1dba61"
+    },
+    "x86-cilium-bpf_xdp.native.json": {
+      "bytes": 20348,
+      "sha256": "0f2259e216585f818e6fd73a26f44983408cf741680c4f4bc97ab690450e0cb5"
+    },
+    "x86-katran-balancer.native.json": {
+      "bytes": 16071,
+      "sha256": "be4521033bd4db2b982757527b61476a94bde5169c872404e92633adf35ff23f"
+    },
+    "x86-katran-healthchecking_ipip.native.json": {
+      "bytes": 21959,
+      "sha256": "8eca77d41c5107b232a8d3739c2d83553b2a177f47f0d651a42cd97c7e9642de"
+    },
+    "x86-katran-xdp_root.native.json": {
+      "bytes": 3791,
+      "sha256": "bed9239c3572e238ab41ac013dc1006797d5f10eb1b0d0de1e6b0f328d18e653"
+    },
+    "arm64-cilium-bpf_lxc.native.json": {
+      "bytes": 97270,
+      "sha256": "b7d6be4e0a90f226d96314d2b0d63ef235190f06b55aaa70544d6adf315f113a"
+    },
+    "arm64-cilium-bpf_host.native.json": {
+      "bytes": 106864,
+      "sha256": "6a4ec7164d36e7e8902fcafdb6e14f58abfae5e094749e4677f8292ad981446d"
+    },
+    "arm64-cilium-bpf_overlay.native.json": {
+      "bytes": 78571,
+      "sha256": "b49a55ee700ba0379a02bd6176ff69f751511a0b6714c9a4f3524dbd11befabc"
+    },
+    "arm64-cilium-bpf_wireguard.native.json": {
+      "bytes": 81982,
+      "sha256": "e9d877f45bff2a02b9ae8edf9977d742055bb50a5f81819476f77fdd5c7219ab"
+    },
+    "arm64-cilium-bpf_sock.native.json": {
+      "bytes": 10565,
+      "sha256": "f07cb3feabea74c10c6dbf5b8d46c7fbd2ff45c549a475ba18402df159eed41d"
+    },
+    "arm64-cilium-bpf_xdp.native.json": {
+      "bytes": 20160,
+      "sha256": "6eeb47ffeb454d4b04d9aa0c0eebefceada1b0a227f67a6f9eac60d5d612714e"
+    },
+    "arm64-katran-balancer.native.json": {
+      "bytes": 15987,
+      "sha256": "18dbb060efdfe9fecf2158110311da054ed09ed1f71d8e5e52d32f58a49f31d0"
+    },
+    "arm64-katran-healthchecking_ipip.native.json": {
+      "bytes": 21963,
+      "sha256": "5e1ecfb9d4feb4b8236ed4ed280d4aae2f71de90443e10728711660104b68b56"
+    },
+    "arm64-katran-xdp_root.native.json": {
+      "bytes": 3795,
+      "sha256": "a7219bcd9c6c013ccf567b12e8cd7b787ae36cd60245f933712b43954f1eda0a"
+    },
+    "arm64-cilium-bpf_host.native-llvm-dis.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-cilium-bpf_host.native-llvm-dis.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-katran-balancer.native-llvm-dis.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-cilium-bpf_overlay.native-llvm-dis.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-btf.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-cilium-bpf_overlay.native-llvm-dis.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-katran-healthchecking_ipip.native-llvm-dis.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-cilium-bpf_sock.native-llvm-dis.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-katran-balancer.native-llvm-dis.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-cilium-bpf_lxc.native-llvm-dis.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-katran-xdp_root.native-llvm-dis.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-btf.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-cilium-bpf_xdp.native-llvm-dis.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-cilium-bpf_lxc.native-llvm-dis.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-cilium-bpf_wireguard.native-llvm-dis.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-cilium-bpf_wireguard.native-llvm-dis.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-katran-xdp_root.native-llvm-dis.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-katran-healthchecking_ipip.native-llvm-dis.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-cilium-bpf_sock.native-llvm-dis.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-cilium-bpf_xdp.native-llvm-dis.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "repair": "Only BTF anonymous expansion: actual bpftool names unnamed members (anon), not empty. Re-read two canonical BTFs, reuse unchanged18DWARF/IR/callgraph results and176row indices, write comparison addendum. No full census rerun.",
+  "initial_counts": {
+    "typed_geps": 348,
+    "ordinal_unresolved": 0,
+    "kernel_field_not_resolved": 204,
+    "offset_match": 132,
+    "anonymous_container": 8,
+    "public_XDP_rule": 4
+  },
+  "authority": "Newest resume COORDINATOR 2026-11-28T07:17Z; result-reader-only repair."
+}

@@ -1,0 +1,120 @@
+{
+  "other_call_instructions": [],
+  "defined_calls": {
+    "xdp_root": []
+  },
+  "typed_field_geps": [],
+  "unresolved_ordinal_maps": [],
+  "llvm_struct_element_counts": {},
+  "object": "vendor/build/native-bpf/arm64/stage/katran/xdp_root.native.o",
+  "sha256": "933612807336a2c537eb9aaf8157a8d3e9ad751228aeeea7c1d145af18f3e71b",
+  "architecture": "arm64",
+  "app": "katran",
+  "declared_layouts": [
+    {
+      "name": "xdp_md",
+      "size": 56,
+      "fields": [
+        {
+          "name": "data",
+          "offset": 0,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "data",
+            "expected_offsets": [
+              0
+            ],
+            "native_offset": 0,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "data_end",
+          "offset": 8,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "data_end",
+            "expected_offsets": [
+              8
+            ],
+            "native_offset": 8,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "data_meta",
+          "offset": 16,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "data_meta",
+            "expected_offsets": [
+              16
+            ],
+            "native_offset": 16,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "data_hard_start",
+          "offset": 24,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "data_hard_start",
+            "expected_offsets": [
+              24
+            ],
+            "native_offset": 24,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "rxq",
+          "offset": 32,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "rxq",
+            "expected_offsets": [
+              32
+            ],
+            "native_offset": 32,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "txq",
+          "offset": 40,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "txq",
+            "expected_offsets": [
+              40
+            ],
+            "native_offset": 40,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": null,
+          "offset": 48,
+          "type_kind": "DW_TAG_union_type",
+          "kernel_comparison": {
+            "status": "anonymous-container-not-a-semantic-field"
+          }
+        }
+      ]
+    }
+  ],
+  "frontend_ir_sha256": "c5ba768a227bf9b469adbdf837fdfbef4e4296368cd3a767d80967b907e0b752"
+}

@@ -1,0 +1,648 @@
+{
+  "other_call_instructions": [],
+  "defined_calls": {
+    "healthcheck_encap": []
+  },
+  "typed_field_geps": [
+    {
+      "function": "healthcheck_encap",
+      "line": 54,
+      "ir": "  %18 = getelementptr inbounds %struct.__sk_buff, ptr %17, i32 0, i32 23, !dbg !213",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 38,
+      "field_index": 23,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "mark",
+            "offset": 168,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "mark",
+              "expected_offsets": [],
+              "native_offset": 168,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "mark",
+            "expected_offsets": [],
+            "native_offset": 168,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "healthcheck_encap",
+      "line": 84,
+      "ir": "  %26 = getelementptr inbounds %struct.__sk_buff, ptr %25, i32 0, i32 23, !dbg !237",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 38,
+      "field_index": 23,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "mark",
+            "offset": 168,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "mark",
+              "expected_offsets": [],
+              "native_offset": 168,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "mark",
+            "expected_offsets": [],
+            "native_offset": 168,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "healthcheck_encap",
+      "line": 120,
+      "ir": "  %45 = getelementptr inbounds %struct.__sk_buff, ptr %44, i32 0, i32 7, !dbg !260",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 38,
+      "field_index": 7,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "len",
+            "offset": 112,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "sk_buff",
+              "kernel_field": "len",
+              "expected_offsets": [
+                112
+              ],
+              "native_offset": 112,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "len",
+            "expected_offsets": [
+              112
+            ],
+            "native_offset": 112,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "healthcheck_encap",
+      "line": 182,
+      "ir": "  %78 = getelementptr inbounds %struct.__sk_buff, ptr %77, i32 0, i32 23, !dbg !301",
+      "llvm_type": "%struct.__sk_buff",
+      "llvm_element_count": 38,
+      "field_index": 23,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "mark",
+            "offset": 168,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "kernel-field-not-resolved",
+              "kernel_type": "sk_buff",
+              "kernel_field": "mark",
+              "expected_offsets": [],
+              "native_offset": 168,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 224,
+          "comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "mark",
+            "expected_offsets": [],
+            "native_offset": 168,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    }
+  ],
+  "unresolved_ordinal_maps": [],
+  "llvm_struct_element_counts": {
+    "%struct.__sk_buff": 38
+  },
+  "object": "vendor/build/native-bpf/arm64/stage/katran/healthchecking_ipip.native.o",
+  "sha256": "2374d6537dfe7b5f0e518493f1de5688471c9f0d94b3a803101dbd5c8f4d4a6b",
+  "architecture": "arm64",
+  "app": "katran",
+  "declared_layouts": [
+    {
+      "name": "__sk_buff",
+      "size": 224,
+      "fields": [
+        {
+          "name": "next",
+          "offset": 0,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "next",
+            "expected_offsets": [],
+            "native_offset": 0,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "prev",
+          "offset": 8,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "prev",
+            "expected_offsets": [],
+            "native_offset": 8,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "dev",
+          "offset": 16,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "dev",
+            "expected_offsets": [],
+            "native_offset": 16,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "sk",
+          "offset": 24,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "sk",
+            "expected_offsets": [
+              24
+            ],
+            "native_offset": 24,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "tstamp",
+          "offset": 32,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "tstamp",
+            "expected_offsets": [],
+            "native_offset": 32,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "cb",
+          "offset": 40,
+          "type_kind": "DW_TAG_array_type",
+          "kernel_comparison": {
+            "status": "declared-offset-differs",
+            "kernel_type": "sk_buff",
+            "kernel_field": "cb",
+            "expected_offsets": [
+              48
+            ],
+            "native_offset": 40,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "__native_pad88",
+          "offset": 88,
+          "type_kind": "DW_TAG_array_type",
+          "kernel_comparison": {
+            "status": "private-padding"
+          }
+        },
+        {
+          "name": "len",
+          "offset": 112,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "len",
+            "expected_offsets": [
+              112
+            ],
+            "native_offset": 112,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "data_len",
+          "offset": 116,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "data_len",
+            "expected_offsets": [
+              116
+            ],
+            "native_offset": 116,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "mac_len",
+          "offset": 120,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "mac_len",
+            "expected_offsets": [
+              120
+            ],
+            "native_offset": 120,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "hdr_len",
+          "offset": 122,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "hdr_len",
+            "expected_offsets": [
+              122
+            ],
+            "native_offset": 122,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "queue_mapping",
+          "offset": 124,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "queue_mapping",
+            "expected_offsets": [
+              124
+            ],
+            "native_offset": 124,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "__native_pad126",
+          "offset": 126,
+          "type_kind": "DW_TAG_array_type",
+          "kernel_comparison": {
+            "status": "private-padding"
+          }
+        },
+        {
+          "name": "tc_index",
+          "offset": 134,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "tc_index",
+            "expected_offsets": [],
+            "native_offset": 134,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "alloc_cpu",
+          "offset": 136,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "alloc_cpu",
+            "expected_offsets": [],
+            "native_offset": 136,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "__native_pad138",
+          "offset": 138,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "private-padding"
+          }
+        },
+        {
+          "name": null,
+          "offset": 140,
+          "type_kind": "DW_TAG_union_type",
+          "kernel_comparison": {
+            "status": "anonymous-container-not-a-semantic-field"
+          }
+        },
+        {
+          "name": "priority",
+          "offset": 144,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "priority",
+            "expected_offsets": [],
+            "native_offset": 144,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "ingress_ifindex",
+          "offset": 148,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "skb_iif",
+            "expected_offsets": [],
+            "native_offset": 148,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "hash",
+          "offset": 152,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "hash",
+            "expected_offsets": [],
+            "native_offset": 152,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": null,
+          "offset": 156,
+          "type_kind": "DW_TAG_union_type",
+          "kernel_comparison": {
+            "status": "anonymous-container-not-a-semantic-field"
+          }
+        },
+        {
+          "name": "napi_id",
+          "offset": 160,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "napi_id",
+            "expected_offsets": [],
+            "native_offset": 160,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "secmark",
+          "offset": 164,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "secmark",
+            "expected_offsets": [],
+            "native_offset": 164,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "mark",
+          "offset": 168,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "mark",
+            "expected_offsets": [],
+            "native_offset": 168,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": null,
+          "offset": 172,
+          "type_kind": "DW_TAG_union_type",
+          "kernel_comparison": {
+            "status": "anonymous-container-not-a-semantic-field"
+          }
+        },
+        {
+          "name": "inner_transport_header",
+          "offset": 174,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "inner_transport_header",
+            "expected_offsets": [],
+            "native_offset": 174,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "inner_network_header",
+          "offset": 176,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "inner_network_header",
+            "expected_offsets": [],
+            "native_offset": 176,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "inner_mac_header",
+          "offset": 178,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "inner_mac_header",
+            "expected_offsets": [],
+            "native_offset": 178,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "protocol",
+          "offset": 180,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "protocol",
+            "expected_offsets": [],
+            "native_offset": 180,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "transport_header",
+          "offset": 182,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "transport_header",
+            "expected_offsets": [],
+            "native_offset": 182,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "network_header",
+          "offset": 184,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "network_header",
+            "expected_offsets": [],
+            "native_offset": 184,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "mac_header",
+          "offset": 186,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "kernel-field-not-resolved",
+            "kernel_type": "sk_buff",
+            "kernel_field": "mac_header",
+            "expected_offsets": [],
+            "native_offset": 186,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "tail",
+          "offset": 188,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "tail",
+            "expected_offsets": [
+              188
+            ],
+            "native_offset": 188,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "end",
+          "offset": 192,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "end",
+            "expected_offsets": [
+              192
+            ],
+            "native_offset": 192,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "__native_pad196",
+          "offset": 196,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "private-padding"
+          }
+        },
+        {
+          "name": "head",
+          "offset": 200,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "head",
+            "expected_offsets": [
+              200
+            ],
+            "native_offset": 200,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "data",
+          "offset": 208,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "data",
+            "expected_offsets": [
+              208
+            ],
+            "native_offset": 208,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "truesize",
+          "offset": 216,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "sk_buff",
+            "kernel_field": "truesize",
+            "expected_offsets": [
+              216
+            ],
+            "native_offset": 216,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    }
+  ],
+  "frontend_ir_sha256": "781d1069aec8e5991384dfc0a94a7954cb6e4c5867bb6c9e016d7a2a6d1a4e44"
+}

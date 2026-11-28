@@ -1,0 +1,532 @@
+{
+  "other_call_instructions": [],
+  "defined_calls": {
+    "balancer_ingress": [
+      "process_packet"
+    ],
+    "process_packet": [
+      "check_and_update_real_index_in_lru",
+      "check_udp_flow_migration",
+      "connection_table_lookup",
+      "encap_v4",
+      "encap_v6",
+      "get_packet_dst",
+      "handle_if_icmp",
+      "ignorable_quic_icmp_code",
+      "incr_server_id_routing_stats",
+      "increment_quic_cid_version_stats",
+      "parse_l3_headers",
+      "parse_quic",
+      "parse_tcp",
+      "parse_udp",
+      "update_vip_lru_miss_stats"
+    ],
+    "parse_l3_headers": [],
+    "handle_if_icmp": [
+      "parse_icmp",
+      "parse_icmpv6"
+    ],
+    "parse_tcp": [
+      "calc_offset"
+    ],
+    "parse_udp": [
+      "calc_offset"
+    ],
+    "ignorable_quic_icmp_code": [],
+    "parse_quic": [
+      "calc_offset"
+    ],
+    "increment_quic_cid_version_stats": [],
+    "check_and_update_real_index_in_lru": [
+      "is_under_flood"
+    ],
+    "incr_server_id_routing_stats": [],
+    "connection_table_lookup": [
+      "bpf_ktime_get_ns"
+    ],
+    "check_udp_flow_migration": [
+      "is_under_flood"
+    ],
+    "get_packet_dst": [
+      "get_packet_hash",
+      "increment_ch_drop_no_real",
+      "increment_ch_drop_real_0",
+      "is_under_flood"
+    ],
+    "update_vip_lru_miss_stats": [],
+    "encap_v6": [
+      "create_encap_ipv6_src",
+      "create_v6_hdr"
+    ],
+    "encap_v4": [
+      "create_encap_ipv4_src",
+      "create_v4_hdr"
+    ],
+    "parse_icmpv6": [
+      "send_icmp6_reply"
+    ],
+    "parse_icmp": [
+      "send_icmp_reply"
+    ],
+    "send_icmp6_reply": [
+      "swap_mac_and_send"
+    ],
+    "swap_mac_and_send": [],
+    "send_icmp_reply": [
+      "ipv4_csum_inline",
+      "swap_mac_and_send"
+    ],
+    "ipv4_csum_inline": [
+      "csum_fold_helper"
+    ],
+    "csum_fold_helper": [],
+    "calc_offset": [],
+    "is_under_flood": [
+      "bpf_ktime_get_ns"
+    ],
+    "bpf_ktime_get_ns": [],
+    "get_packet_hash": [
+      "jhash",
+      "jhash_2words"
+    ],
+    "jhash_2words": [
+      "__jhash_nwords"
+    ],
+    "jhash": [
+      "rol32"
+    ],
+    "__jhash_nwords": [
+      "rol32"
+    ],
+    "rol32": [],
+    "increment_ch_drop_real_0": [],
+    "increment_ch_drop_no_real": [],
+    "create_encap_ipv6_src": [],
+    "create_v6_hdr": [],
+    "create_encap_ipv4_src": [],
+    "create_v4_hdr": [
+      "ipv4_csum_inline"
+    ]
+  },
+  "typed_field_geps": [
+    {
+      "function": "balancer_ingress",
+      "line": 99,
+      "ir": "  %15 = getelementptr inbounds %struct.xdp_md, ptr %14, i32 0, i32 0, !dbg !474",
+      "llvm_type": "%struct.xdp_md",
+      "llvm_element_count": 7,
+      "field_index": 0,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "data",
+            "offset": 0,
+            "type_kind": "DW_TAG_pointer_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "xdp_buff",
+              "kernel_field": "data",
+              "expected_offsets": [
+                0
+              ],
+              "native_offset": 0,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 56,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "data",
+            "expected_offsets": [
+              0
+            ],
+            "native_offset": 0,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "balancer_ingress",
+      "line": 107,
+      "ir": "  %20 = getelementptr inbounds %struct.xdp_md, ptr %19, i32 0, i32 1, !dbg !482",
+      "llvm_type": "%struct.xdp_md",
+      "llvm_element_count": 7,
+      "field_index": 1,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "data_end",
+            "offset": 8,
+            "type_kind": "DW_TAG_pointer_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "xdp_buff",
+              "kernel_field": "data_end",
+              "expected_offsets": [
+                8
+              ],
+              "native_offset": 8,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 56,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "data_end",
+            "expected_offsets": [
+              8
+            ],
+            "native_offset": 8,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "process_packet",
+      "line": 349,
+      "ir": "  %45 = getelementptr inbounds %struct.xdp_md, ptr %44, i32 0, i32 0, !dbg !695",
+      "llvm_type": "%struct.xdp_md",
+      "llvm_element_count": 7,
+      "field_index": 0,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "data",
+            "offset": 0,
+            "type_kind": "DW_TAG_pointer_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "xdp_buff",
+              "kernel_field": "data",
+              "expected_offsets": [
+                0
+              ],
+              "native_offset": 0,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 56,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "data",
+            "expected_offsets": [
+              0
+            ],
+            "native_offset": 0,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "process_packet",
+      "line": 357,
+      "ir": "  %50 = getelementptr inbounds %struct.xdp_md, ptr %49, i32 0, i32 1, !dbg !701",
+      "llvm_type": "%struct.xdp_md",
+      "llvm_element_count": 7,
+      "field_index": 1,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "data_end",
+            "offset": 8,
+            "type_kind": "DW_TAG_pointer_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "xdp_buff",
+              "kernel_field": "data_end",
+              "expected_offsets": [
+                8
+              ],
+              "native_offset": 8,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 56,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "data_end",
+            "expected_offsets": [
+              8
+            ],
+            "native_offset": 8,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "encap_v6",
+      "line": 3318,
+      "ir": "  %30 = getelementptr inbounds %struct.xdp_md, ptr %29, i32 0, i32 0, !dbg !2620",
+      "llvm_type": "%struct.xdp_md",
+      "llvm_element_count": 7,
+      "field_index": 0,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "data",
+            "offset": 0,
+            "type_kind": "DW_TAG_pointer_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "xdp_buff",
+              "kernel_field": "data",
+              "expected_offsets": [
+                0
+              ],
+              "native_offset": 0,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 56,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "data",
+            "expected_offsets": [
+              0
+            ],
+            "native_offset": 0,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "encap_v6",
+      "line": 3324,
+      "ir": "  %35 = getelementptr inbounds %struct.xdp_md, ptr %34, i32 0, i32 1, !dbg !2625",
+      "llvm_type": "%struct.xdp_md",
+      "llvm_element_count": 7,
+      "field_index": 1,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "data_end",
+            "offset": 8,
+            "type_kind": "DW_TAG_pointer_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "xdp_buff",
+              "kernel_field": "data_end",
+              "expected_offsets": [
+                8
+              ],
+              "native_offset": 8,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 56,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "data_end",
+            "expected_offsets": [
+              8
+            ],
+            "native_offset": 8,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "encap_v4",
+      "line": 3516,
+      "ir": "  %36 = getelementptr inbounds %struct.xdp_md, ptr %35, i32 0, i32 0, !dbg !2756",
+      "llvm_type": "%struct.xdp_md",
+      "llvm_element_count": 7,
+      "field_index": 0,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "data",
+            "offset": 0,
+            "type_kind": "DW_TAG_pointer_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "xdp_buff",
+              "kernel_field": "data",
+              "expected_offsets": [
+                0
+              ],
+              "native_offset": 0,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 56,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "data",
+            "expected_offsets": [
+              0
+            ],
+            "native_offset": 0,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    },
+    {
+      "function": "encap_v4",
+      "line": 3522,
+      "ir": "  %41 = getelementptr inbounds %struct.xdp_md, ptr %40, i32 0, i32 1, !dbg !2761",
+      "llvm_type": "%struct.xdp_md",
+      "llvm_element_count": 7,
+      "field_index": 1,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "data_end",
+            "offset": 8,
+            "type_kind": "DW_TAG_pointer_type",
+            "kernel_comparison": {
+              "status": "declared-offset-matches",
+              "kernel_type": "xdp_buff",
+              "kernel_field": "data_end",
+              "expected_offsets": [
+                8
+              ],
+              "native_offset": 8,
+              "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+            }
+          },
+          "layout_size": 56,
+          "comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "data_end",
+            "expected_offsets": [
+              8
+            ],
+            "native_offset": 8,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        }
+      ]
+    }
+  ],
+  "unresolved_ordinal_maps": [],
+  "llvm_struct_element_counts": {
+    "%struct.xdp_md": 7
+  },
+  "object": "vendor/build/native-bpf/x86/stage/katran/balancer.native.o",
+  "sha256": "87729bacfd0232d1849c5f5a000dae2d684db84e0d4ab926dd32a3bd72749ba4",
+  "architecture": "x86",
+  "app": "katran",
+  "declared_layouts": [
+    {
+      "name": "xdp_md",
+      "size": 56,
+      "fields": [
+        {
+          "name": "data",
+          "offset": 0,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "data",
+            "expected_offsets": [
+              0
+            ],
+            "native_offset": 0,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "data_end",
+          "offset": 8,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "data_end",
+            "expected_offsets": [
+              8
+            ],
+            "native_offset": 8,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "data_meta",
+          "offset": 16,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "data_meta",
+            "expected_offsets": [
+              16
+            ],
+            "native_offset": 16,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "data_hard_start",
+          "offset": 24,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "data_hard_start",
+            "expected_offsets": [
+              24
+            ],
+            "native_offset": 24,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "rxq",
+          "offset": 32,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "rxq",
+            "expected_offsets": [
+              32
+            ],
+            "native_offset": 32,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": "txq",
+          "offset": 40,
+          "type_kind": "DW_TAG_pointer_type",
+          "kernel_comparison": {
+            "status": "declared-offset-matches",
+            "kernel_type": "xdp_buff",
+            "kernel_field": "txq",
+            "expected_offsets": [
+              40
+            ],
+            "native_offset": 40,
+            "scope": "Declaration comparison only; pointer origin and runtime/width/bit semantics separate."
+          }
+        },
+        {
+          "name": null,
+          "offset": 48,
+          "type_kind": "DW_TAG_union_type",
+          "kernel_comparison": {
+            "status": "anonymous-container-not-a-semantic-field"
+          }
+        }
+      ]
+    }
+  ],
+  "frontend_ir_sha256": "9a9980779ca05f20693c3695870a79fcca3b955e61e4f76f722845f424c20d7b"
+}

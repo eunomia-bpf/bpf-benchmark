@@ -1,0 +1,766 @@
+{
+  "other_call_instructions": [
+    {
+      "function": "bpf_barrier",
+      "line": 23832,
+      "ir": "  call void asm sideeffect \"\", \"~{memory}\"() #13, !dbg !8519, !srcloc !8520",
+      "kind": "inline-asm"
+    },
+    {
+      "function": "snat_v4_nat_handle_mapping",
+      "line": 27672,
+      "ir": "  call void asm sideeffect \"\", \"r,~{memory}\"(ptr %159) #13, !dbg !10615, !srcloc !10616",
+      "kind": "inline-asm"
+    }
+  ],
+  "defined_calls": {
+    "__check_cluster_id_bits": [],
+    "tail_drop_notify": [
+      "compute_capture_len",
+      "ctx_classify",
+      "ctx_full_len",
+      "ctx_get_ifindex",
+      "ctx_load_meta",
+      "load_ip_trace_id",
+      "ratelimit_check_and_take"
+    ],
+    "ctx_load_meta": [],
+    "load_ip_trace_id": [
+      "bpf_trace_id_get"
+    ],
+    "ctx_full_len": [
+      "micro_native_xdp_data",
+      "micro_native_xdp_data_end"
+    ],
+    "ratelimit_check_and_take": [],
+    "ctx_classify": [
+      "can_observe_overlay_hdr",
+      "cls_flag_tunnel",
+      "ctx_get_protocol",
+      "ctx_is_overlay_hdr"
+    ],
+    "compute_capture_len": [
+      "can_observe_overlay_hdr",
+      "can_observe_overlay_mark",
+      "cls_flag_tunnel",
+      "ctx_full_len"
+    ],
+    "ctx_get_ifindex": [],
+    "tail_no_service_ipv4": [
+      "__id_for_file",
+      "_send_drop_notify",
+      "cilium_dbg_capture",
+      "ctx_get_ifindex",
+      "ctx_load_meta",
+      "generate_icmp4_reply",
+      "redirect_self"
+    ],
+    "generate_icmp4_reply": [
+      "__revalidate_data_pull",
+      "csum_diff",
+      "csum_fold",
+      "ctx_adjust_troom",
+      "ctx_data",
+      "ctx_data_end",
+      "ctx_full_len",
+      "eth_load_daddr",
+      "eth_load_saddr",
+      "icmp_wsum_accumulate",
+      "memcpy"
+    ],
+    "cilium_dbg_capture": [],
+    "redirect_self": [],
+    "_send_drop_notify": [
+      "_update_metrics",
+      "ctx_full_len",
+      "ctx_store_meta",
+      "tail_call_internal"
+    ],
+    "__id_for_file": [],
+    "__check_device_mtu": [],
+    "tail_nodeport_rev_dnat_ipv4": [
+      "__id_for_file",
+      "_send_drop_notify",
+      "ctx_skip_nodeport_set",
+      "edt_set_aggregate",
+      "nodeport_rev_dnat_ipv4",
+      "tail_call_internal"
+    ],
+    "nodeport_rev_dnat_ipv4": [
+      "__revalidate_data_pull",
+      "ct_lazy_lookup4",
+      "ctx_get_ifindex",
+      "ctx_snat_done_set",
+      "fib_redirect",
+      "get_ct_map4",
+      "ipfrag_encode_ipv4",
+      "ipfrag_has_l4_header",
+      "ipv4_hdrlen",
+      "ipv4_l3",
+      "lb4_extract_tuple",
+      "lb4_rev_nat"
+    ],
+    "ctx_skip_nodeport_set": [
+      "ctx_store_meta"
+    ],
+    "tail_call_internal": [],
+    "edt_set_aggregate": [],
+    "tail_nodeport_nat_ingress_ipv4": [
+      "__id_for_file",
+      "_send_drop_notify",
+      "ctx_load_meta",
+      "ctx_skip_nodeport_set",
+      "ctx_snat_done_set",
+      "edt_set_aggregate",
+      "nodeport_rev_dnat_ipv4",
+      "snat_v4_rev_nat",
+      "tail_call_internal"
+    ],
+    "snat_v4_rev_nat": [
+      "__revalidate_data_pull",
+      "ipfrag_encode_ipv4",
+      "ipfrag_has_l4_header",
+      "ipfrag_is_fragment",
+      "ipv4_ct_tuple_swap_ports",
+      "ipv4_hdrlen",
+      "ipv4_load_l4_ports",
+      "snat_v4_init_tuple",
+      "snat_v4_rev_nat_can_skip",
+      "snat_v4_rev_nat_handle_icmp_error",
+      "snat_v4_rev_nat_handle_mapping",
+      "snat_v4_rewrite_headers",
+      "xdp_load_bytes"
+    ],
+    "ctx_snat_done_set": [
+      "ctx_set_xfer"
+    ],
+    "tail_nodeport_nat_egress_ipv4": [
+      "__id_for_file",
+      "__revalidate_data_pull",
+      "__snat_v4_nat",
+      "_send_drop_notify",
+      "ctx_get_ifindex",
+      "ctx_snat_done_set",
+      "fib_lookup_src_v4",
+      "fib_ok",
+      "fib_redirect",
+      "ipfrag_encode_ipv4",
+      "ipv4_ct_tuple_swap_ports",
+      "ipv4_hdrlen",
+      "ipv4_l3",
+      "lb4_extract_tuple"
+    ],
+    "__revalidate_data_pull": [
+      "ctx_data",
+      "ctx_data_end"
+    ],
+    "ipfrag_encode_ipv4": [],
+    "ipv4_hdrlen": [],
+    "fib_lookup_src_v4": [
+      "fib_lookup_v4"
+    ],
+    "lb4_extract_tuple": [
+      "ipv4_load_l4_ports"
+    ],
+    "ipv4_ct_tuple_swap_ports": [],
+    "ipv4_l3": [
+      "eth_store_daddr",
+      "eth_store_saddr",
+      "ipv4_dec_ttl"
+    ],
+    "__snat_v4_nat": [
+      "ipfrag_has_l4_header",
+      "snat_v4_nat_handle_mapping",
+      "snat_v4_rewrite_headers"
+    ],
+    "fib_redirect": [
+      "fib_do_redirect",
+      "fib_lookup_skip_neigh"
+    ],
+    "fib_ok": [],
+    "cil_xdp_entry": [
+      "check_and_store_ip_trace_id",
+      "check_filters"
+    ],
+    "check_and_store_ip_trace_id": [
+      "bpf_trace_id_set",
+      "trace_id_from_ctx"
+    ],
+    "check_filters": [
+      "bpf_xdp_exit",
+      "check_v4_lb",
+      "ctx_skip_nodeport_clear",
+      "ctx_store_meta",
+      "prefilter_v4",
+      "validate_ethertype"
+    ],
+    "bpf_trace_id_get": [],
+    "micro_native_xdp_data_end": [],
+    "micro_native_xdp_data": [],
+    "ctx_get_protocol": [
+      "ctx_data",
+      "ctx_data_end",
+      "ctx_no_room"
+    ],
+    "can_observe_overlay_hdr": [],
+    "ctx_is_overlay_hdr": [],
+    "ctx_data_end": [
+      "micro_native_xdp_data_end"
+    ],
+    "ctx_data": [
+      "micro_native_xdp_data"
+    ],
+    "ctx_no_room": [],
+    "cls_flag_tunnel": [],
+    "can_observe_overlay_mark": [],
+    "eth_load_saddr": [
+      "xdp_load_bytes"
+    ],
+    "eth_load_daddr": [
+      "xdp_load_bytes"
+    ],
+    "ctx_adjust_troom": [],
+    "icmp_wsum_accumulate": [],
+    "memcpy": [
+      "__bpf_memcpy"
+    ],
+    "csum_fold": [],
+    "csum_diff": [
+      "csum_add"
+    ],
+    "xdp_load_bytes": [
+      "memcpy",
+      "micro_native_xdp_data",
+      "micro_native_xdp_data_end"
+    ],
+    "__bpf_memcpy": [],
+    "csum_add": [],
+    "ctx_store_meta": [],
+    "_update_metrics": [],
+    "ct_lazy_lookup4": [
+      "__ct_lookup4",
+      "ct_lookup_select_tuple_type"
+    ],
+    "get_ct_map4": [],
+    "lb4_rev_nat": [
+      "__lb4_rev_nat",
+      "lb4_lookup_rev_nat_entry"
+    ],
+    "ipfrag_has_l4_header": [],
+    "ct_lookup_select_tuple_type": [],
+    "__ct_lookup4": [
+      "__ct_lookup",
+      "__id_for_file",
+      "_update_metrics",
+      "cilium_dbg",
+      "cilium_dbg3",
+      "ct_tcp_select_action",
+      "ct_to_metrics_dir",
+      "ctx_full_len",
+      "ipfrag_has_l4_header",
+      "ipfrag_is_fragment",
+      "ipv4_ct_tuple_reverse",
+      "l4_load_tcp_flags"
+    ],
+    "ipfrag_is_fragment": [],
+    "ct_to_metrics_dir": [],
+    "l4_load_tcp_flags": [
+      "xdp_load_bytes"
+    ],
+    "ct_tcp_select_action": [],
+    "cilium_dbg3": [],
+    "__ct_lookup": [
+      "__ct_update_timeout",
+      "bpf_sec_to_mono",
+      "cilium_dbg",
+      "ct_entry_alive",
+      "ct_entry_closing",
+      "ct_entry_expired_rebalance",
+      "ct_entry_matches_types",
+      "ct_entry_seen_both_syns",
+      "ct_lookup_fill_state",
+      "ct_reset_closing",
+      "ct_reset_seen_flags",
+      "ct_update_timeout",
+      "ctx_full_len"
+    ],
+    "ipv4_ct_tuple_reverse": [
+      "__ipv4_ct_tuple_reverse",
+      "ct_flip_tuple_dir4"
+    ],
+    "cilium_dbg": [],
+    "ct_entry_matches_types": [],
+    "ct_entry_closing": [],
+    "ct_entry_expired_rebalance": [
+      "bpf_barrier",
+      "bpf_mono_now",
+      "bpf_sec_to_mono"
+    ],
+    "ct_entry_alive": [],
+    "ct_update_timeout": [
+      "__ct_update_timeout",
+      "bpf_sec_to_mono"
+    ],
+    "ct_reset_closing": [],
+    "ct_reset_seen_flags": [],
+    "ct_entry_seen_both_syns": [],
+    "__ct_update_timeout": [
+      "bpf_barrier",
+      "bpf_mono_now",
+      "bpf_sec_to_mono"
+    ],
+    "bpf_sec_to_mono": [],
+    "ct_lookup_fill_state": [
+      "ipv6_addr_copy"
+    ],
+    "bpf_barrier": [],
+    "bpf_mono_now": [
+      "bpf_ktime_get_sec"
+    ],
+    "bpf_ktime_get_sec": [],
+    "ipv6_addr_copy": [
+      "memcpy"
+    ],
+    "__ipv4_ct_tuple_reverse": [
+      "ipv4_ct_tuple_swap_addrs",
+      "ipv4_ct_tuple_swap_ports"
+    ],
+    "ct_flip_tuple_dir4": [],
+    "ipv4_ct_tuple_swap_addrs": [],
+    "lb4_lookup_rev_nat_entry": [
+      "cilium_dbg_lb"
+    ],
+    "__lb4_rev_nat": [
+      "cilium_dbg_lb",
+      "csum_diff",
+      "csum_l4_offset_and_flags",
+      "csum_l4_replace",
+      "ipv4_csum_update_by_diff",
+      "reverse_map_l4_port",
+      "xdp_store_bytes"
+    ],
+    "cilium_dbg_lb": [
+      "cilium_dbg"
+    ],
+    "xdp_store_bytes": [
+      "memcpy",
+      "micro_native_xdp_data",
+      "micro_native_xdp_data_end"
+    ],
+    "ipv4_csum_update_by_diff": [
+      "l3_csum_replace"
+    ],
+    "csum_l4_offset_and_flags": [],
+    "reverse_map_l4_port": [
+      "l4_modify_port"
+    ],
+    "csum_l4_replace": [
+      "l4_csum_replace"
+    ],
+    "l3_csum_replace": [
+      "__csum_replace_by_4",
+      "__csum_replace_by_diff",
+      "micro_native_xdp_data",
+      "micro_native_xdp_data_end"
+    ],
+    "__csum_replace_by_4": [
+      "__csum_replace_by_diff",
+      "csum_add"
+    ],
+    "__csum_replace_by_diff": [
+      "csum_add",
+      "csum_fold",
+      "csum_unfold"
+    ],
+    "csum_unfold": [],
+    "l4_modify_port": [
+      "csum_l4_replace",
+      "xdp_store_bytes"
+    ],
+    "l4_csum_replace": [
+      "__csum_replace_by_4",
+      "__csum_replace_by_diff",
+      "micro_native_xdp_data",
+      "micro_native_xdp_data_end"
+    ],
+    "snat_v4_init_tuple": [],
+    "ipv4_load_l4_ports": [
+      "ipfrag_has_l4_header",
+      "ipv4_handle_fragmentation",
+      "l4_load_ports"
+    ],
+    "snat_v4_rev_nat_can_skip": [],
+    "snat_v4_rev_nat_handle_icmp_error": [
+      "ctx_full_len",
+      "ipv4_hdrlen",
+      "l4_load_ports",
+      "snat_v4_calc_icmp_error_csum_diff",
+      "snat_v4_lookup",
+      "snat_v4_rewrite_headers",
+      "xdp_load_bytes"
+    ],
+    "snat_v4_rev_nat_handle_mapping": [
+      "__snat_create",
+      "__snat_lookup",
+      "bpf_mono_now",
+      "ct_lazy_lookup4",
+      "get_cluster_snat_map_v4",
+      "get_ct_map4",
+      "ipv4_ct_tuple_swap_ports",
+      "memcpy",
+      "memset"
+    ],
+    "snat_v4_rewrite_headers": [
+      "csum_diff",
+      "csum_l4_offset_and_flags",
+      "csum_l4_replace",
+      "ipv4_csum_update_by_diff",
+      "l4_modify_port",
+      "xdp_store_bytes"
+    ],
+    "ipv4_handle_fragmentation": [
+      "__id_for_file",
+      "_update_metrics",
+      "ct_to_metrics_dir",
+      "ctx_full_len",
+      "ipfrag_get_id",
+      "ipfrag_get_protocol",
+      "ipfrag_has_l4_header",
+      "ipfrag_is_fragment",
+      "ipv4_frag_get_l4ports",
+      "l4_load_ports"
+    ],
+    "l4_load_ports": [
+      "xdp_load_bytes"
+    ],
+    "ipfrag_get_id": [],
+    "ipfrag_get_protocol": [],
+    "ipv4_frag_get_l4ports": [
+      "memcpy"
+    ],
+    "snat_v4_lookup": [
+      "__snat_lookup"
+    ],
+    "snat_v4_calc_icmp_error_csum_diff": [
+      "csum_diff"
+    ],
+    "__snat_lookup": [],
+    "get_cluster_snat_map_v4": [],
+    "memset": [
+      "__bpf_memset_builtin",
+      "__bpf_memzero"
+    ],
+    "__snat_create": [],
+    "__bpf_memzero": [],
+    "__bpf_memset_builtin": [],
+    "ctx_set_xfer": [
+      "ctx_load_meta",
+      "ctx_store_meta"
+    ],
+    "fib_lookup_v4": [
+      "ctx_get_ifindex",
+      "fib_lookup_skip_neigh"
+    ],
+    "fib_lookup_skip_neigh": [
+      "neigh_resolver_available"
+    ],
+    "neigh_resolver_available": [],
+    "ipv4_dec_ttl": [
+      "ipv4_csum_update_by_value"
+    ],
+    "eth_store_saddr": [
+      "__bpf_memcpy_builtin",
+      "ctx_data",
+      "ctx_data_end",
+      "ctx_no_room"
+    ],
+    "eth_store_daddr": [
+      "__bpf_memcpy_builtin",
+      "ctx_data",
+      "ctx_data_end",
+      "ctx_no_room"
+    ],
+    "ipv4_csum_update_by_value": [
+      "l3_csum_replace"
+    ],
+    "__bpf_memcpy_builtin": [],
+    "snat_v4_nat_handle_mapping": [
+      "__snat_create",
+      "__snat_delete",
+      "__snat_lookup",
+      "bpf_mono_now",
+      "ct_create4",
+      "ct_lazy_lookup4",
+      "get_cluster_snat_map_v4",
+      "get_ct_map4",
+      "ipv4_ct_tuple_swap_addrs",
+      "memcpy",
+      "memset",
+      "set_v4_rtuple",
+      "snat_v4_new_mapping"
+    ],
+    "ct_create4": [
+      "cilium_dbg3",
+      "ct_create_fill_entry",
+      "ct_update_timeout",
+      "ctx_full_len"
+    ],
+    "set_v4_rtuple": [],
+    "__snat_delete": [],
+    "snat_v4_new_mapping": [
+      "__snat_clamp_port_range",
+      "__snat_create",
+      "__snat_try_keep_port",
+      "bpf_mono_now",
+      "memset",
+      "send_signal_nat_fill_up",
+      "set_v4_rtuple"
+    ],
+    "ct_create_fill_entry": [
+      "ipv6_addr_copy"
+    ],
+    "__snat_try_keep_port": [
+      "__snat_clamp_port_range"
+    ],
+    "__snat_clamp_port_range": [],
+    "send_signal_nat_fill_up": [],
+    "fib_do_redirect": [
+      "__bpf_memcpy_builtin",
+      "ctx_redirect",
+      "device_mac",
+      "eth_store_daddr",
+      "eth_store_daddr_aligned",
+      "eth_store_saddr",
+      "eth_store_saddr_aligned",
+      "maybe_add_l2_hdr",
+      "neigh_lookup_ip4",
+      "neigh_lookup_ip6",
+      "neigh_resolver_available",
+      "neigh_resolver_without_nh_available",
+      "redirect_neigh"
+    ],
+    "maybe_add_l2_hdr": [
+      "device_is_l3"
+    ],
+    "redirect_neigh": [],
+    "device_mac": [
+      "device_state_lookup"
+    ],
+    "neigh_lookup_ip4": [],
+    "neigh_lookup_ip6": [],
+    "eth_store_daddr_aligned": [
+      "xdp_store_bytes"
+    ],
+    "eth_store_saddr_aligned": [
+      "xdp_store_bytes"
+    ],
+    "ctx_redirect": [],
+    "device_is_l3": [
+      "device_state_lookup"
+    ],
+    "device_state_lookup": [],
+    "neigh_resolver_without_nh_available": [
+      "neigh_resolver_available"
+    ],
+    "trace_id_from_ctx": [
+      "__revalidate_data_pull",
+      "trace_id_from_ip4",
+      "validate_ethertype"
+    ],
+    "bpf_trace_id_set": [],
+    "validate_ethertype": [
+      "ctx_data",
+      "ctx_data_end",
+      "eth_is_supported_ethertype"
+    ],
+    "trace_id_from_ip4": [
+      "xdp_load_bytes"
+    ],
+    "eth_is_supported_ethertype": [],
+    "ctx_skip_nodeport_clear": [
+      "ctx_store_meta"
+    ],
+    "prefilter_v4": [
+      "ctx_data",
+      "ctx_data_end",
+      "ctx_no_room",
+      "memcpy"
+    ],
+    "check_v4_lb": [],
+    "bpf_xdp_exit": [
+      "ctx_move_xfer"
+    ],
+    "ctx_move_xfer": [
+      "ctx_data",
+      "ctx_data_meta",
+      "ctx_load_meta",
+      "ctx_no_room"
+    ],
+    "ctx_data_meta": [
+      "micro_native_xdp_data_meta"
+    ],
+    "micro_native_xdp_data_meta": []
+  },
+  "typed_field_geps": [
+    {
+      "function": "ctx_get_ifindex",
+      "line": 992,
+      "ir": "  %4 = getelementptr inbounds %struct.xdp_md, ptr %3, i32 0, i32 3, !dbg !2408",
+      "llvm_type": "%struct.xdp_md",
+      "llvm_element_count": 6,
+      "field_index": 3,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "ingress_ifindex",
+            "offset": 12,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "public-XDP-view-requires-conversion",
+              "rule": [
+                "xdp_buff.rxq",
+                "xdp_rxq_info.dev",
+                "net_device.ifindex"
+              ],
+              "scope": "Known ingress rule fixed in common source6c8fdc70f; raw staged frontend IR predates load-time conversion. Other uses need selected-use review."
+            }
+          },
+          "layout_size": 24,
+          "comparison": {
+            "status": "public-XDP-view-requires-conversion",
+            "rule": [
+              "xdp_buff.rxq",
+              "xdp_rxq_info.dev",
+              "net_device.ifindex"
+            ],
+            "scope": "Known ingress rule fixed in common source6c8fdc70f; raw staged frontend IR predates load-time conversion. Other uses need selected-use review."
+          }
+        }
+      ]
+    },
+    {
+      "function": "ctx_redirect",
+      "line": 29027,
+      "ir": "  %10 = getelementptr inbounds %struct.xdp_md, ptr %9, i32 0, i32 3, !dbg !11425",
+      "llvm_type": "%struct.xdp_md",
+      "llvm_element_count": 6,
+      "field_index": 3,
+      "layout_candidates": [
+        {
+          "field": {
+            "name": "ingress_ifindex",
+            "offset": 12,
+            "type_kind": "DW_TAG_base_type",
+            "kernel_comparison": {
+              "status": "public-XDP-view-requires-conversion",
+              "rule": [
+                "xdp_buff.rxq",
+                "xdp_rxq_info.dev",
+                "net_device.ifindex"
+              ],
+              "scope": "Known ingress rule fixed in common source6c8fdc70f; raw staged frontend IR predates load-time conversion. Other uses need selected-use review."
+            }
+          },
+          "layout_size": 24,
+          "comparison": {
+            "status": "public-XDP-view-requires-conversion",
+            "rule": [
+              "xdp_buff.rxq",
+              "xdp_rxq_info.dev",
+              "net_device.ifindex"
+            ],
+            "scope": "Known ingress rule fixed in common source6c8fdc70f; raw staged frontend IR predates load-time conversion. Other uses need selected-use review."
+          }
+        }
+      ]
+    }
+  ],
+  "unresolved_ordinal_maps": [],
+  "llvm_struct_element_counts": {
+    "%struct.xdp_md": 6
+  },
+  "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_xdp.native.o",
+  "sha256": "9328d114a9d031a38685c4eaca2ee5795da6b03a23f1df8b186ac2f1b1666230",
+  "architecture": "arm64",
+  "app": "cilium",
+  "declared_layouts": [
+    {
+      "name": "xdp_md",
+      "size": 24,
+      "fields": [
+        {
+          "name": "data",
+          "offset": 0,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "public-XDP-view-requires-conversion",
+            "rule": [],
+            "scope": "Known ingress rule fixed in common source6c8fdc70f; raw staged frontend IR predates load-time conversion. Other uses need selected-use review."
+          }
+        },
+        {
+          "name": "data_end",
+          "offset": 4,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "public-XDP-view-requires-conversion",
+            "rule": [],
+            "scope": "Known ingress rule fixed in common source6c8fdc70f; raw staged frontend IR predates load-time conversion. Other uses need selected-use review."
+          }
+        },
+        {
+          "name": "data_meta",
+          "offset": 8,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "public-XDP-view-requires-conversion",
+            "rule": [],
+            "scope": "Known ingress rule fixed in common source6c8fdc70f; raw staged frontend IR predates load-time conversion. Other uses need selected-use review."
+          }
+        },
+        {
+          "name": "ingress_ifindex",
+          "offset": 12,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "public-XDP-view-requires-conversion",
+            "rule": [
+              "xdp_buff.rxq",
+              "xdp_rxq_info.dev",
+              "net_device.ifindex"
+            ],
+            "scope": "Known ingress rule fixed in common source6c8fdc70f; raw staged frontend IR predates load-time conversion. Other uses need selected-use review."
+          }
+        },
+        {
+          "name": "rx_queue_index",
+          "offset": 16,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "public-XDP-view-requires-conversion",
+            "rule": [
+              "xdp_buff.rxq",
+              "xdp_rxq_info.queue_index"
+            ],
+            "scope": "Known ingress rule fixed in common source6c8fdc70f; raw staged frontend IR predates load-time conversion. Other uses need selected-use review."
+          }
+        },
+        {
+          "name": "egress_ifindex",
+          "offset": 20,
+          "type_kind": "DW_TAG_base_type",
+          "kernel_comparison": {
+            "status": "public-XDP-view-requires-conversion",
+            "rule": [
+              "xdp_buff.txq",
+              "xdp_txq_info.dev",
+              "net_device.ifindex"
+            ],
+            "scope": "Known ingress rule fixed in common source6c8fdc70f; raw staged frontend IR predates load-time conversion. Other uses need selected-use review."
+          }
+        }
+      ]
+    }
+  ],
+  "frontend_ir_sha256": "ee026b201bce3847398a21795caf058a9dbe9a9a427a4794c00836d2fa60d1fc"
+}

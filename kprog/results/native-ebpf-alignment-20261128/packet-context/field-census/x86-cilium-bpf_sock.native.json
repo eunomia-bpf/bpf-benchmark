@@ -1,0 +1,393 @@
+{
+  "other_call_instructions": [
+    {
+      "function": "__sock4_xlate_fwd",
+      "line": 503,
+      "ir": "  call void asm sideeffect \"\", \"~{memory},~{dirflag},~{fpsr},~{flags}\"() #13, !dbg !1341, !srcloc !1342",
+      "kind": "inline-asm"
+    },
+    {
+      "function": "__sock4_xlate_fwd",
+      "line": 565,
+      "ir": "  call void asm sideeffect \"\", \"~{memory},~{dirflag},~{fpsr},~{flags}\"() #13, !dbg !1381, !srcloc !1382",
+      "kind": "inline-asm"
+    },
+    {
+      "function": "bpf_barrier",
+      "line": 4257,
+      "ir": "  call void asm sideeffect \"\", \"~{memory},~{dirflag},~{fpsr},~{flags}\"() #13, !dbg !3126, !srcloc !3127",
+      "kind": "inline-asm"
+    },
+    {
+      "function": "ctx_get_v6_src_address",
+      "line": 6115,
+      "ir": "  call void asm sideeffect \"\", \"~{memory},~{dirflag},~{fpsr},~{flags}\"() #13, !dbg !3523, !srcloc !3524",
+      "kind": "inline-asm"
+    },
+    {
+      "function": "ctx_get_v6_src_address",
+      "line": 6123,
+      "ir": "  call void asm sideeffect \"\", \"~{memory},~{dirflag},~{fpsr},~{flags}\"() #13, !dbg !3530, !srcloc !3531",
+      "kind": "inline-asm"
+    },
+    {
+      "function": "ctx_get_v6_src_address",
+      "line": 6131,
+      "ir": "  call void asm sideeffect \"\", \"~{memory},~{dirflag},~{fpsr},~{flags}\"() #13, !dbg !3537, !srcloc !3538",
+      "kind": "inline-asm"
+    },
+    {
+      "function": "ctx_get_v6_src_address",
+      "line": 6139,
+      "ir": "  call void asm sideeffect \"\", \"~{memory},~{dirflag},~{fpsr},~{flags}\"() #13, !dbg !3544, !srcloc !3545",
+      "kind": "inline-asm"
+    },
+    {
+      "function": "ctx_get_v6_address",
+      "line": 7537,
+      "ir": "  call void asm sideeffect \"\", \"~{memory},~{dirflag},~{fpsr},~{flags}\"() #13, !dbg !3891, !srcloc !3892",
+      "kind": "inline-asm"
+    },
+    {
+      "function": "ctx_get_v6_address",
+      "line": 7545,
+      "ir": "  call void asm sideeffect \"\", \"~{memory},~{dirflag},~{fpsr},~{flags}\"() #13, !dbg !3898, !srcloc !3899",
+      "kind": "inline-asm"
+    },
+    {
+      "function": "ctx_get_v6_address",
+      "line": 7553,
+      "ir": "  call void asm sideeffect \"\", \"~{memory},~{dirflag},~{fpsr},~{flags}\"() #13, !dbg !3905, !srcloc !3906",
+      "kind": "inline-asm"
+    },
+    {
+      "function": "ctx_get_v6_address",
+      "line": 7561,
+      "ir": "  call void asm sideeffect \"\", \"~{memory},~{dirflag},~{fpsr},~{flags}\"() #13, !dbg !3912, !srcloc !3913",
+      "kind": "inline-asm"
+    },
+    {
+      "function": "ctx_set_v6_address",
+      "line": 7603,
+      "ir": "  call void asm sideeffect \"\", \"~{memory},~{dirflag},~{fpsr},~{flags}\"() #13, !dbg !3947, !srcloc !3948",
+      "kind": "inline-asm"
+    },
+    {
+      "function": "ctx_set_v6_address",
+      "line": 7611,
+      "ir": "  call void asm sideeffect \"\", \"~{memory},~{dirflag},~{fpsr},~{flags}\"() #13, !dbg !3954, !srcloc !3955",
+      "kind": "inline-asm"
+    },
+    {
+      "function": "ctx_set_v6_address",
+      "line": 7619,
+      "ir": "  call void asm sideeffect \"\", \"~{memory},~{dirflag},~{fpsr},~{flags}\"() #13, !dbg !3961, !srcloc !3962",
+      "kind": "inline-asm"
+    },
+    {
+      "function": "ctx_set_v6_address",
+      "line": 7627,
+      "ir": "  call void asm sideeffect \"\", \"~{memory},~{dirflag},~{fpsr},~{flags}\"() #13, !dbg !3968, !srcloc !3969",
+      "kind": "inline-asm"
+    }
+  ],
+  "defined_calls": {
+    "__check_cluster_id_bits": [],
+    "cil_sock4_connect": [
+      "__sock4_xlate_fwd",
+      "sock_is_health_check",
+      "sock_reset_health_check_marker",
+      "try_set_retval"
+    ],
+    "sock_is_health_check": [],
+    "sock_reset_health_check_marker": [],
+    "__sock4_xlate_fwd": [
+      "__id_for_file",
+      "__lb4_lookup_backend",
+      "__lb4_lookup_backend_slot",
+      "_update_metrics",
+      "ctx_dst_port",
+      "ctx_in_hostns",
+      "ctx_set_port",
+      "handle_nonroutable_endpoints_v4",
+      "lb4_affinity_backend_id_by_netns",
+      "lb4_lookup_service",
+      "lb4_svc_is_affinity",
+      "lb4_svc_is_l7_loadbalancer",
+      "lb4_svc_is_l7_punt_proxy",
+      "lb4_svc_is_localredirect",
+      "lb4_update_affinity_by_netns",
+      "lrp_v4_skip_xlate_from_ctx_to_svc",
+      "send_trace_sock_notify4",
+      "sock4_skip_xlate",
+      "sock4_update_revnat",
+      "sock4_wildcard_lookup_full",
+      "sock_proto_enabled",
+      "sock_select_slot"
+    ],
+    "try_set_retval": [],
+    "cil_sock4_post_bind": [
+      "__sock4_post_bind",
+      "try_set_retval"
+    ],
+    "__sock4_post_bind": [
+      "__lb4_svc_is_l7_loadbalancer",
+      "ctx_in_hostns",
+      "ctx_src_port",
+      "lb4_lookup_service",
+      "lb4_svc_is_external_ip",
+      "lb4_svc_is_l7_punt_proxy",
+      "lb4_svc_is_loadbalancer",
+      "lb4_svc_is_nodeport",
+      "sock4_wildcard_lookup",
+      "sock_proto_enabled"
+    ],
+    "cil_sock4_sendmsg": [
+      "__sock4_xlate_fwd",
+      "try_set_retval"
+    ],
+    "cil_sock4_recvmsg": [
+      "__sock4_xlate_rev"
+    ],
+    "__sock4_xlate_rev": [
+      "__id_for_file",
+      "_update_metrics",
+      "ctx_dst_port",
+      "ctx_in_hostns",
+      "ctx_set_port",
+      "lb4_lookup_service",
+      "lb4_svc_is_l7_loadbalancer",
+      "send_trace_sock_notify4",
+      "sock4_wildcard_lookup_full",
+      "sock_local_cookie"
+    ],
+    "cil_sock6_post_bind": [
+      "__sock6_post_bind",
+      "try_set_retval"
+    ],
+    "__sock6_post_bind": [
+      "__lb6_svc_is_l7_loadbalancer",
+      "ctx_get_v6_src_address",
+      "ctx_in_hostns",
+      "ctx_src_port",
+      "lb6_lookup_service",
+      "lb6_svc_is_external_ip",
+      "lb6_svc_is_l7_punt_proxy",
+      "lb6_svc_is_loadbalancer",
+      "lb6_svc_is_nodeport",
+      "sock6_post_bind_v4_in_v6",
+      "sock6_wildcard_lookup",
+      "sock_proto_enabled"
+    ],
+    "cil_sock6_connect": [
+      "__sock6_xlate_fwd",
+      "sock_is_health_check",
+      "sock_reset_health_check_marker",
+      "try_set_retval"
+    ],
+    "__sock6_xlate_fwd": [
+      "sock6_xlate_v4_in_v6"
+    ],
+    "cil_sock6_sendmsg": [
+      "__sock6_xlate_fwd",
+      "try_set_retval"
+    ],
+    "cil_sock6_recvmsg": [
+      "__sock6_xlate_rev"
+    ],
+    "__sock6_xlate_rev": [
+      "sock6_xlate_rev_v4_in_v6"
+    ],
+    "cil_sock_release": [
+      "__id_for_file",
+      "_update_metrics",
+      "sock4_delete_revnat"
+    ],
+    "sock4_delete_revnat": [],
+    "_update_metrics": [],
+    "__id_for_file": [],
+    "ctx_in_hostns": [
+      "task_in_extended_hostns"
+    ],
+    "ctx_dst_port": [],
+    "sock_proto_enabled": [],
+    "lb4_lookup_service": [
+      "__lb4_lookup_service",
+      "lb4_key_to_wildcard",
+      "lb4_svc_is_two_scopes",
+      "lb4_wildcard_to_key"
+    ],
+    "sock4_wildcard_lookup_full": [
+      "identity_is_remote_node",
+      "ipcache_lookup4",
+      "is_v4_loopback",
+      "lb4_lookup_service",
+      "lb4_svc_is_hostport",
+      "lb4_svc_is_loopback",
+      "lb4_svc_is_nodeport"
+    ],
+    "lb4_svc_is_l7_loadbalancer": [],
+    "handle_nonroutable_endpoints_v4": [
+      "lb4_svc_is_etp_local",
+      "lb4_svc_is_external",
+      "lb4_svc_is_itp_local"
+    ],
+    "send_trace_sock_notify4": [],
+    "lb4_svc_is_l7_punt_proxy": [
+      "lb4_svc_is_hostport"
+    ],
+    "sock4_skip_xlate": [
+      "ipcache_lookup4",
+      "is_v4_loopback",
+      "lb4_svc_is_external_ip",
+      "lb4_svc_is_hostport",
+      "lb4_to_lb6_service"
+    ],
+    "lb4_svc_is_localredirect": [],
+    "lrp_v4_skip_xlate_from_ctx_to_svc": [
+      "memset"
+    ],
+    "lb4_svc_is_affinity": [],
+    "lb4_affinity_backend_id_by_netns": [
+      "__lb4_affinity_backend_id"
+    ],
+    "__lb4_lookup_backend": [],
+    "sock_select_slot": [
+      "sock_local_cookie"
+    ],
+    "__lb4_lookup_backend_slot": [
+      "__lb4_lookup_service"
+    ],
+    "lb4_update_affinity_by_netns": [
+      "__lb4_update_affinity"
+    ],
+    "sock4_update_revnat": [
+      "memcmp",
+      "sock_local_cookie"
+    ],
+    "ctx_set_port": [],
+    "task_in_extended_hostns": [],
+    "__lb4_lookup_service": [],
+    "lb4_key_to_wildcard": [],
+    "lb4_wildcard_to_key": [],
+    "lb4_svc_is_two_scopes": [],
+    "is_v4_loopback": [],
+    "ipcache_lookup4": [],
+    "identity_is_remote_node": [],
+    "lb4_svc_is_nodeport": [],
+    "lb4_svc_is_hostport": [],
+    "lb4_svc_is_loopback": [],
+    "lb4_svc_is_external": [],
+    "lb4_svc_is_etp_local": [],
+    "lb4_svc_is_itp_local": [],
+    "lb4_to_lb6_service": [],
+    "lb4_svc_is_external_ip": [],
+    "memset": [
+      "__bpf_memset_builtin",
+      "__bpf_memzero"
+    ],
+    "__bpf_memzero": [],
+    "__bpf_memset_builtin": [],
+    "__lb4_affinity_backend_id": [
+      "bpf_barrier",
+      "bpf_mono_now",
+      "bpf_sec_to_mono",
+      "lb4_affinity_timeout"
+    ],
+    "bpf_mono_now": [
+      "bpf_jiffies64",
+      "bpf_ktime_get_sec"
+    ],
+    "bpf_barrier": [],
+    "bpf_sec_to_mono": [],
+    "lb4_affinity_timeout": [],
+    "bpf_ktime_get_sec": [
+      "bpf_ktime_get_ns"
+    ],
+    "bpf_jiffies64": [],
+    "bpf_ktime_get_ns": [],
+    "sock_local_cookie": [],
+    "__lb4_update_affinity": [
+      "bpf_mono_now"
+    ],
+    "memcmp": [
+      "__bpf_memcmp"
+    ],
+    "__bpf_memcmp": [],
+    "ctx_src_port": [],
+    "sock4_wildcard_lookup": [
+      "ipcache_lookup4",
+      "is_v4_loopback",
+      "lb4_lookup_service"
+    ],
+    "lb4_svc_is_loadbalancer": [],
+    "__lb4_svc_is_l7_loadbalancer": [],
+    "ctx_get_v6_src_address": [],
+    "lb6_lookup_service": [],
+    "sock6_wildcard_lookup": [
+      "ipcache_lookup6",
+      "is_v6_loopback",
+      "lb6_lookup_service",
+      "memset"
+    ],
+    "sock6_post_bind_v4_in_v6": [
+      "__sock4_post_bind",
+      "ctx_get_v6_src_address",
+      "is_v4_in_v6",
+      "memset"
+    ],
+    "lb6_svc_is_nodeport": [],
+    "lb6_svc_is_external_ip": [],
+    "lb6_svc_is_loadbalancer": [],
+    "__lb6_svc_is_l7_loadbalancer": [],
+    "lb6_svc_is_l7_punt_proxy": [
+      "lb6_svc_is_hostport"
+    ],
+    "is_v6_loopback": [
+      "ipv6_addr_equals"
+    ],
+    "ipcache_lookup6": [
+      "ipv6_addr_clear_suffix"
+    ],
+    "ipv6_addr_equals": [],
+    "ipv6_addr_clear_suffix": [],
+    "is_v4_in_v6": [
+      "ipv6_addr_equals"
+    ],
+    "lb6_svc_is_hostport": [],
+    "sock6_xlate_v4_in_v6": [
+      "__sock4_xlate_fwd",
+      "build_v4_in_v6",
+      "ctx_dst_port",
+      "ctx_get_v6_address",
+      "ctx_set_port",
+      "ctx_set_v6_address",
+      "is_v4_in_v6",
+      "memset"
+    ],
+    "ctx_get_v6_address": [],
+    "build_v4_in_v6": [
+      "memset"
+    ],
+    "ctx_set_v6_address": [],
+    "sock6_xlate_rev_v4_in_v6": [
+      "__sock4_xlate_rev",
+      "build_v4_in_v6",
+      "ctx_dst_port",
+      "ctx_get_v6_address",
+      "ctx_set_port",
+      "ctx_set_v6_address",
+      "is_v4_in_v6",
+      "memset"
+    ]
+  },
+  "typed_field_geps": [],
+  "unresolved_ordinal_maps": [],
+  "llvm_struct_element_counts": {},
+  "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+  "sha256": "f2299977fa0ffba5fab0075fb164701ba46fcbaa81c30dc5cd0bfc74a48b84fc",
+  "architecture": "x86",
+  "app": "cilium",
+  "declared_layouts": [],
+  "frontend_ir_sha256": "1ebc65944a9a6331baff260ff58e78b7f84db0600d568e293d886434c8e7a886"
+}

@@ -1,0 +1,406 @@
+{
+  "pid": 1398323,
+  "started_utc": "2026-11-28T09:06:14Z",
+  "controller_status": 0,
+  "commands": [
+    {
+      "args": [
+        "/workspaces/repository/vendor/build/x86/bpftool/bin/bpftool",
+        "-j",
+        "btf",
+        "dump",
+        "file",
+        "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "format",
+        "raw"
+      ],
+      "cpu": 19,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "/workspaces/repository/vendor/build/x86/bpftool/bin/bpftool",
+        "-j",
+        "btf",
+        "dump",
+        "file",
+        "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+        "format",
+        "raw"
+      ],
+      "cpu": 19,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "exit": 0
+    }
+  ],
+  "objects": [
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "sha256": "1373794b9611d99815dd255edd47fd54707b404ae3256097fe6e360f0804d263",
+      "analysis_file": "x86-cilium-bpf_lxc.native.json",
+      "typed_geps": 44,
+      "unresolved_ordinal_maps": 0,
+      "defined_functions": 289
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "sha256": "79db42e767775c7343bffe55ac498f062946bf3af34da452441bef696be98dc4",
+      "analysis_file": "x86-cilium-bpf_host.native.json",
+      "typed_geps": 53,
+      "unresolved_ordinal_maps": 0,
+      "defined_functions": 300
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "sha256": "21e265e92c9b906094d22ac87da9c64af8bf1df8b7877734029c9f9ff8be4152",
+      "analysis_file": "x86-cilium-bpf_overlay.native.json",
+      "typed_geps": 30,
+      "unresolved_ordinal_maps": 0,
+      "defined_functions": 281
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "sha256": "a9abda8fb5d5c2e6f0c8edf1935af9c7b42a7364f03cb343e49391fe1d3a53ab",
+      "analysis_file": "x86-cilium-bpf_wireguard.native.json",
+      "typed_geps": 33,
+      "unresolved_ordinal_maps": 0,
+      "defined_functions": 277
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+      "sha256": "f2299977fa0ffba5fab0075fb164701ba46fcbaa81c30dc5cd0bfc74a48b84fc",
+      "analysis_file": "x86-cilium-bpf_sock.native.json",
+      "typed_geps": 0,
+      "unresolved_ordinal_maps": 0,
+      "defined_functions": 97
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o",
+      "sha256": "7db6ead1b5ccc7d2715bd9230935c6ea866676db35e160185200c6210aabf496",
+      "analysis_file": "x86-cilium-bpf_xdp.native.json",
+      "typed_geps": 2,
+      "unresolved_ordinal_maps": 0,
+      "defined_functions": 170
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/katran/balancer.native.o",
+      "sha256": "87729bacfd0232d1849c5f5a000dae2d684db84e0d4ab926dd32a3bd72749ba4",
+      "analysis_file": "x86-katran-balancer.native.json",
+      "typed_geps": 8,
+      "unresolved_ordinal_maps": 0,
+      "defined_functions": 38
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/katran/healthchecking_ipip.native.o",
+      "sha256": "4c19ed2bed045423dea3e8f3a8b0d2d9a99b014fd65fc807a24effd2f91169b7",
+      "analysis_file": "x86-katran-healthchecking_ipip.native.json",
+      "typed_geps": 4,
+      "unresolved_ordinal_maps": 0,
+      "defined_functions": 1
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/katran/xdp_root.native.o",
+      "sha256": "05863480183e8b03d7ff075b60ca55ba6bbc5d662034f0a772340a49c309a539",
+      "analysis_file": "x86-katran-xdp_root.native.json",
+      "typed_geps": 0,
+      "unresolved_ordinal_maps": 0,
+      "defined_functions": 1
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "sha256": "e5959faa80f1d85b3035f507fd9e8cb8c586b4a91a25d36574a0789819a08f80",
+      "analysis_file": "arm64-cilium-bpf_lxc.native.json",
+      "typed_geps": 44,
+      "unresolved_ordinal_maps": 0,
+      "defined_functions": 287
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "sha256": "2329ee0c89d3744e58a0cf65b1ba01d93e08f1b8e33483864bd023bd88e64d38",
+      "analysis_file": "arm64-cilium-bpf_host.native.json",
+      "typed_geps": 53,
+      "unresolved_ordinal_maps": 0,
+      "defined_functions": 298
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o",
+      "sha256": "86578195b5d0075c8104dc176dd30a6fb72652dd1b29d2e26bef95de054005e8",
+      "analysis_file": "arm64-cilium-bpf_overlay.native.json",
+      "typed_geps": 30,
+      "unresolved_ordinal_maps": 0,
+      "defined_functions": 279
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_wireguard.native.o",
+      "sha256": "bb8442d848b9c12bc54ad4e13c34773d1dafef47c84fbfec4af5515064517f2a",
+      "analysis_file": "arm64-cilium-bpf_wireguard.native.json",
+      "typed_geps": 33,
+      "unresolved_ordinal_maps": 0,
+      "defined_functions": 275
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_sock.native.o",
+      "sha256": "10e17ce4f1e731aad12d60445ff284b6a203f7f6a68494e3940ee63886ce6f76",
+      "analysis_file": "arm64-cilium-bpf_sock.native.json",
+      "typed_geps": 0,
+      "unresolved_ordinal_maps": 0,
+      "defined_functions": 95
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_xdp.native.o",
+      "sha256": "9328d114a9d031a38685c4eaca2ee5795da6b03a23f1df8b186ac2f1b1666230",
+      "analysis_file": "arm64-cilium-bpf_xdp.native.json",
+      "typed_geps": 2,
+      "unresolved_ordinal_maps": 0,
+      "defined_functions": 168
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/katran/balancer.native.o",
+      "sha256": "f9b88b293e12ebcc1d11dd2d3f16ac112c215efc63d6f28e80c8bca7637b7ce5",
+      "analysis_file": "arm64-katran-balancer.native.json",
+      "typed_geps": 8,
+      "unresolved_ordinal_maps": 0,
+      "defined_functions": 37
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/katran/healthchecking_ipip.native.o",
+      "sha256": "2374d6537dfe7b5f0e518493f1de5688471c9f0d94b3a803101dbd5c8f4d4a6b",
+      "analysis_file": "arm64-katran-healthchecking_ipip.native.json",
+      "typed_geps": 4,
+      "unresolved_ordinal_maps": 0,
+      "defined_functions": 1
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/katran/xdp_root.native.o",
+      "sha256": "933612807336a2c537eb9aaf8157a8d3e9ad751228aeeea7c1d145af18f3e71b",
+      "analysis_file": "arm64-katran-xdp_root.native.json",
+      "typed_geps": 0,
+      "unresolved_ordinal_maps": 0,
+      "defined_functions": 1
+    }
+  ],
+  "source_sha256": {
+    "vendor/bpf/cilium/bpf/include/linux/bpf.h": "34cf8b6c978854bb115dceaf330c9be0f1dcc7c34d557868e27e61ea13a357e5",
+    "vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h": "c8a6251487d57123d098bf325cfc4b049f58701cae4abb775f4685b7b32835ed",
+    "vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h": "93bffd9691f1564c03d7b778ce57b20b80d4cecf3183e2c57ba23e97e9769911",
+    "vendor/bpf/katran/katran/lib/linux_includes/bpf.h": "593e1d9e9dc2685c11da40e5b1b67e9026c5c4a7cad077ff5057f3607faf3746",
+    "vendor/bpf/native_compat.h": "906737856b4c533575095e11e090b125ed6bc95a676bd9087411234b44d74494",
+    "vendor/linux-framework/net/core/filter.c": "629e5372b2d239485e75fc5c3f5bee98be4bbe6201794d4480de68a4fcd6f542",
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/objects.json": "88fb43dfc6238b7b2e0fc8c157d620982126c24f57472232b71df46ba24e85f3",
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/programs.json": "6a23a92783d8195bc5f43cc9f9a845ebbc298ca1eeec9e72e7da0fe58995bdc7"
+  },
+  "kernel_layouts": {
+    "x86": {
+      "path": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+      "sha256": "ef8733dbbfb41c1d1ea13f5704d7b1b95a12c5ca0a262f687fd1ff9db725c0de",
+      "fields_file": "x86-btf.json"
+    },
+    "arm64": {
+      "path": "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+      "sha256": "8407e20d8c8c198e06fc84cb0c338fdcdbb957001352f4116058a3ff7befda17",
+      "fields_file": "arm64-btf.json"
+    }
+  },
+  "program_rows": 176,
+  "scope": "Metadata census completed, not a semantic equality verdict. Unresolved fields/calls and missing candidate symbols remain explicit. No source/P/image/root/kernel/app/timing changes.",
+  "ended_utc": "2026-11-28T09:06:22Z"
+}
