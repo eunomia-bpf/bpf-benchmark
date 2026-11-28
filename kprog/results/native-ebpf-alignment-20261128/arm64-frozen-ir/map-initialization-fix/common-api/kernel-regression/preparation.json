@@ -1,0 +1,15 @@
+{
+  "utc": "2026-11-28T06:22:34Z",
+  "app_fork_commit": "6cfd48e9705c263a89839d5e7b34c716d1cdfc27",
+  "recipe_sha256": {
+    "README.md": "9736220f31b4d86dd33803ffc654732efb85d40eedc1997f682ea0110f665542",
+    "build-actual-regression.sh": "24937acc5584b1a6d107e2d2dbe36075626756b0027fa0703cd9901be5e28eab",
+    "guest-run.sh": "476227413ac37bb46361481c113aa7ad852937a32e0d5d3ee72a1ffcd73df102",
+    "run_regression.py": "41a78e839a975d2d8c2f48c5ec8764b068a7e7d3e1687a34919e81c6f97615a9"
+  },
+  "source_parent_publication": {
+    "commit": "472bf7d3fd0b9070d126209bcb4b63107e094f03",
+    "remote": "472bf7d3fd0b9070d126209bcb4b63107e094f03\trefs/heads/master"
+  },
+  "scope": "One actual-graph test compilation then real ARM kernel map regression; current collector app product retained; existing ARM root, imageSH, CPUs16/18/19, no timing lock. Compile48GiB/CPUs16,18/p2. Full affected app activation and work check follow as separate steps."
+}
