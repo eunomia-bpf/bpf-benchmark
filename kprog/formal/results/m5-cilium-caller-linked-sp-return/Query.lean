@@ -1,0 +1,3 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerLinkedSPReturn.resume
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerLinkedSPReturn.resume
