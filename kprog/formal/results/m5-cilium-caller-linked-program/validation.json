@@ -1,0 +1,121 @@
+{
+  "scope": "actual complete caller/program source link through imported clean private-symbol linker",
+  "failed_attempts": {
+    "stage1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-linked-program/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 34.54607081413269,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    }
+  },
+  "failed_stage1_source_sha256": "6e756b1c913aed39e3a9ae82b0a31992a917739ded12028fe49890e19f35b2ca",
+  "repair": "replace deep meta-whnf linker cache extraction with kernel-checked actual Option.isSome, Option.get and standard Option.some_get; same full imported linker/source/default limits",
+  "source_sha256": "b71d1c4a6be2e3f686a9e40e971543dcf2d27ff610a69b3cbde70739586a98cd",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-linked-program/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 197.8269555568695,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerLinkedProgram"
+      ],
+      "exit": 0,
+      "seconds": 198.39745354652405,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.742483377456665,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-linked-program/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.2635490894317627,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    }
+  },
+  "focused_jobs": 185,
+  "full_jobs": 1550,
+  "root_queries": [
+    "linked_source",
+    "linked_wellformed",
+    "caller_lookup",
+    "writer_lookup",
+    "local_layouts",
+    "linked_allocation"
+  ],
+  "actual_writer_entry_commit": "23d3dc9c0190e481d2842dfac3561456a1b87e38",
+  "link": "CC.Link.linkProgramRenaming actual CallerUnit.prog FIRST and complete Arm64Program.prog SECOND; no fabricated body or filtered export",
+  "private_collision": "source inspection found width_effective Internal in both and private in both; imported linker renames SECOND private collision",
+  "binding": "actual linked caller resolves unchanged original procedure, writer resolves actual Arm64Program internal helper only in explicitly linked ge",
+  "allocation": "all795 original caller locals sizeof/align and actual doAllocVariables equality checked, no old allocator/resource bridge",
+  "open": "transport original caller executions/resources to explicitly linked world and actual writer effects remain; linked computation does not supply original external success or behavior equivalence",
+  "whole_instruction_proved_here": false,
+  "native_whole_state_proved_here": false,
+  "native_global_universal_refinement_claimed": false,
+  "resource_assignment": "- COORDINATOR 2026-11-28T05:43Z: operator 05:40Z \"x86 \u91cd\u65b0\u6027\u80fd\u6d4b\u8bd5\u4e5f\u53ef\u4ee5? ...\": the coordinator started one x86 frozen-entry rotate (defaults, six apps, stats off then on) on the current image, kprog/results/x86-rotate-20261128/chain.sh; it holds the timing lock exclusive, the image lock shared and the batch lock for about six hours. Rebuild no x86 image and run no x86 timing until it ends; arm64 work on CPUs 16-19 and formal's builds outside the timing lock continue.",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
