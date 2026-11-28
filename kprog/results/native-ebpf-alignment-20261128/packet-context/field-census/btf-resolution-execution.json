@@ -1,0 +1,16 @@
+{
+  "started_utc": "2026-11-28T09:11:40Z",
+  "ended_utc": "2026-11-28T09:11:42Z",
+  "args": [
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/field-census",
+    "resolve-btf"
+  ],
+  "exit": 0,
+  "cpu": 19,
+  "recipe_commit": "7cbd1eb0c9358b93de080167871e3e484bf3ad3f",
+  "recipe_sha256": "4421d702822591838eb17bf9aa200ed48c0ede44968a2b76cb7ea5a452bda706",
+  "fixed_reader_sha256": "3320d67b45468ea3d343e8b411e234eade483b98971999ed33030b3ca8e1295c",
+  "scope": "Short metadata-only repair; only2BTFdump subprocesses, all original18IR/DWARF outputs reused."
+}

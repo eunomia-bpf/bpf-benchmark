@@ -1,0 +1,210 @@
+{
+  "started_utc": "2026-11-28T09:13:12Z",
+  "cases": [
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "sha256": "79db42e767775c7343bffe55ac498f062946bf3af34da452441bef696be98dc4",
+      "native_nested_members": [
+        {
+          "name": "vlan_all",
+          "offset": 156,
+          "type_kind": "DW_TAG_base_type",
+          "bytes": 4
+        },
+        {
+          "name": "vlan_proto",
+          "offset": 156,
+          "type_kind": "DW_TAG_base_type",
+          "bytes": 2
+        },
+        {
+          "name": "vlan_tci",
+          "offset": 158,
+          "type_kind": "DW_TAG_base_type",
+          "bytes": 2
+        }
+      ],
+      "kernel_btf_fields": [
+        {
+          "name": "vlan_all",
+          "bits_offset": 1248,
+          "bitfield_size": 0
+        },
+        {
+          "name": "vlan_proto",
+          "bits_offset": 1248,
+          "bitfield_size": 0
+        },
+        {
+          "name": "vlan_tci",
+          "bits_offset": 1264,
+          "bitfield_size": 0
+        }
+      ],
+      "typed_gep_snippets": [
+        {
+          "gep_index": 11,
+          "function": "cil_from_netdev",
+          "line": 6463,
+          "ir": "  %14 = getelementptr inbounds %struct.__sk_buff, ptr %13, i32 0, i32 21, !dbg !5830\n  %15 = load i32, ptr %14, align 4, !dbg !5830, !tbaa !2348\n  %16 = icmp ne i32 %15, 0, !dbg !5829\n  br i1 %16, label %17, label %37, !dbg !5831\n\n17:                                               ; preds = %1\n  call void @llvm.lifetime.start.p0(i64 4, ptr %7) #14, !dbg !5832\n  call void @llvm.dbg.declare(metadata ptr %7, metadata !5812, metadata !DIExpression()), !dbg !5833"
+        },
+        {
+          "gep_index": 12,
+          "function": "cil_from_netdev",
+          "line": 6472,
+          "ir": "  %19 = getelementptr inbounds %struct.__sk_buff, ptr %18, i32 0, i32 21, !dbg !5835\n  %20 = getelementptr inbounds %struct.anon.3, ptr %19, i32 0, i32 1, !dbg !5835\n  %21 = load i16, ptr %20, align 2, !dbg !5835, !tbaa !2348\n  %22 = zext i16 %21 to i32, !dbg !5834\n  %23 = and i32 %22, 4095, !dbg !5836\n  store i32 %23, ptr %7, align 4, !dbg !5833, !tbaa !2342\n  %24 = load i32, ptr %7, align 4, !dbg !5837, !tbaa !2342\n  %25 = icmp ne i32 %24, 0, !dbg !5837"
+        },
+        {
+          "gep_index": 27,
+          "function": "cil_to_netdev",
+          "line": 7539,
+          "ir": "  %53 = getelementptr inbounds %struct.__sk_buff, ptr %52, i32 0, i32 21, !dbg !6337\n  %54 = load i32, ptr %53, align 4, !dbg !6337, !tbaa !2348\n  %55 = icmp ne i32 %54, 0, !dbg !6335\n  br i1 %55, label %56, label %73, !dbg !6338\n\n56:                                               ; preds = %51\n  %57 = load ptr, ptr %3, align 8, !dbg !6339, !tbaa !2463\n  %58 = getelementptr inbounds %struct.__sk_buff, ptr %57, i32 0, i32 21, !dbg !6341"
+        },
+        {
+          "gep_index": 28,
+          "function": "cil_to_netdev",
+          "line": 7546,
+          "ir": "  %58 = getelementptr inbounds %struct.__sk_buff, ptr %57, i32 0, i32 21, !dbg !6341\n  %59 = getelementptr inbounds %struct.anon.3, ptr %58, i32 0, i32 1, !dbg !6341\n  %60 = load i16, ptr %59, align 2, !dbg !6341, !tbaa !2348\n  %61 = zext i16 %60 to i32, !dbg !6339\n  %62 = and i32 %61, 4095, !dbg !6342\n  store i32 %62, ptr %9, align 4, !dbg !6343, !tbaa !2342\n  %63 = load i32, ptr %9, align 4, !dbg !6344, !tbaa !2342\n  %64 = icmp ne i32 %63, 0, !dbg !6344"
+        }
+      ]
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "sha256": "2329ee0c89d3744e58a0cf65b1ba01d93e08f1b8e33483864bd023bd88e64d38",
+      "native_nested_members": [
+        {
+          "name": "vlan_all",
+          "offset": 156,
+          "type_kind": "DW_TAG_base_type",
+          "bytes": 4
+        },
+        {
+          "name": "vlan_proto",
+          "offset": 156,
+          "type_kind": "DW_TAG_base_type",
+          "bytes": 2
+        },
+        {
+          "name": "vlan_tci",
+          "offset": 158,
+          "type_kind": "DW_TAG_base_type",
+          "bytes": 2
+        }
+      ],
+      "kernel_btf_fields": [
+        {
+          "name": "vlan_all",
+          "bits_offset": 1248,
+          "bitfield_size": 0
+        },
+        {
+          "name": "vlan_proto",
+          "bits_offset": 1248,
+          "bitfield_size": 0
+        },
+        {
+          "name": "vlan_tci",
+          "bits_offset": 1264,
+          "bitfield_size": 0
+        }
+      ],
+      "typed_gep_snippets": [
+        {
+          "gep_index": 11,
+          "function": "cil_from_netdev",
+          "line": 6459,
+          "ir": "  %14 = getelementptr inbounds %struct.__sk_buff, ptr %13, i32 0, i32 21, !dbg !5827\n  %15 = load i32, ptr %14, align 4, !dbg !5827, !tbaa !2345\n  %16 = icmp ne i32 %15, 0, !dbg !5826\n  br i1 %16, label %17, label %37, !dbg !5828\n\n17:                                               ; preds = %1\n  call void @llvm.lifetime.start.p0(i64 4, ptr %7) #14, !dbg !5829\n  call void @llvm.dbg.declare(metadata ptr %7, metadata !5809, metadata !DIExpression()), !dbg !5830"
+        },
+        {
+          "gep_index": 12,
+          "function": "cil_from_netdev",
+          "line": 6468,
+          "ir": "  %19 = getelementptr inbounds %struct.__sk_buff, ptr %18, i32 0, i32 21, !dbg !5832\n  %20 = getelementptr inbounds %struct.anon.3, ptr %19, i32 0, i32 1, !dbg !5832\n  %21 = load i16, ptr %20, align 2, !dbg !5832, !tbaa !2345\n  %22 = zext i16 %21 to i32, !dbg !5831\n  %23 = and i32 %22, 4095, !dbg !5833\n  store i32 %23, ptr %7, align 4, !dbg !5830, !tbaa !2339\n  %24 = load i32, ptr %7, align 4, !dbg !5834, !tbaa !2339\n  %25 = icmp ne i32 %24, 0, !dbg !5834"
+        },
+        {
+          "gep_index": 27,
+          "function": "cil_to_netdev",
+          "line": 7535,
+          "ir": "  %53 = getelementptr inbounds %struct.__sk_buff, ptr %52, i32 0, i32 21, !dbg !6334\n  %54 = load i32, ptr %53, align 4, !dbg !6334, !tbaa !2345\n  %55 = icmp ne i32 %54, 0, !dbg !6332\n  br i1 %55, label %56, label %73, !dbg !6335\n\n56:                                               ; preds = %51\n  %57 = load ptr, ptr %3, align 8, !dbg !6336, !tbaa !2460\n  %58 = getelementptr inbounds %struct.__sk_buff, ptr %57, i32 0, i32 21, !dbg !6338"
+        },
+        {
+          "gep_index": 28,
+          "function": "cil_to_netdev",
+          "line": 7542,
+          "ir": "  %58 = getelementptr inbounds %struct.__sk_buff, ptr %57, i32 0, i32 21, !dbg !6338\n  %59 = getelementptr inbounds %struct.anon.3, ptr %58, i32 0, i32 1, !dbg !6338\n  %60 = load i16, ptr %59, align 2, !dbg !6338, !tbaa !2345\n  %61 = zext i16 %60 to i32, !dbg !6336\n  %62 = and i32 %61, 4095, !dbg !6339\n  store i32 %62, ptr %9, align 4, !dbg !6340, !tbaa !2339\n  %63 = load i32, ptr %9, align 4, !dbg !6341, !tbaa !2339\n  %64 = icmp ne i32 %63, 0, !dbg !6341"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "exit": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "exit": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    }
+  ],
+  "source": {
+    "vendor/bpf/cilium/bpf/bpf_host.c": {
+      "sha256": "b18cca811286f753ffbae667fa467680f4ac444aa141b0af4833372af9674399",
+      "anchors": [
+        {
+          "line": 1190,
+          "context": "\t * We will see the packet again in from-netdev@eth0.vlanXXX.\n\t */\n\tif (ctx->vlan_all) {\n\t\t__u32 vlan_id = ctx->vlan_tci & 0xfff;\n\n\t\tif (vlan_id) {\n\t\t\tif (allow_vlan(ctx_get_ifindex(ctx), vlan_id))\n\t\t\t\treturn CTX_ACT_OK;\n\n\t\t\tret = DROP_VLAN_FILTERED;\n\t\t\tgoto drop_err;\n\t\t}\n\t}\n\n\tctx_skip_nodeport_clear(ctx);"
+        },
+        {
+          "line": 1191,
+          "context": "\t */\n\tif (ctx->vlan_all) {\n\t\t__u32 vlan_id = ctx->vlan_tci & 0xfff;\n\n\t\tif (vlan_id) {\n\t\t\tif (allow_vlan(ctx_get_ifindex(ctx), vlan_id))\n\t\t\t\treturn CTX_ACT_OK;\n\n\t\t\tret = DROP_VLAN_FILTERED;\n\t\t\tgoto drop_err;\n\t\t}\n\t}\n\n\tctx_skip_nodeport_clear(ctx);\n"
+        },
+        {
+          "line": 1354,
+          "context": "\t/* Filter allowed vlan id's and pass them back to kernel.\n\t */\n\tif (ctx->vlan_all) {\n\t\tvlan_id = ctx->vlan_tci & 0xfff;\n\t\tif (vlan_id) {\n\t\t\tif (allow_vlan(ctx_get_ifindex(ctx), vlan_id))\n\t\t\t\treturn CTX_ACT_OK;\n\n\t\t\tret = DROP_VLAN_FILTERED;\n\t\t\tgoto drop_err;\n\t\t}\n\t}\n\n#if defined(ENABLE_L7_LB)\n\tif (magic == MARK_MAGIC_PROXY_EGRESS_EPID) {"
+        },
+        {
+          "line": 1355,
+          "context": "\t */\n\tif (ctx->vlan_all) {\n\t\tvlan_id = ctx->vlan_tci & 0xfff;\n\t\tif (vlan_id) {\n\t\t\tif (allow_vlan(ctx_get_ifindex(ctx), vlan_id))\n\t\t\t\treturn CTX_ACT_OK;\n\n\t\t\tret = DROP_VLAN_FILTERED;\n\t\t\tgoto drop_err;\n\t\t}\n\t}\n\n#if defined(ENABLE_L7_LB)\n\tif (magic == MARK_MAGIC_PROXY_EGRESS_EPID) {\n\t\t__u32 lxc_id = get_epid(ctx);"
+        }
+      ]
+    },
+    "vendor/linux-framework/net/core/filter.c": {
+      "sha256": "629e5372b2d239485e75fc5c3f5bee98be4bbe6201794d4480de68a4fcd6f542",
+      "anchors": [
+        {
+          "line": 9774,
+          "context": "\t\tbreak;\n\n\tcase offsetof(struct __sk_buff, vlan_proto):\n\t\t*insn++ = BPF_LDX_MEM(BPF_H, si->dst_reg, si->src_reg,\n\t\t\t\t      bpf_target_off(struct sk_buff, vlan_proto, 2,\n\t\t\t\t\t\t     target_size));\n\t\tbreak;\n\n\tcase offsetof(struct __sk_buff, priority):\n\t\tif (type == BPF_WRITE)\n\t\t\t*insn++ = BPF_EMIT_STORE(BPF_W, si,\n\t\t\t\t\t\t bpf_target_off(struct sk_buff, priority, 4,\n\t\t\t\t\t\t\t\ttarget_size));\n\t\telse\n\t\t\t*insn++ = BPF_LDX_MEM(BPF_W, si->dst_reg, si->src_reg,"
+        },
+        {
+          "line": 9854,
+          "context": "\t\tbreak;\n\n\tcase offsetof(struct __sk_buff, vlan_present):\n\t\t*insn++ = BPF_LDX_MEM(BPF_W, si->dst_reg, si->src_reg,\n\t\t\t\t      bpf_target_off(struct sk_buff,\n\t\t\t\t\t\t     vlan_all, 4, target_size));\n\t\t*insn++ = BPF_JMP_IMM(BPF_JEQ, si->dst_reg, 0, 1);\n\t\t*insn++ = BPF_ALU32_IMM(BPF_MOV, si->dst_reg, 1);\n\t\tbreak;\n\n\tcase offsetof(struct __sk_buff, vlan_tci):\n\t\t*insn++ = BPF_LDX_MEM(BPF_H, si->dst_reg, si->src_reg,\n\t\t\t\t      bpf_target_off(struct sk_buff, vlan_tci, 2,\n\t\t\t\t\t\t     target_size));\n\t\tbreak;"
+        },
+        {
+          "line": 9862,
+          "context": "\t\tbreak;\n\n\tcase offsetof(struct __sk_buff, vlan_tci):\n\t\t*insn++ = BPF_LDX_MEM(BPF_H, si->dst_reg, si->src_reg,\n\t\t\t\t      bpf_target_off(struct sk_buff, vlan_tci, 2,\n\t\t\t\t\t\t     target_size));\n\t\tbreak;\n\n\tcase offsetof(struct __sk_buff, cb[0]) ...\n\t     offsetofend(struct __sk_buff, cb[4]) - 1:\n\t\tBUILD_BUG_ON(sizeof_field(struct qdisc_skb_cb, data) < 20);\n\t\tBUILD_BUG_ON((offsetof(struct sk_buff, cb) +\n\t\t\t      offsetof(struct qdisc_skb_cb, data)) %\n\t\t\t     sizeof(__u64));\n"
+        }
+      ]
+    }
+  },
+  "controller_status": 0,
+  "ended_utc": "2026-11-28T09:13:13Z",
+  "scope": "Targeted follow-up of eight anonymous-container GEPs only. Native DWARF vlan_all156/u32 and vlan_tci158/u16; source uses raw vlan_all only as nonzero condition, kernel public vlan_present normalizes same raw value to0/1. No pointer-origin, livebranch or installed equality verdict."
+}
