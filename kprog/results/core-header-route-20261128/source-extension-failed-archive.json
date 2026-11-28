@@ -1,0 +1,2825 @@
+{
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/core-header-route-20261128/source-extension-failed-records.tar.zst",
+    "bytes": 70343271,
+    "sha256": "f4d4e3dd8cedb56c2cf980f5d0a57bdd61aa90847bf1a5bed76c34f005977e1c"
+  },
+  "members": [
+    {
+      "name": "real-source-arrays/.debug/jit/llvm-IR-jit-20261128-31ca01/jit-1598397.dump",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/.debug/jit/llvm-IR-jit-20261128-31ca01/jit-1598397.dump",
+      "bytes": 40,
+      "sha256": "1391bf683f1c019e4f41f762ad8abd05f88d4150541cac0f1fb5cfc35aa5f78b"
+    },
+    {
+      "name": "real-source-arrays/.debug/jit/llvm-IR-jit-20261128-d0287c/jit-1598383.dump",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/.debug/jit/llvm-IR-jit-20261128-d0287c/jit-1598383.dump",
+      "bytes": 40,
+      "sha256": "31b048b0897d39c785656d06582fa4f8ba2613117819cf79a81492dab196caf5"
+    },
+    {
+      "name": "real-source-arrays/arm64-bcc-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-bcc-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays/arm64-bcc-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-bcc-generate.stdout",
+      "bytes": 137,
+      "sha256": "304014d673ee221ccd3a55f897f56a754e8def51f8fdcadee7e2626aa33a9176"
+    },
+    {
+      "name": "real-source-arrays/arm64-bcc-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-bcc-native-ir.stderr",
+      "bytes": 7665,
+      "sha256": "36e70d3d5e2e749c66cefa98fe570dcb499d21a50e7a782425db74fca1dd7819"
+    },
+    {
+      "name": "real-source-arrays/arm64-bcc-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-bcc-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays/arm64-bcc-tmp/core-answers-ewaw3ws_/biosnoop.bpf.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-bcc-tmp/core-answers-ewaw3ws_/biosnoop.bpf.i",
+      "bytes": 2751471,
+      "sha256": "c1a96be49a50c65b5f0730919b2e03621bd625f74c23e404772ec5e39e09d162"
+    },
+    {
+      "name": "real-source-arrays/arm64-bcc-tmp/core-answers-ewaw3ws_/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-bcc-tmp/core-answers-ewaw3ws_/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-arrays/arm64-bcc.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-bcc.h",
+      "bytes": 4190,
+      "sha256": "e7d76d0deaf61c7a9706b7da1846e8b8d42be9518da1a651a4cf874df0c9418d"
+    },
+    {
+      "name": "real-source-arrays/arm64-bcc.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-bcc.json",
+      "bytes": 4375,
+      "sha256": "6bd296feb55e6f7994e6a647664af237d4a522b336e1d4b1b56c868d8378041e"
+    },
+    {
+      "name": "real-source-arrays/arm64-bcc.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-bcc.ll",
+      "bytes": 5382269,
+      "sha256": "fa3e1e8a5c44668546a39319da683a621a0d7583ef012cc355e5de264c180809"
+    },
+    {
+      "name": "real-source-arrays/arm64-producer-flags.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-producer-flags.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays/arm64-producer-flags.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-producer-flags.stdout",
+      "bytes": 401,
+      "sha256": "826ba0546ef565b9d7d86163eb8755f81498341b390cd39811eee5e12148de02"
+    },
+    {
+      "name": "real-source-arrays/arm64-tetragon-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tetragon-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays/arm64-tetragon-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tetragon-generate.stdout",
+      "bytes": 143,
+      "sha256": "9df258535a7903738f30c206592617979f8562af5edf21c75e6a93468a1508a7"
+    },
+    {
+      "name": "real-source-arrays/arm64-tetragon-iter-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tetragon-iter-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays/arm64-tetragon-iter-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tetragon-iter-generate.stdout",
+      "bytes": 146,
+      "sha256": "6af0164ea90fb0a6024d133427e636944e57b87680ec8890133bf094ff430496"
+    },
+    {
+      "name": "real-source-arrays/arm64-tetragon-iter-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tetragon-iter-native-ir.stderr",
+      "bytes": 2877,
+      "sha256": "b1b53e3646c9a4fb6dcf4f348235cf62605b44ac09168cc4a29158c760ec24af"
+    },
+    {
+      "name": "real-source-arrays/arm64-tetragon-iter-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tetragon-iter-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays/arm64-tetragon-iter-tmp/core-answers-9do90wrg/bpf_prog_iter.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tetragon-iter-tmp/core-answers-9do90wrg/bpf_prog_iter.i",
+      "bytes": 2755458,
+      "sha256": "76495945c2c004cbc0c84c971d47ee234f4b8de6360d8e6506c6afc7655d0370"
+    },
+    {
+      "name": "real-source-arrays/arm64-tetragon-iter-tmp/core-answers-9do90wrg/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tetragon-iter-tmp/core-answers-9do90wrg/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-arrays/arm64-tetragon-iter.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tetragon-iter.h",
+      "bytes": 1488,
+      "sha256": "6f82746adf6a077148a5ac48b2e298184570f65100e1ff1c0dd8ed8c15d6cd3f"
+    },
+    {
+      "name": "real-source-arrays/arm64-tetragon-iter.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tetragon-iter.json",
+      "bytes": 285,
+      "sha256": "efe720cc9c9b0200cbae951d007db60fb8718aeeaa639e48283ebdafc06b1aa8"
+    },
+    {
+      "name": "real-source-arrays/arm64-tetragon-iter.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tetragon-iter.ll",
+      "bytes": 5227795,
+      "sha256": "9995330ecc74c9f9ab6cd165795bfd92daf4c11a20bcaa4e7a34dcdbfab4b3f3"
+    },
+    {
+      "name": "real-source-arrays/arm64-tetragon-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tetragon-native-ir.stderr",
+      "bytes": 21056,
+      "sha256": "3816ee260aa12d5ef8525623577408e7fa3efcbb707e8bc69d58e1ed1395950a"
+    },
+    {
+      "name": "real-source-arrays/arm64-tetragon-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tetragon-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays/arm64-tetragon-tmp/core-answers-clyjtxdl/bpf_generic_kprobe.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tetragon-tmp/core-answers-clyjtxdl/bpf_generic_kprobe.i",
+      "bytes": 2992468,
+      "sha256": "80bf4302ed91ec1e679d03af486b35e43907c9efe3d98bfcbfb7399efc9022e9"
+    },
+    {
+      "name": "real-source-arrays/arm64-tetragon-tmp/core-answers-clyjtxdl/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tetragon-tmp/core-answers-clyjtxdl/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-arrays/arm64-tetragon.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tetragon.h",
+      "bytes": 30773,
+      "sha256": "6fbc27490467d128a4d03e6aa625647ca456737f0c02faf038b0dd1ed2f35f9b"
+    },
+    {
+      "name": "real-source-arrays/arm64-tetragon.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tetragon.json",
+      "bytes": 46073,
+      "sha256": "f7d4e4986cfbba5ca759acff81d523b34d920698b2474265fd5f6547327580fe"
+    },
+    {
+      "name": "real-source-arrays/arm64-tetragon.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tetragon.ll",
+      "bytes": 9483710,
+      "sha256": "c81cfaa683835ca0874713a308ba5b0407b22cff2febe202a391102798239576"
+    },
+    {
+      "name": "real-source-arrays/arm64-tracee-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tracee-generate.stderr",
+      "bytes": 190,
+      "sha256": "e18541635734918b6ef32da9eabc593e4d1ed74ad8a47f740a028d0f02e54ce3"
+    },
+    {
+      "name": "real-source-arrays/arm64-tracee-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tracee-generate.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays/arm64-tracee-tmp/core-answers-bdzotue4/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tracee-tmp/core-answers-bdzotue4/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-arrays/arm64-tracee-tmp/core-answers-bdzotue4/tracee.bpf.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/arm64-tracee-tmp/core-answers-bdzotue4/tracee.bpf.i",
+      "bytes": 626996,
+      "sha256": "480c8ec6ee122717984c7cac2ea6c946348c22c27183912a990bb52b893cbad6"
+    },
+    {
+      "name": "real-source-arrays/real-source-arrays-fixture.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/real-source-arrays-fixture.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays/real-source-arrays-fixture.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/real-source-arrays-fixture.stdout",
+      "bytes": 7579,
+      "sha256": "3d2e94cdc560945b0d42b823be8cf2dfb76a0b5807f6d20923618e10a957a584"
+    },
+    {
+      "name": "real-source-arrays/x86-bcc-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-bcc-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays/x86-bcc-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-bcc-generate.stdout",
+      "bytes": 135,
+      "sha256": "3f54eaf57eaa13dd81b925591ac49d2a9cab55fceb3f397fadfccf2edea1eef7"
+    },
+    {
+      "name": "real-source-arrays/x86-bcc-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-bcc-native-ir.stderr",
+      "bytes": 7855,
+      "sha256": "1b3c8135b91d1e55cd581012bc9fcfa8dd422b383ee21a0ee88c7a561f8faab4"
+    },
+    {
+      "name": "real-source-arrays/x86-bcc-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-bcc-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays/x86-bcc-tmp/core-answers-okhhs2mg/biosnoop.bpf.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-bcc-tmp/core-answers-okhhs2mg/biosnoop.bpf.i",
+      "bytes": 2909586,
+      "sha256": "8d565e01f02f8a5754a0b5aa3b75a72ba3828392d87207695774072efd337b57"
+    },
+    {
+      "name": "real-source-arrays/x86-bcc-tmp/core-answers-okhhs2mg/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-bcc-tmp/core-answers-okhhs2mg/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-arrays/x86-bcc.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-bcc.h",
+      "bytes": 4190,
+      "sha256": "ece4339560241ab6420149385faa6ad6d8263a6094fc9fb62246ff651092bac9"
+    },
+    {
+      "name": "real-source-arrays/x86-bcc.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-bcc.json",
+      "bytes": 4375,
+      "sha256": "edc1170a1465ecfbf0af371d7cb0a42aff58619b05bf8e65169d2c187a6881ab"
+    },
+    {
+      "name": "real-source-arrays/x86-bcc.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-bcc.ll",
+      "bytes": 5410608,
+      "sha256": "4fa6e90ecca5b31f25ef507b1b574447e1e9f1752dfc7bbe2d15b43860d271e5"
+    },
+    {
+      "name": "real-source-arrays/x86-producer-flags.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-producer-flags.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays/x86-producer-flags.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-producer-flags.stdout",
+      "bytes": 409,
+      "sha256": "cbfbf285664e7568f1532c406d805b28d9afd4ba79781e999296f31d1e590e34"
+    },
+    {
+      "name": "real-source-arrays/x86-tetragon-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tetragon-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays/x86-tetragon-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tetragon-generate.stdout",
+      "bytes": 141,
+      "sha256": "258ae340856ec104b0b7309cbf4c055bfbd8f9068c24a325e0579eb504571925"
+    },
+    {
+      "name": "real-source-arrays/x86-tetragon-iter-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tetragon-iter-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays/x86-tetragon-iter-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tetragon-iter-generate.stdout",
+      "bytes": 144,
+      "sha256": "551785f5aa0298e0fe6eba537e43b104464898e3d725ed604ca549aadf9fcf34"
+    },
+    {
+      "name": "real-source-arrays/x86-tetragon-iter-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tetragon-iter-native-ir.stderr",
+      "bytes": 3086,
+      "sha256": "d918d74279efbee9520a4b808fa04bb1346bf47013cf137271964b2d351310cc"
+    },
+    {
+      "name": "real-source-arrays/x86-tetragon-iter-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tetragon-iter-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays/x86-tetragon-iter-tmp/core-answers-95xhq08o/bpf_prog_iter.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tetragon-iter-tmp/core-answers-95xhq08o/bpf_prog_iter.i",
+      "bytes": 2913579,
+      "sha256": "729fa3879009c36914fc54d031cc6966fc30c9399c3790af83f9a2817bd9f11d"
+    },
+    {
+      "name": "real-source-arrays/x86-tetragon-iter-tmp/core-answers-95xhq08o/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tetragon-iter-tmp/core-answers-95xhq08o/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-arrays/x86-tetragon-iter.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tetragon-iter.h",
+      "bytes": 1488,
+      "sha256": "6f82746adf6a077148a5ac48b2e298184570f65100e1ff1c0dd8ed8c15d6cd3f"
+    },
+    {
+      "name": "real-source-arrays/x86-tetragon-iter.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tetragon-iter.json",
+      "bytes": 285,
+      "sha256": "efe720cc9c9b0200cbae951d007db60fb8718aeeaa639e48283ebdafc06b1aa8"
+    },
+    {
+      "name": "real-source-arrays/x86-tetragon-iter.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tetragon-iter.ll",
+      "bytes": 5257096,
+      "sha256": "1795778fcf43e066bfb7cf68161af14798c0b04c61718bd8b02d3ab6fb929e0c"
+    },
+    {
+      "name": "real-source-arrays/x86-tetragon-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tetragon-native-ir.stderr",
+      "bytes": 21265,
+      "sha256": "c89f526cddcb8458bb2850214c4d44cd648dc9d9868e329a9565473216a128da"
+    },
+    {
+      "name": "real-source-arrays/x86-tetragon-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tetragon-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays/x86-tetragon-tmp/core-answers-jkxi87ya/bpf_generic_kprobe.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tetragon-tmp/core-answers-jkxi87ya/bpf_generic_kprobe.i",
+      "bytes": 3143868,
+      "sha256": "e605a174e1c72d68133aa69a38ee70ba2aca408e0299d12980357e3b051ffb93"
+    },
+    {
+      "name": "real-source-arrays/x86-tetragon-tmp/core-answers-jkxi87ya/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tetragon-tmp/core-answers-jkxi87ya/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-arrays/x86-tetragon.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tetragon.h",
+      "bytes": 30774,
+      "sha256": "e0162d17b576ffd96fcefd2946b4aa8381a269fdafad1cf72aa71e17bbc4ceda"
+    },
+    {
+      "name": "real-source-arrays/x86-tetragon.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tetragon.json",
+      "bytes": 46074,
+      "sha256": "0e0f9f27b604ed0af9e0b896277fca5c646872422fa268208acbda0a2bb44013"
+    },
+    {
+      "name": "real-source-arrays/x86-tetragon.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tetragon.ll",
+      "bytes": 9543050,
+      "sha256": "2bf6f6a8ad228844d402dcc1b8af205c307b5afccc4dc74da25b659bd39bf2b3"
+    },
+    {
+      "name": "real-source-arrays/x86-tracee-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tracee-generate.stderr",
+      "bytes": 190,
+      "sha256": "e18541635734918b6ef32da9eabc593e4d1ed74ad8a47f740a028d0f02e54ce3"
+    },
+    {
+      "name": "real-source-arrays/x86-tracee-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tracee-generate.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays/x86-tracee-tmp/core-answers-exbz78rx/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tracee-tmp/core-answers-exbz78rx/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-arrays/x86-tracee-tmp/core-answers-exbz78rx/tracee.bpf.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays/x86-tracee-tmp/core-answers-exbz78rx/tracee.bpf.i",
+      "bytes": 633253,
+      "sha256": "ac25a162ac85a22c300718d79b415b4ada69dc7fbce4ebf7fcb606c5c11b4e72"
+    },
+    {
+      "name": "real-source-arrays-controller.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-controller.json",
+      "bytes": 61551,
+      "sha256": "9c24647c67cbdc2d4351ed0e24423a1743ceb9f508daaeb5b21421beaf970ea4"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/arm64-answers.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/arm64-answers.h",
+      "bytes": 3668,
+      "sha256": "be3618289c8ce86db736c03744e6e0a2c939fdde84b1a36a72ba19277e993ab9"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/arm64-answers.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/arm64-answers.json",
+      "bytes": 3356,
+      "sha256": "cc5b61315a04ab553561e546c4bc8c070c77c1a63c8e3667baf129fd66d968a3"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/arm64-dynamic-execution.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/arm64-dynamic-execution.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/arm64-dynamic-execution.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/arm64-dynamic-execution.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/arm64-dynamic.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/arm64-dynamic.ll",
+      "bytes": 4939,
+      "sha256": "624b31622ef731c990a5ecd63b4974f441a84843a8da693fff6297f278dbb485"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/arm64-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/arm64-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/arm64-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/arm64-generate.stdout",
+      "bytes": 158,
+      "sha256": "7f35de6d6434dc96e9da970470d9aa435719ad2b8b700b7702954aa2c3edeb1c"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/arm64-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/arm64-native-ir.stderr",
+      "bytes": 1041,
+      "sha256": "58d20d5e328b2f7f1bf053f50272670c8398e6907e00763ac8324418257825d7"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/arm64-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/arm64-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/arm64-native.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/arm64-native.ll",
+      "bytes": 4375,
+      "sha256": "ab3f695a7ad768ceb119a22dbae4c29bfc691c091cbb1114b6c507156d186337"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/arm64-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/arm64-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/arm64-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/arm64-oracle.stdout",
+      "bytes": 6539,
+      "sha256": "971910e0a5ca44769824077b0e3ae4588f49fdc0c44541768d5f660256701021"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/arm64-tmp/core-answers-p2yx14t2/queries.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/arm64-tmp/core-answers-p2yx14t2/queries.i",
+      "bytes": 13548,
+      "sha256": "727919052ca4bb5947194ab4316aa57d720d65d7124fe3b3b1e233ae9c76dcd9"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/arm64-tmp/core-answers-p2yx14t2/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/arm64-tmp/core-answers-p2yx14t2/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/build-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/build-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/build-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/build-oracle.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/oracle.bpf.o",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/oracle.bpf.o",
+      "bytes": 13248,
+      "sha256": "df95575da8d082a0c8d9ad101cb83e3bb0ad95ee50e8cf64e84c08696128b48d"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/x86-answers.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/x86-answers.h",
+      "bytes": 3668,
+      "sha256": "305ea6ebf69dca0f9d3473b9031ef06109fab0c242b95405e91b6d6003d8a097"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/x86-answers.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/x86-answers.json",
+      "bytes": 3356,
+      "sha256": "bfa9b14eea147d4e0f2cdb121cba74f6dc3bc9ae53fb824ab859cc56ea67f702"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/x86-dynamic-execution.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/x86-dynamic-execution.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/x86-dynamic-execution.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/x86-dynamic-execution.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/x86-dynamic.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/x86-dynamic.ll",
+      "bytes": 4935,
+      "sha256": "3ca9d05144e2039544bc9b0e8f3b40764526bbe6332c2a9839e626b4fb570dc9"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/x86-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/x86-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/x86-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/x86-generate.stdout",
+      "bytes": 156,
+      "sha256": "8e700041f7a88d6fd38825571ba50a4b40ac2f0ff13eee4ceaa45dffbee52a49"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/x86-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/x86-native-ir.stderr",
+      "bytes": 1037,
+      "sha256": "6c4320396a7bb4df26c99b9a32aaedfbaf41be5c6049b941a5c56a752ef95fc9"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/x86-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/x86-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/x86-native.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/x86-native.ll",
+      "bytes": 4371,
+      "sha256": "27c0073cac06edbf3d2a7b5e7fa74a78a53a585789922582353f10e81b9bdaf9"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/x86-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/x86-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/x86-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/x86-oracle.stdout",
+      "bytes": 6537,
+      "sha256": "1c9713dfa200e1d1ad859922081ff6a40b35e67902106e9430f748fe35c3fee1"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/x86-tmp/core-answers-7borx_q9/queries.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/x86-tmp/core-answers-7borx_q9/queries.i",
+      "bytes": 13997,
+      "sha256": "b2d8a98f9f694f2f4b9304f99c8f6850d55506ae980005b4f152f40647515917"
+    },
+    {
+      "name": "real-source-arrays-fixture-baseline/x86-tmp/core-answers-7borx_q9/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-baseline/x86-tmp/core-answers-7borx_q9/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-arrays-fixture-controller.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-fixture-controller.json",
+      "bytes": 7579,
+      "sha256": "3d2e94cdc560945b0d42b823be8cf2dfb76a0b5807f6d20923618e10a957a584"
+    },
+    {
+      "name": "real-source-arrays-job.log",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-arrays-job.log",
+      "bytes": 61551,
+      "sha256": "9c24647c67cbdc2d4351ed0e24423a1743ceb9f508daaeb5b21421beaf970ea4"
+    },
+    {
+      "name": "real-source-flat/.debug/jit/llvm-IR-jit-20261128-0f75c1/jit-1598067.dump",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/.debug/jit/llvm-IR-jit-20261128-0f75c1/jit-1598067.dump",
+      "bytes": 40,
+      "sha256": "93f80b4e206f4ccb4a9ae9ede6cf7ff10a8c0e8dda7bb26f973c1cd29e414ef7"
+    },
+    {
+      "name": "real-source-flat/.debug/jit/llvm-IR-jit-20261128-aea033/jit-1598059.dump",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/.debug/jit/llvm-IR-jit-20261128-aea033/jit-1598059.dump",
+      "bytes": 40,
+      "sha256": "8fb41904e28335379b419acf065b6a44bf2ee2154fa98325b0385d21de829a9f"
+    },
+    {
+      "name": "real-source-flat/arm64-bcc-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-bcc-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/arm64-bcc-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-bcc-generate.stdout",
+      "bytes": 135,
+      "sha256": "6d17db1f32c482513a0c5e7bc06213e59a13c0097f49070e4931d976d211f6b6"
+    },
+    {
+      "name": "real-source-flat/arm64-bcc-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-bcc-native-ir.stderr",
+      "bytes": 7661,
+      "sha256": "4215780dd9185fcb21a01d68f3ac2f3396f8f1700d198030d5a752f4713ffefe"
+    },
+    {
+      "name": "real-source-flat/arm64-bcc-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-bcc-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/arm64-bcc-tmp/core-answers-dh_t4guv/biosnoop.bpf.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-bcc-tmp/core-answers-dh_t4guv/biosnoop.bpf.i",
+      "bytes": 2751467,
+      "sha256": "27717e35c47277e655e8ba638c09cb50d51cf0069788172d22885860a14a75f0"
+    },
+    {
+      "name": "real-source-flat/arm64-bcc-tmp/core-answers-dh_t4guv/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-bcc-tmp/core-answers-dh_t4guv/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-flat/arm64-bcc.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-bcc.h",
+      "bytes": 4190,
+      "sha256": "e7d76d0deaf61c7a9706b7da1846e8b8d42be9518da1a651a4cf874df0c9418d"
+    },
+    {
+      "name": "real-source-flat/arm64-bcc.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-bcc.json",
+      "bytes": 4375,
+      "sha256": "6bd296feb55e6f7994e6a647664af237d4a522b336e1d4b1b56c868d8378041e"
+    },
+    {
+      "name": "real-source-flat/arm64-bcc.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-bcc.ll",
+      "bytes": 5382269,
+      "sha256": "be666b4ae0097754e45a8d954351cc6ab3df15c40edbb2d8fc76d8cf91247900"
+    },
+    {
+      "name": "real-source-flat/arm64-producer-flags.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-producer-flags.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/arm64-producer-flags.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-producer-flags.stdout",
+      "bytes": 401,
+      "sha256": "826ba0546ef565b9d7d86163eb8755f81498341b390cd39811eee5e12148de02"
+    },
+    {
+      "name": "real-source-flat/arm64-tetragon-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tetragon-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/arm64-tetragon-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tetragon-generate.stdout",
+      "bytes": 141,
+      "sha256": "54f4d52eba6143bb83c2c2e3af6bec7dab4cac1d79b7e501a4921c571071c359"
+    },
+    {
+      "name": "real-source-flat/arm64-tetragon-iter-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tetragon-iter-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/arm64-tetragon-iter-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tetragon-iter-generate.stdout",
+      "bytes": 144,
+      "sha256": "3ce57954af4fe0c7a976019354b084fab495513b0a77f0072209d20d5c8b7c18"
+    },
+    {
+      "name": "real-source-flat/arm64-tetragon-iter-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tetragon-iter-native-ir.stderr",
+      "bytes": 2875,
+      "sha256": "e899f6fef053250fb5e295e340e3bc3d9db90a1c5d56117c1559d9874e9b9ae0"
+    },
+    {
+      "name": "real-source-flat/arm64-tetragon-iter-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tetragon-iter-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/arm64-tetragon-iter-tmp/core-answers-a4vzv5_v/bpf_prog_iter.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tetragon-iter-tmp/core-answers-a4vzv5_v/bpf_prog_iter.i",
+      "bytes": 2755454,
+      "sha256": "67445f6a9206a58b591260496f9198b4065114c2adb18293b67dc94d97fc83ba"
+    },
+    {
+      "name": "real-source-flat/arm64-tetragon-iter-tmp/core-answers-a4vzv5_v/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tetragon-iter-tmp/core-answers-a4vzv5_v/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-flat/arm64-tetragon-iter.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tetragon-iter.h",
+      "bytes": 1488,
+      "sha256": "6f82746adf6a077148a5ac48b2e298184570f65100e1ff1c0dd8ed8c15d6cd3f"
+    },
+    {
+      "name": "real-source-flat/arm64-tetragon-iter.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tetragon-iter.json",
+      "bytes": 285,
+      "sha256": "efe720cc9c9b0200cbae951d007db60fb8718aeeaa639e48283ebdafc06b1aa8"
+    },
+    {
+      "name": "real-source-flat/arm64-tetragon-iter.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tetragon-iter.ll",
+      "bytes": 5227793,
+      "sha256": "562ed420da707ff8573b738e1a75331d30e453c285b27fd56d656cf916d26123"
+    },
+    {
+      "name": "real-source-flat/arm64-tetragon-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tetragon-native-ir.stderr",
+      "bytes": 21054,
+      "sha256": "9f2fc4571718612a6063e0c26438fb930a97f2b7162adce94fc709314597295f"
+    },
+    {
+      "name": "real-source-flat/arm64-tetragon-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tetragon-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/arm64-tetragon-tmp/core-answers-59lvum2c/bpf_generic_kprobe.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tetragon-tmp/core-answers-59lvum2c/bpf_generic_kprobe.i",
+      "bytes": 2992464,
+      "sha256": "fc72d4cfae0c1c79ceea9211bce6c676777b1a45b8e194097cf99235dfbb3f50"
+    },
+    {
+      "name": "real-source-flat/arm64-tetragon-tmp/core-answers-59lvum2c/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tetragon-tmp/core-answers-59lvum2c/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-flat/arm64-tetragon.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tetragon.h",
+      "bytes": 30773,
+      "sha256": "6fbc27490467d128a4d03e6aa625647ca456737f0c02faf038b0dd1ed2f35f9b"
+    },
+    {
+      "name": "real-source-flat/arm64-tetragon.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tetragon.json",
+      "bytes": 46073,
+      "sha256": "f7d4e4986cfbba5ca759acff81d523b34d920698b2474265fd5f6547327580fe"
+    },
+    {
+      "name": "real-source-flat/arm64-tetragon.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tetragon.ll",
+      "bytes": 9483704,
+      "sha256": "f4311e7e854230ef701d57b1911551bcfd92c620d2ab79bc48e29ce04d1cfb21"
+    },
+    {
+      "name": "real-source-flat/arm64-tracee-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tracee-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/arm64-tracee-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tracee-generate.stdout",
+      "bytes": 139,
+      "sha256": "c1196c544af86c147319588c170e743095fef099e6a39772a85776e71f3212af"
+    },
+    {
+      "name": "real-source-flat/arm64-tracee-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tracee-native-ir.stderr",
+      "bytes": 1062,
+      "sha256": "d4ae48b72d9b9d7cab714a1212059e13c7ce08764edda5396f0cead89fa9f943"
+    },
+    {
+      "name": "real-source-flat/arm64-tracee-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tracee-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/arm64-tracee-tmp/core-answers-6r2288ae/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tracee-tmp/core-answers-6r2288ae/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-flat/arm64-tracee-tmp/core-answers-6r2288ae/tracee.bpf.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tracee-tmp/core-answers-6r2288ae/tracee.bpf.i",
+      "bytes": 626992,
+      "sha256": "b6ab1b6b4a2446b3e7255cf6cb595e650a79344157402ef2b524c83c4ae35148"
+    },
+    {
+      "name": "real-source-flat/arm64-tracee.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tracee.h",
+      "bytes": 81456,
+      "sha256": "977f8aebdc9b880c4d5d147d5f1d17b260815e3205300ad1232e6bf39cdc2381"
+    },
+    {
+      "name": "real-source-flat/arm64-tracee.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tracee.json",
+      "bytes": 119683,
+      "sha256": "4458216ff874a0914b45275bac64172d87ee28ef33aee80ab4c0dfad7c9bb457"
+    },
+    {
+      "name": "real-source-flat/arm64-tracee.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/arm64-tracee.ll",
+      "bytes": 118264313,
+      "sha256": "35dce0cd64b8e4d50773bd29de224aabcc464fac153a0f72f4fa6067df86e390"
+    },
+    {
+      "name": "real-source-flat/real-source-flat-fixture.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/real-source-flat-fixture.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/real-source-flat-fixture.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/real-source-flat-fixture.stdout",
+      "bytes": 7403,
+      "sha256": "f4312eb8281706533459d9d2f94ed2d7d11508136bc1c833ef64480006de16de"
+    },
+    {
+      "name": "real-source-flat/x86-bcc-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-bcc-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/x86-bcc-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-bcc-generate.stdout",
+      "bytes": 133,
+      "sha256": "b06c4a3e62fc9ba2563d04d5790ba44969e570c371bb3dc41b681c047475bc14"
+    },
+    {
+      "name": "real-source-flat/x86-bcc-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-bcc-native-ir.stderr",
+      "bytes": 7851,
+      "sha256": "f44acfd0f62375ec3e2ee3048abceed7a17f1b1a97dc5cdd629bcc7f2b79bef1"
+    },
+    {
+      "name": "real-source-flat/x86-bcc-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-bcc-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/x86-bcc-tmp/core-answers-6nmjc7l2/biosnoop.bpf.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-bcc-tmp/core-answers-6nmjc7l2/biosnoop.bpf.i",
+      "bytes": 2909582,
+      "sha256": "eb70777cec8f14e1b0d54481e7ad75cf19a85402b77375b99dd07d5b1d548b30"
+    },
+    {
+      "name": "real-source-flat/x86-bcc-tmp/core-answers-6nmjc7l2/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-bcc-tmp/core-answers-6nmjc7l2/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-flat/x86-bcc.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-bcc.h",
+      "bytes": 4190,
+      "sha256": "ece4339560241ab6420149385faa6ad6d8263a6094fc9fb62246ff651092bac9"
+    },
+    {
+      "name": "real-source-flat/x86-bcc.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-bcc.json",
+      "bytes": 4375,
+      "sha256": "edc1170a1465ecfbf0af371d7cb0a42aff58619b05bf8e65169d2c187a6881ab"
+    },
+    {
+      "name": "real-source-flat/x86-bcc.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-bcc.ll",
+      "bytes": 5410604,
+      "sha256": "1d67b888e1fdaedf28caf226c6640c7be572476e8d77c534ba201e916cc8ed9b"
+    },
+    {
+      "name": "real-source-flat/x86-producer-flags.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-producer-flags.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/x86-producer-flags.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-producer-flags.stdout",
+      "bytes": 409,
+      "sha256": "cbfbf285664e7568f1532c406d805b28d9afd4ba79781e999296f31d1e590e34"
+    },
+    {
+      "name": "real-source-flat/x86-tetragon-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tetragon-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/x86-tetragon-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tetragon-generate.stdout",
+      "bytes": 139,
+      "sha256": "f796da0452eb29a37f6236e825e26c8ed143da9de20c6433e3a1e43b04925922"
+    },
+    {
+      "name": "real-source-flat/x86-tetragon-iter-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tetragon-iter-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/x86-tetragon-iter-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tetragon-iter-generate.stdout",
+      "bytes": 142,
+      "sha256": "e71d3df33f079546abac466e0932e17a0f44f24d40f66fde91d673cb5d7fe8c0"
+    },
+    {
+      "name": "real-source-flat/x86-tetragon-iter-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tetragon-iter-native-ir.stderr",
+      "bytes": 3084,
+      "sha256": "39f78d278acc40caf61293c95b87b350c67fc5ddc5735cad57bd39daf5b8400c"
+    },
+    {
+      "name": "real-source-flat/x86-tetragon-iter-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tetragon-iter-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/x86-tetragon-iter-tmp/core-answers-xp1_6van/bpf_prog_iter.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tetragon-iter-tmp/core-answers-xp1_6van/bpf_prog_iter.i",
+      "bytes": 2913575,
+      "sha256": "afc5e4f5eb2301b433e7a462622d9ced1d7296eef86e128176640a216e5ace64"
+    },
+    {
+      "name": "real-source-flat/x86-tetragon-iter-tmp/core-answers-xp1_6van/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tetragon-iter-tmp/core-answers-xp1_6van/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-flat/x86-tetragon-iter.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tetragon-iter.h",
+      "bytes": 1488,
+      "sha256": "6f82746adf6a077148a5ac48b2e298184570f65100e1ff1c0dd8ed8c15d6cd3f"
+    },
+    {
+      "name": "real-source-flat/x86-tetragon-iter.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tetragon-iter.json",
+      "bytes": 285,
+      "sha256": "efe720cc9c9b0200cbae951d007db60fb8718aeeaa639e48283ebdafc06b1aa8"
+    },
+    {
+      "name": "real-source-flat/x86-tetragon-iter.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tetragon-iter.ll",
+      "bytes": 5257094,
+      "sha256": "e90af8926e0c197d4aa3b07333f1bfa3419291d1e5c3eb820b8670964c02e498"
+    },
+    {
+      "name": "real-source-flat/x86-tetragon-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tetragon-native-ir.stderr",
+      "bytes": 21263,
+      "sha256": "6b0d335f6ab3f223e8982310ce893b6bf619d2052de41bdd05afac3fafae4811"
+    },
+    {
+      "name": "real-source-flat/x86-tetragon-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tetragon-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/x86-tetragon-tmp/core-answers-557ffuq8/bpf_generic_kprobe.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tetragon-tmp/core-answers-557ffuq8/bpf_generic_kprobe.i",
+      "bytes": 3143864,
+      "sha256": "46925086bca5efc90c1e582709926dec9e69b805270c441a30542677ceb803c1"
+    },
+    {
+      "name": "real-source-flat/x86-tetragon-tmp/core-answers-557ffuq8/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tetragon-tmp/core-answers-557ffuq8/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-flat/x86-tetragon.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tetragon.h",
+      "bytes": 30774,
+      "sha256": "e0162d17b576ffd96fcefd2946b4aa8381a269fdafad1cf72aa71e17bbc4ceda"
+    },
+    {
+      "name": "real-source-flat/x86-tetragon.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tetragon.json",
+      "bytes": 46074,
+      "sha256": "0e0f9f27b604ed0af9e0b896277fca5c646872422fa268208acbda0a2bb44013"
+    },
+    {
+      "name": "real-source-flat/x86-tetragon.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tetragon.ll",
+      "bytes": 9543052,
+      "sha256": "33b6bf0511ea3f3d781c95a7388ac644b79b5b510ee7681346a2358499eb2500"
+    },
+    {
+      "name": "real-source-flat/x86-tracee-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tracee-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/x86-tracee-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tracee-generate.stdout",
+      "bytes": 137,
+      "sha256": "38949ab4ab52a245141b2b751055a5d18240a4b3b06462ca176a5c6a7c9af4d7"
+    },
+    {
+      "name": "real-source-flat/x86-tracee-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tracee-native-ir.stderr",
+      "bytes": 1062,
+      "sha256": "d4ae48b72d9b9d7cab714a1212059e13c7ce08764edda5396f0cead89fa9f943"
+    },
+    {
+      "name": "real-source-flat/x86-tracee-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tracee-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat/x86-tracee-tmp/core-answers-s0phqefg/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tracee-tmp/core-answers-s0phqefg/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-flat/x86-tracee-tmp/core-answers-s0phqefg/tracee.bpf.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tracee-tmp/core-answers-s0phqefg/tracee.bpf.i",
+      "bytes": 633249,
+      "sha256": "838b7859aac90fdc55b9f415c4757547b6fa51a813308fdf33c75cdec3f32e2e"
+    },
+    {
+      "name": "real-source-flat/x86-tracee.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tracee.h",
+      "bytes": 84840,
+      "sha256": "fcd901b56143bb6ac17d9836b34bd3cc7892ba10a6b91f25270073e12c3d8c5a"
+    },
+    {
+      "name": "real-source-flat/x86-tracee.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tracee.json",
+      "bytes": 124750,
+      "sha256": "0631c05f8e27201d396e8f85f613d6f2969a1230919b233a1d3d726657154de6"
+    },
+    {
+      "name": "real-source-flat/x86-tracee.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat/x86-tracee.ll",
+      "bytes": 120778628,
+      "sha256": "cd6780e44c22e7ac6df90e98bc196547813d707f20a9cce437ee9b0b39a537fd"
+    },
+    {
+      "name": "real-source-flat-controller.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-controller.json",
+      "bytes": 65298,
+      "sha256": "52f31fa597b20988d030e1d9b66def124d16cb44e61720d3fe24d722ba7e635d"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/arm64-answers.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/arm64-answers.h",
+      "bytes": 3469,
+      "sha256": "81ee9b7e1cfba316d1eae66823d944c682cd4442f46dd7ad9b512ebb0053e930"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/arm64-answers.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/arm64-answers.json",
+      "bytes": 3055,
+      "sha256": "1386c672cc76bdbc7b2cb731201d3ceedbf5dd50fc429d962c5b60efcbca5bfd"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/arm64-dynamic-execution.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/arm64-dynamic-execution.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/arm64-dynamic-execution.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/arm64-dynamic-execution.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/arm64-dynamic.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/arm64-dynamic.ll",
+      "bytes": 4676,
+      "sha256": "00c3e7175085837db758a6f1f444db7319e341a7bb6b8c7afcc84d07b1d133e7"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/arm64-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/arm64-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/arm64-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/arm64-generate.stdout",
+      "bytes": 156,
+      "sha256": "57a32e2d2b35b16fe59f309e5b3f59e2a1d8fbda6810c8df72ca7276f252be09"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/arm64-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/arm64-native-ir.stderr",
+      "bytes": 1037,
+      "sha256": "106ca346a660846f003778649b80618508cb64a0ebcbc785c56af839e36888b1"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/arm64-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/arm64-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/arm64-native.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/arm64-native.ll",
+      "bytes": 4112,
+      "sha256": "b54932791e9ebd1d9efbc68467f4cf25be46481aa0716f2dcfe6489ba5faaff2"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/arm64-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/arm64-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/arm64-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/arm64-oracle.stdout",
+      "bytes": 6046,
+      "sha256": "de2a4592c52591f490c993344ec4bc12340fd49d67d207c6c521ea504d12d372"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/arm64-tmp/core-answers-2m3otuys/queries.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/arm64-tmp/core-answers-2m3otuys/queries.i",
+      "bytes": 13090,
+      "sha256": "f28339262c568ec46708f4ed14106e529b7026c8db234575bd732ef88e109515"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/arm64-tmp/core-answers-2m3otuys/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/arm64-tmp/core-answers-2m3otuys/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/build-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/build-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/build-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/build-oracle.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/oracle.bpf.o",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/oracle.bpf.o",
+      "bytes": 12248,
+      "sha256": "d8aeca0766b34bc02a1d2116af4419906e5764ab9abc1372d93a8ce537e3a463"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/x86-answers.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/x86-answers.h",
+      "bytes": 3469,
+      "sha256": "773a0e71661bb1f2a09501a94c14aeaae1737c44bd5762b8d3093b06293879ce"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/x86-answers.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/x86-answers.json",
+      "bytes": 3055,
+      "sha256": "f6ca50e2a025511819e824cd1136f112a7dcffaf325e340ccb28aab708c65286"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/x86-dynamic-execution.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/x86-dynamic-execution.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/x86-dynamic-execution.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/x86-dynamic-execution.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/x86-dynamic.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/x86-dynamic.ll",
+      "bytes": 4672,
+      "sha256": "47974d1047e6814d8bca72740a42871a8892f87006ab67dafc9e6ab0b74df41e"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/x86-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/x86-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/x86-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/x86-generate.stdout",
+      "bytes": 154,
+      "sha256": "13628cddfdbdee2806ef3b9b3b7527521fde0f7c691795f9fd6f45e6ff0f1eff"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/x86-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/x86-native-ir.stderr",
+      "bytes": 1033,
+      "sha256": "0282115d58eda1f7f3245ab88ddb820f855d3821ce5de554ccd365df1cc52a09"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/x86-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/x86-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/x86-native.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/x86-native.ll",
+      "bytes": 4108,
+      "sha256": "3bda02f9ba38530beb270c3b40ac905ab0b879382739b0d5e89cb982e1ba6259"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/x86-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/x86-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/x86-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/x86-oracle.stdout",
+      "bytes": 6044,
+      "sha256": "51f39c29590d55506f91d8890fdf426de1b391d9c40075009bc5feb3578893c6"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/x86-tmp/core-answers-r_ci5ddv/queries.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/x86-tmp/core-answers-r_ci5ddv/queries.i",
+      "bytes": 13539,
+      "sha256": "113ed635e8872e1aee66fd237a3cee3305efba932311f3aebcc8400f7e2c8d9d"
+    },
+    {
+      "name": "real-source-flat-fixture-baseline/x86-tmp/core-answers-r_ci5ddv/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-baseline/x86-tmp/core-answers-r_ci5ddv/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-flat-fixture-controller.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-fixture-controller.json",
+      "bytes": 7403,
+      "sha256": "f4312eb8281706533459d9d2f94ed2d7d11508136bc1c833ef64480006de16de"
+    },
+    {
+      "name": "real-source-flat-job.log",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-flat-job.log",
+      "bytes": 65298,
+      "sha256": "52f31fa597b20988d030e1d9b66def124d16cb44e61720d3fe24d722ba7e635d"
+    },
+    {
+      "name": "real-source-scoped/.debug/jit/llvm-IR-jit-20261128-05a30e/jit-1593539.dump",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/.debug/jit/llvm-IR-jit-20261128-05a30e/jit-1593539.dump",
+      "bytes": 40,
+      "sha256": "351f6f59f61b7df85f0f7f411f0144fdad37c44068dae27adfce23f253d2d79c"
+    },
+    {
+      "name": "real-source-scoped/.debug/jit/llvm-IR-jit-20261128-8bd782/jit-1593495.dump",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/.debug/jit/llvm-IR-jit-20261128-8bd782/jit-1593495.dump",
+      "bytes": 40,
+      "sha256": "1e6ce524f8e8cdbc230cf1ec31d482172b836007ceab7053013b32be465fbe10"
+    },
+    {
+      "name": "real-source-scoped/arm64-bcc-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-bcc-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped/arm64-bcc-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-bcc-generate.stdout",
+      "bytes": 137,
+      "sha256": "d5999b39994b92325de6e0b4434f415276ac4bec74f6091c4edbbc6e7e157d73"
+    },
+    {
+      "name": "real-source-scoped/arm64-bcc-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-bcc-native-ir.stderr",
+      "bytes": 7668,
+      "sha256": "ad617c65af32b5c841d20ea07dadfe7bcfd49b4f460b5348da190b1e55f31f09"
+    },
+    {
+      "name": "real-source-scoped/arm64-bcc-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-bcc-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped/arm64-bcc-tmp/core-answers-x0s4hbka/biosnoop.bpf.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-bcc-tmp/core-answers-x0s4hbka/biosnoop.bpf.i",
+      "bytes": 2751471,
+      "sha256": "4b68323fa56c1688355109822813ac3b9f047c41e0be6a013d6e3e91fbbbf86e"
+    },
+    {
+      "name": "real-source-scoped/arm64-bcc-tmp/core-answers-x0s4hbka/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-bcc-tmp/core-answers-x0s4hbka/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped/arm64-bcc.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-bcc.h",
+      "bytes": 4181,
+      "sha256": "0a30759a7ff834f3cd0cb2a57e61baac453b26e8af54f8c8341826ebccd7339f"
+    },
+    {
+      "name": "real-source-scoped/arm64-bcc.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-bcc.json",
+      "bytes": 4375,
+      "sha256": "3061d2c4627a1e7e0689fb70569c0b60e5b77c0f49750977c3dfdf1e5b2414f3"
+    },
+    {
+      "name": "real-source-scoped/arm64-bcc.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-bcc.ll",
+      "bytes": 5382269,
+      "sha256": "bd34be6a417ae3f1ef6307b89f9813a9075874498483cae3777c0fc030cb6ad6"
+    },
+    {
+      "name": "real-source-scoped/arm64-producer-flags.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-producer-flags.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped/arm64-producer-flags.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-producer-flags.stdout",
+      "bytes": 401,
+      "sha256": "826ba0546ef565b9d7d86163eb8755f81498341b390cd39811eee5e12148de02"
+    },
+    {
+      "name": "real-source-scoped/arm64-tetragon-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tetragon-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped/arm64-tetragon-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tetragon-generate.stdout",
+      "bytes": 143,
+      "sha256": "ccd38c544d95289fc971162d7b04c6c0f86297283e9ccc2de5390d4d95bcc973"
+    },
+    {
+      "name": "real-source-scoped/arm64-tetragon-iter-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tetragon-iter-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped/arm64-tetragon-iter-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tetragon-iter-generate.stdout",
+      "bytes": 146,
+      "sha256": "1e9fdfaecc4ee4db45cad14f610d3caedfe72771ebc7e5d256b46aeed328ba0a"
+    },
+    {
+      "name": "real-source-scoped/arm64-tetragon-iter-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tetragon-iter-native-ir.stderr",
+      "bytes": 2877,
+      "sha256": "acd3eb0f0e023b89b8a28ed7ec30aab0e821973ef7c2a8101ec0dd7f46a80323"
+    },
+    {
+      "name": "real-source-scoped/arm64-tetragon-iter-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tetragon-iter-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped/arm64-tetragon-iter-tmp/core-answers-5_egdqqr/bpf_prog_iter.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tetragon-iter-tmp/core-answers-5_egdqqr/bpf_prog_iter.i",
+      "bytes": 2755458,
+      "sha256": "bbc056563e8616094278554fa687ed960db0bc865f06669b399af9f4b1e0bc5e"
+    },
+    {
+      "name": "real-source-scoped/arm64-tetragon-iter-tmp/core-answers-5_egdqqr/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tetragon-iter-tmp/core-answers-5_egdqqr/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped/arm64-tetragon-iter.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tetragon-iter.h",
+      "bytes": 1485,
+      "sha256": "580c5b9957532b7f63e0eb889efeb6eb656ea1419cdf79201cb02b2748db0b97"
+    },
+    {
+      "name": "real-source-scoped/arm64-tetragon-iter.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tetragon-iter.json",
+      "bytes": 285,
+      "sha256": "efe720cc9c9b0200cbae951d007db60fb8718aeeaa639e48283ebdafc06b1aa8"
+    },
+    {
+      "name": "real-source-scoped/arm64-tetragon-iter.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tetragon-iter.ll",
+      "bytes": 5227795,
+      "sha256": "94f5cb777991973cdd592fc4fa50a4ec3e454f0af68436f89c8d63f8425aebfc"
+    },
+    {
+      "name": "real-source-scoped/arm64-tetragon-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tetragon-native-ir.stderr",
+      "bytes": 21055,
+      "sha256": "78645e2bf270204587bb683ee0b1ba167768fcd80daab5e4f13c42a4fdd7af02"
+    },
+    {
+      "name": "real-source-scoped/arm64-tetragon-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tetragon-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped/arm64-tetragon-tmp/core-answers-xn3gug9y/bpf_generic_kprobe.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tetragon-tmp/core-answers-xn3gug9y/bpf_generic_kprobe.i",
+      "bytes": 2992468,
+      "sha256": "59301ec1e738351acae4955d7ae77d57ec04a7b13419df32bf26c351a4111410"
+    },
+    {
+      "name": "real-source-scoped/arm64-tetragon-tmp/core-answers-xn3gug9y/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tetragon-tmp/core-answers-xn3gug9y/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped/arm64-tetragon.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tetragon.h",
+      "bytes": 30755,
+      "sha256": "f23609bba18e776911e48e55a5a63de08a0fadc418138b14718dbfc60020bafc"
+    },
+    {
+      "name": "real-source-scoped/arm64-tetragon.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tetragon.json",
+      "bytes": 46073,
+      "sha256": "94adf9c55a54abe859216d57a5bf4755f192cad92417e4f1b8dcd19bc5bb8fe3"
+    },
+    {
+      "name": "real-source-scoped/arm64-tetragon.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tetragon.ll",
+      "bytes": 9462144,
+      "sha256": "b5232cab610cff66dee46223b914efeebd5ca2cbb4545fc78ca47c54f975f33e"
+    },
+    {
+      "name": "real-source-scoped/arm64-tracee-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tracee-generate.stderr",
+      "bytes": 1136,
+      "sha256": "23916037bca09f46eb5a452e015539d3690673449ce8006c0ed875e479bf66ca"
+    },
+    {
+      "name": "real-source-scoped/arm64-tracee-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tracee-generate.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped/arm64-tracee-tmp/core-answers-sweyr0v1/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tracee-tmp/core-answers-sweyr0v1/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped/arm64-tracee-tmp/core-answers-sweyr0v1/tracee.bpf.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/arm64-tracee-tmp/core-answers-sweyr0v1/tracee.bpf.i",
+      "bytes": 626996,
+      "sha256": "6df804e01339629f1404642b62beb4a1789315324fd2721e3c3947b60f9a528e"
+    },
+    {
+      "name": "real-source-scoped/real-source-scoped-fixture.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/real-source-scoped-fixture.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped/real-source-scoped-fixture.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/real-source-scoped-fixture.stdout",
+      "bytes": 7311,
+      "sha256": "e5513c80eef8e0a0bcb8ad4deffcd60736938a8b669a00a9a73b27ef0c7b5858"
+    },
+    {
+      "name": "real-source-scoped/x86-bcc-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-bcc-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped/x86-bcc-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-bcc-generate.stdout",
+      "bytes": 135,
+      "sha256": "4a48bcb9845df65465d04d4a11021e6157633228520eea9862c63fd632ada99f"
+    },
+    {
+      "name": "real-source-scoped/x86-bcc-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-bcc-native-ir.stderr",
+      "bytes": 7858,
+      "sha256": "f77a4a69f2997db041e7a85e6a28e7d692c4907774915db4c2b14e2892b6e201"
+    },
+    {
+      "name": "real-source-scoped/x86-bcc-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-bcc-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped/x86-bcc-tmp/core-answers-iyid7gmt/biosnoop.bpf.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-bcc-tmp/core-answers-iyid7gmt/biosnoop.bpf.i",
+      "bytes": 2909586,
+      "sha256": "1aaaa2eb61d99d106b554eaf5e08d66fde71545b9be046e3e627e5b0e8fe0adb"
+    },
+    {
+      "name": "real-source-scoped/x86-bcc-tmp/core-answers-iyid7gmt/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-bcc-tmp/core-answers-iyid7gmt/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped/x86-bcc.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-bcc.h",
+      "bytes": 4181,
+      "sha256": "edff9b7a2894e5ba0efe58e887ee57e1ebb048486be8133c6817bcf115150c8c"
+    },
+    {
+      "name": "real-source-scoped/x86-bcc.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-bcc.json",
+      "bytes": 4375,
+      "sha256": "149c67448813f1b70116a31c5533ff5a2c9ef9b4e4605fa8230d615612292827"
+    },
+    {
+      "name": "real-source-scoped/x86-bcc.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-bcc.ll",
+      "bytes": 5410608,
+      "sha256": "f3099bc8a2c3d45c9af96d261909ba082fe77047a6fd464b8c5ca6780b75e168"
+    },
+    {
+      "name": "real-source-scoped/x86-producer-flags.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-producer-flags.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped/x86-producer-flags.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-producer-flags.stdout",
+      "bytes": 409,
+      "sha256": "cbfbf285664e7568f1532c406d805b28d9afd4ba79781e999296f31d1e590e34"
+    },
+    {
+      "name": "real-source-scoped/x86-tetragon-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tetragon-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped/x86-tetragon-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tetragon-generate.stdout",
+      "bytes": 141,
+      "sha256": "a2ddd6feb0abab9ecd3d3230f05ff12d4feec7f7371048e74dc84397743dca7e"
+    },
+    {
+      "name": "real-source-scoped/x86-tetragon-iter-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tetragon-iter-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped/x86-tetragon-iter-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tetragon-iter-generate.stdout",
+      "bytes": 144,
+      "sha256": "2e1ada533fd402c3a3eb9528aa307e8049c5695307189111628c6043a2b6da2b"
+    },
+    {
+      "name": "real-source-scoped/x86-tetragon-iter-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tetragon-iter-native-ir.stderr",
+      "bytes": 3086,
+      "sha256": "d67730a23c8d5aa77941adc01beb1bffb72ad5587eb94c33dd94bf3073ec7b06"
+    },
+    {
+      "name": "real-source-scoped/x86-tetragon-iter-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tetragon-iter-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped/x86-tetragon-iter-tmp/core-answers-lye8zjll/bpf_prog_iter.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tetragon-iter-tmp/core-answers-lye8zjll/bpf_prog_iter.i",
+      "bytes": 2913579,
+      "sha256": "e8e9626d66ea51a34b95389c2bac5e4ca5e433d840543e5313d38f77e40ecc31"
+    },
+    {
+      "name": "real-source-scoped/x86-tetragon-iter-tmp/core-answers-lye8zjll/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tetragon-iter-tmp/core-answers-lye8zjll/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped/x86-tetragon-iter.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tetragon-iter.h",
+      "bytes": 1485,
+      "sha256": "580c5b9957532b7f63e0eb889efeb6eb656ea1419cdf79201cb02b2748db0b97"
+    },
+    {
+      "name": "real-source-scoped/x86-tetragon-iter.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tetragon-iter.json",
+      "bytes": 285,
+      "sha256": "efe720cc9c9b0200cbae951d007db60fb8718aeeaa639e48283ebdafc06b1aa8"
+    },
+    {
+      "name": "real-source-scoped/x86-tetragon-iter.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tetragon-iter.ll",
+      "bytes": 5257096,
+      "sha256": "d2f74269a99a699cb46a96f8acdd8c09be467ead595bac4beb73a49cafb2ae68"
+    },
+    {
+      "name": "real-source-scoped/x86-tetragon-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tetragon-native-ir.stderr",
+      "bytes": 21264,
+      "sha256": "392839254aa1bc601caf77a63e3187c73fb199f46f512eb0c139bb89911608ca"
+    },
+    {
+      "name": "real-source-scoped/x86-tetragon-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tetragon-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped/x86-tetragon-tmp/core-answers-iyohvbr3/bpf_generic_kprobe.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tetragon-tmp/core-answers-iyohvbr3/bpf_generic_kprobe.i",
+      "bytes": 3143868,
+      "sha256": "71b9071938cd1aea49ec678dc372cf0044549a9b942b6881a35523d0d88d4548"
+    },
+    {
+      "name": "real-source-scoped/x86-tetragon-tmp/core-answers-iyohvbr3/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tetragon-tmp/core-answers-iyohvbr3/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped/x86-tetragon.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tetragon.h",
+      "bytes": 30756,
+      "sha256": "eefa8aed803296a54b24f122309752db8ef03b7fb5469f63ba3bdbbae6a9ad08"
+    },
+    {
+      "name": "real-source-scoped/x86-tetragon.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tetragon.json",
+      "bytes": 46074,
+      "sha256": "56d89697b958d49054be0f3c245d093f4616cfdb5d6e724ac9373d6a6d845cef"
+    },
+    {
+      "name": "real-source-scoped/x86-tetragon.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tetragon.ll",
+      "bytes": 9519107,
+      "sha256": "e27cbca7d29dc2d9db2a6b8f45106c6a67202d2a550982426ee3ccbbe0fb5429"
+    },
+    {
+      "name": "real-source-scoped/x86-tracee-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tracee-generate.stderr",
+      "bytes": 1136,
+      "sha256": "23916037bca09f46eb5a452e015539d3690673449ce8006c0ed875e479bf66ca"
+    },
+    {
+      "name": "real-source-scoped/x86-tracee-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tracee-generate.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped/x86-tracee-tmp/core-answers-1pvwj47i/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tracee-tmp/core-answers-1pvwj47i/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped/x86-tracee-tmp/core-answers-1pvwj47i/tracee.bpf.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped/x86-tracee-tmp/core-answers-1pvwj47i/tracee.bpf.i",
+      "bytes": 633253,
+      "sha256": "cd579980f9f5cad07ff9cf5fae7e2227641ab7d4a03a32011fb80721d295b6bc"
+    },
+    {
+      "name": "real-source-scoped-controller.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-controller.json",
+      "bytes": 61553,
+      "sha256": "22d726f9c9ae406749afdba66b33ac3ec2534675c3a8e63267412b88506b5e2a"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/arm64-answers.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/arm64-answers.h",
+      "bytes": 3293,
+      "sha256": "8d314813f47ff45b1642d2343fb640aacb743836588f02a8220ff8d5e57cfbf4"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/arm64-answers.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/arm64-answers.json",
+      "bytes": 2852,
+      "sha256": "ef888e96d0a54baad6ea1df7f2b38140b3c3e15379c5dc4a0ea2e2ddbbd9eeda"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/arm64-dynamic-execution.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/arm64-dynamic-execution.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/arm64-dynamic-execution.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/arm64-dynamic-execution.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/arm64-dynamic.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/arm64-dynamic.ll",
+      "bytes": 4463,
+      "sha256": "c9ec679241df6a293138dc914ba88f46d02f988486dd49059b13ff9995c73b50"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/arm64-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/arm64-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/arm64-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/arm64-generate.stdout",
+      "bytes": 158,
+      "sha256": "f9ab9528c609dfaa837c504a26b6cc7807bc96bad0c5c04f0270455ecd1867ab"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/arm64-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/arm64-native-ir.stderr",
+      "bytes": 1041,
+      "sha256": "1f8d3360ca83da181c7053d44ccb962a7a9e0ad1f177ded866a5626dac07ebce"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/arm64-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/arm64-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/arm64-native.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/arm64-native.ll",
+      "bytes": 3899,
+      "sha256": "55c3bfac401e28b009772674422903fb7818e57133c17789cbfd5e7dcc4d5f30"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/arm64-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/arm64-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/arm64-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/arm64-oracle.stdout",
+      "bytes": 5591,
+      "sha256": "f1dab6c2fef0f5b4a197017edced4ffbcb5e5428065c6b149696b90c05e79359"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/arm64-tmp/core-answers-cmccsoiy/queries.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/arm64-tmp/core-answers-cmccsoiy/queries.i",
+      "bytes": 12850,
+      "sha256": "40c8c0856cf6a338f837a711a32b33fc542ef44a0e1979ed9b2ae300f04908c9"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/arm64-tmp/core-answers-cmccsoiy/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/arm64-tmp/core-answers-cmccsoiy/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/build-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/build-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/build-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/build-oracle.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/oracle.bpf.o",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/oracle.bpf.o",
+      "bytes": 11608,
+      "sha256": "7d0a2b1c3f5dc1587ab9f1283923fc86c918c9bab5651fa92cf520293fc45c22"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/x86-answers.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/x86-answers.h",
+      "bytes": 3293,
+      "sha256": "55d0bf9adb92ce4b931e3ee10b9e5a86e2ce28b3b63b3bdee9084cd8e547447d"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/x86-answers.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/x86-answers.json",
+      "bytes": 2852,
+      "sha256": "15110d4ce49a1b5f681002a3602d9300d6ac13863a2ad255107d54f2c0cd26ab"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/x86-dynamic-execution.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/x86-dynamic-execution.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/x86-dynamic-execution.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/x86-dynamic-execution.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/x86-dynamic.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/x86-dynamic.ll",
+      "bytes": 4459,
+      "sha256": "3e05eec5a6ebbb65f30f0a16f1dd896198ebf452494e88839ed98346d76d77f3"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/x86-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/x86-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/x86-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/x86-generate.stdout",
+      "bytes": 156,
+      "sha256": "9ad126cfae4cddcbe9872b374983f53e2b6d44a6a81c663487760eba85c69204"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/x86-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/x86-native-ir.stderr",
+      "bytes": 1037,
+      "sha256": "e7dc6365d834fb6568687b25e32bfcc1638546653992a2437977e2293981e905"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/x86-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/x86-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/x86-native.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/x86-native.ll",
+      "bytes": 3895,
+      "sha256": "4240f486e55757d5bbad9e9ee38d51b4d45903e26d5e70ed51ae1382c59572d0"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/x86-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/x86-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/x86-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/x86-oracle.stdout",
+      "bytes": 5589,
+      "sha256": "6ece32edc2504d80a6cc073ab8946c6cff6318ba5e1fe206c0de56ff9ba3c895"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/x86-tmp/core-answers-i5y4mm2w/queries.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/x86-tmp/core-answers-i5y4mm2w/queries.i",
+      "bytes": 13299,
+      "sha256": "75bcd13838ac000a222cb7dbc9889af6ebb76d16fb8e77ce1b3bb7db2532d24e"
+    },
+    {
+      "name": "real-source-scoped-fixture-baseline/x86-tmp/core-answers-i5y4mm2w/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-baseline/x86-tmp/core-answers-i5y4mm2w/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped-fixture-controller.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-fixture-controller.json",
+      "bytes": 7311,
+      "sha256": "e5513c80eef8e0a0bcb8ad4deffcd60736938a8b669a00a9a73b27ef0c7b5858"
+    },
+    {
+      "name": "real-source-scoped-job.log",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-job.log",
+      "bytes": 61553,
+      "sha256": "22d726f9c9ae406749afdba66b33ac3ec2534675c3a8e63267412b88506b5e2a"
+    },
+    {
+      "name": "real-source-scoped-types/.debug/jit/llvm-IR-jit-20261128-5dca16/jit-1597526.dump",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/.debug/jit/llvm-IR-jit-20261128-5dca16/jit-1597526.dump",
+      "bytes": 40,
+      "sha256": "db4f4d4adf3344007d52635129983f436e4060285b02de9eb8f196f124f55a29"
+    },
+    {
+      "name": "real-source-scoped-types/.debug/jit/llvm-IR-jit-20261128-cacfd4/jit-1597518.dump",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/.debug/jit/llvm-IR-jit-20261128-cacfd4/jit-1597518.dump",
+      "bytes": 40,
+      "sha256": "1d4fa2bb02bf99a3991fb0775a46be83055230a5f34a7ca4e9cbc1d7d1d25b93"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-bcc-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-bcc-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-bcc-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-bcc-generate.stdout",
+      "bytes": 143,
+      "sha256": "e1b6721554738c6ca469776a9ecacd084c474f1cac4669ae30fdbdf2d58b9e54"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-bcc-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-bcc-native-ir.stderr",
+      "bytes": 7680,
+      "sha256": "c70d6bb0a6ed6eb5739e5c117849ba8281a53c2c99ff96902d130720f5c2396c"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-bcc-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-bcc-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-bcc-tmp/core-answers-jidxriy9/biosnoop.bpf.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-bcc-tmp/core-answers-jidxriy9/biosnoop.bpf.i",
+      "bytes": 2751483,
+      "sha256": "775a85ae72030f9796cbd297c20916fa3aed2790bfeb57d8ef7840886b05e62d"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-bcc-tmp/core-answers-jidxriy9/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-bcc-tmp/core-answers-jidxriy9/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-bcc.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-bcc.h",
+      "bytes": 4181,
+      "sha256": "f05d52d7b8a31120c404a600b8dcc64aaebb0686e6eeea705a93500146d3bff5"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-bcc.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-bcc.json",
+      "bytes": 4375,
+      "sha256": "6bd296feb55e6f7994e6a647664af237d4a522b336e1d4b1b56c868d8378041e"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-bcc.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-bcc.ll",
+      "bytes": 5382277,
+      "sha256": "593a292f363d42613df0978199c23c916bdd4fe5fbd861f1e64e90379d8723ba"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-producer-flags.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-producer-flags.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-producer-flags.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-producer-flags.stdout",
+      "bytes": 401,
+      "sha256": "826ba0546ef565b9d7d86163eb8755f81498341b390cd39811eee5e12148de02"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tetragon-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tetragon-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tetragon-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tetragon-generate.stdout",
+      "bytes": 149,
+      "sha256": "3a3aec4281609b144d08eaad786c369a215cba28df1aa69e8420985c95b4eba3"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tetragon-iter-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tetragon-iter-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tetragon-iter-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tetragon-iter-generate.stdout",
+      "bytes": 152,
+      "sha256": "53191fa195feec825e8674ceab3eef1d04c63686391270ac9987876f1684935d"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tetragon-iter-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tetragon-iter-native-ir.stderr",
+      "bytes": 2883,
+      "sha256": "fb7c63ba664637ec0feeb7d625f0b330449c3be4642110106aef855bc11627cd"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tetragon-iter-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tetragon-iter-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tetragon-iter-tmp/core-answers-gd3y0rgo/bpf_prog_iter.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tetragon-iter-tmp/core-answers-gd3y0rgo/bpf_prog_iter.i",
+      "bytes": 2755470,
+      "sha256": "20cc7916415ae4c4ac7387a68d005fa2626c4c329bf67fbbc52e1ab5a05aa320"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tetragon-iter-tmp/core-answers-gd3y0rgo/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tetragon-iter-tmp/core-answers-gd3y0rgo/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tetragon-iter.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tetragon-iter.h",
+      "bytes": 1485,
+      "sha256": "580c5b9957532b7f63e0eb889efeb6eb656ea1419cdf79201cb02b2748db0b97"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tetragon-iter.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tetragon-iter.json",
+      "bytes": 285,
+      "sha256": "efe720cc9c9b0200cbae951d007db60fb8718aeeaa639e48283ebdafc06b1aa8"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tetragon-iter.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tetragon-iter.ll",
+      "bytes": 5227801,
+      "sha256": "174ee4f518b219e7556ae2eabe0196f449c6c08b838f20b24b941347a788203d"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tetragon-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tetragon-native-ir.stderr",
+      "bytes": 21061,
+      "sha256": "a2a39bbc87b043f717abb0abd824d8be8f134f3a4a07df4bd071b9b2c2013b4c"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tetragon-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tetragon-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tetragon-tmp/core-answers-ystiumns/bpf_generic_kprobe.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tetragon-tmp/core-answers-ystiumns/bpf_generic_kprobe.i",
+      "bytes": 2992480,
+      "sha256": "035d7671ce8af3af69dac311589e267c6ecb65ca6b6e648d3c5560046568ec41"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tetragon-tmp/core-answers-ystiumns/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tetragon-tmp/core-answers-ystiumns/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tetragon.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tetragon.h",
+      "bytes": 30755,
+      "sha256": "d3277fc927564849be8667fe3819622022280715da7f0f90634639100879f0bc"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tetragon.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tetragon.json",
+      "bytes": 46073,
+      "sha256": "f7d4e4986cfbba5ca759acff81d523b34d920698b2474265fd5f6547327580fe"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tetragon.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tetragon.ll",
+      "bytes": 9483706,
+      "sha256": "6260b7153136e42046ded14740138d1da136b0731103d28a07a36d96f0d8f49d"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tracee-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tracee-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tracee-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tracee-generate.stdout",
+      "bytes": 147,
+      "sha256": "cad6f0d4a6c4e24bce165d8151e3d5fbae4bf7a186a0f9eec8011229ae911a09"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tracee-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tracee-native-ir.stderr",
+      "bytes": 2120,
+      "sha256": "84838f5f68f6a46c1197164bf1e3b0dfba26ff44b5f63583c4a9965f79a41ad0"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tracee-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tracee-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tracee-tmp/core-answers-3y5hkc2f/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tracee-tmp/core-answers-3y5hkc2f/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tracee-tmp/core-answers-3y5hkc2f/tracee.bpf.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tracee-tmp/core-answers-3y5hkc2f/tracee.bpf.i",
+      "bytes": 627008,
+      "sha256": "4125a033eac930a16557fd0f778e60397a4fe6aeb5bbdb2e4a4f42d1235bbdfb"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tracee.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tracee.h",
+      "bytes": 81438,
+      "sha256": "903b9b5d82fdd299b0601a3c8d18661fd7445b5591e16715af8e80e088a7e62d"
+    },
+    {
+      "name": "real-source-scoped-types/arm64-tracee.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/arm64-tracee.json",
+      "bytes": 119683,
+      "sha256": "4458216ff874a0914b45275bac64172d87ee28ef33aee80ab4c0dfad7c9bb457"
+    },
+    {
+      "name": "real-source-scoped-types/real-source-scoped-types-fixture.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/real-source-scoped-types-fixture.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/real-source-scoped-types-fixture.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/real-source-scoped-types-fixture.stdout",
+      "bytes": 7499,
+      "sha256": "bb3f2811d25046074d38e7c60d8df17701d4eba1bef885775425d2009a7d004b"
+    },
+    {
+      "name": "real-source-scoped-types/x86-bcc-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-bcc-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/x86-bcc-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-bcc-generate.stdout",
+      "bytes": 141,
+      "sha256": "c383e5ac47bddca3a5013c56b9fe069f76a5844439e5de375c97150e9032ac5e"
+    },
+    {
+      "name": "real-source-scoped-types/x86-bcc-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-bcc-native-ir.stderr",
+      "bytes": 7870,
+      "sha256": "99a384cb6183516ba40f74fb3cf93f7658086f201571a87a544974efeb15f3b7"
+    },
+    {
+      "name": "real-source-scoped-types/x86-bcc-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-bcc-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/x86-bcc-tmp/core-answers-c6fy4vr9/biosnoop.bpf.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-bcc-tmp/core-answers-c6fy4vr9/biosnoop.bpf.i",
+      "bytes": 2909598,
+      "sha256": "1e746195bb8ce9f3815983204446769d7391844498e423f729b011eecadcd9c9"
+    },
+    {
+      "name": "real-source-scoped-types/x86-bcc-tmp/core-answers-c6fy4vr9/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-bcc-tmp/core-answers-c6fy4vr9/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped-types/x86-bcc.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-bcc.h",
+      "bytes": 4181,
+      "sha256": "e1246d6d8d41bc6751de6fa76b2496f675a26c9e5338b471c02953dd584e4f81"
+    },
+    {
+      "name": "real-source-scoped-types/x86-bcc.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-bcc.json",
+      "bytes": 4375,
+      "sha256": "edc1170a1465ecfbf0af371d7cb0a42aff58619b05bf8e65169d2c187a6881ab"
+    },
+    {
+      "name": "real-source-scoped-types/x86-bcc.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-bcc.ll",
+      "bytes": 5410614,
+      "sha256": "1f99a593c1f2ec2829f6dff87780d92392a2db920a40d90db4c8e9ff4c08b76f"
+    },
+    {
+      "name": "real-source-scoped-types/x86-producer-flags.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-producer-flags.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/x86-producer-flags.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-producer-flags.stdout",
+      "bytes": 409,
+      "sha256": "cbfbf285664e7568f1532c406d805b28d9afd4ba79781e999296f31d1e590e34"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tetragon-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tetragon-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tetragon-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tetragon-generate.stdout",
+      "bytes": 147,
+      "sha256": "0bd4e34acb2b83d0be8bfd219475de9f98843382229f4213958b4c0af3d012c6"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tetragon-iter-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tetragon-iter-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tetragon-iter-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tetragon-iter-generate.stdout",
+      "bytes": 150,
+      "sha256": "ea7775aab531e55f061d35d5ccb3163bf1a87d3aad8f2314e04da3d0497444fd"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tetragon-iter-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tetragon-iter-native-ir.stderr",
+      "bytes": 3092,
+      "sha256": "34b370e7ca4dac6e31c22488c3d034f0c69d202d905ea61fcb602be3159fcf14"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tetragon-iter-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tetragon-iter-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tetragon-iter-tmp/core-answers-uj2x5o2v/bpf_prog_iter.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tetragon-iter-tmp/core-answers-uj2x5o2v/bpf_prog_iter.i",
+      "bytes": 2913591,
+      "sha256": "51becde895d30ef682d57be72d71799f72795ffb357bd3cc792a5854d29ff053"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tetragon-iter-tmp/core-answers-uj2x5o2v/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tetragon-iter-tmp/core-answers-uj2x5o2v/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tetragon-iter.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tetragon-iter.h",
+      "bytes": 1485,
+      "sha256": "580c5b9957532b7f63e0eb889efeb6eb656ea1419cdf79201cb02b2748db0b97"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tetragon-iter.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tetragon-iter.json",
+      "bytes": 285,
+      "sha256": "efe720cc9c9b0200cbae951d007db60fb8718aeeaa639e48283ebdafc06b1aa8"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tetragon-iter.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tetragon-iter.ll",
+      "bytes": 5257102,
+      "sha256": "8d0f75912d323b2565eea453bd4fffefdc2c4e3f36e3738fcc7687b12fb6338d"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tetragon-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tetragon-native-ir.stderr",
+      "bytes": 21270,
+      "sha256": "af1c08d07d997e867de895a11a85fdf63f950cab60b4a250f0f50a976de34d66"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tetragon-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tetragon-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tetragon-tmp/core-answers-y_1z5kec/bpf_generic_kprobe.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tetragon-tmp/core-answers-y_1z5kec/bpf_generic_kprobe.i",
+      "bytes": 3143880,
+      "sha256": "24882bacc1baad1a023f2966b531c8b9cc138db35fdc5b6804946069a4551d77"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tetragon-tmp/core-answers-y_1z5kec/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tetragon-tmp/core-answers-y_1z5kec/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tetragon.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tetragon.h",
+      "bytes": 30756,
+      "sha256": "2540dac3ee8c22e9372c6968377bed0492d4d42e6b1c9326da15bbb952cbcf45"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tetragon.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tetragon.json",
+      "bytes": 46074,
+      "sha256": "0e0f9f27b604ed0af9e0b896277fca5c646872422fa268208acbda0a2bb44013"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tetragon.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tetragon.ll",
+      "bytes": 9543060,
+      "sha256": "3acec1bc99798883ad19ced365de5019d0d0e440982a73c6546f66cceae4c83a"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tracee-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tracee-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tracee-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tracee-generate.stdout",
+      "bytes": 145,
+      "sha256": "bb117963abae50766870d13bb48b4785f7144d94826ecafacbae6345b24c8aad"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tracee-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tracee-native-ir.stderr",
+      "bytes": 2120,
+      "sha256": "84838f5f68f6a46c1197164bf1e3b0dfba26ff44b5f63583c4a9965f79a41ad0"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tracee-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tracee-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tracee-tmp/core-answers-l4l4_sou/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tracee-tmp/core-answers-l4l4_sou/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tracee-tmp/core-answers-l4l4_sou/tracee.bpf.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tracee-tmp/core-answers-l4l4_sou/tracee.bpf.i",
+      "bytes": 633265,
+      "sha256": "8be10eebd5ef977ddbf7914a0944f25f4082c21265d1eb91756dba266b3efaa7"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tracee.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tracee.h",
+      "bytes": 84822,
+      "sha256": "2f4fbcb92784f65234afdda3ae6a3cd3a7d83dcf35e5e71ba8d2e3e2f4b08716"
+    },
+    {
+      "name": "real-source-scoped-types/x86-tracee.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types/x86-tracee.json",
+      "bytes": 124750,
+      "sha256": "0631c05f8e27201d396e8f85f613d6f2969a1230919b233a1d3d726657154de6"
+    },
+    {
+      "name": "real-source-scoped-types-controller.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-controller.json",
+      "bytes": 65568,
+      "sha256": "db7b439d62f1702479bcb6d76ff9f95bf6720bcb442f7369d178aad4f08aab98"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/arm64-answers.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/arm64-answers.h",
+      "bytes": 3448,
+      "sha256": "b7f644404902305ada2827bc5a3f7eeff35a4c37db6b70d252e3a8e5145f9b9d"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/arm64-answers.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/arm64-answers.json",
+      "bytes": 3055,
+      "sha256": "1386c672cc76bdbc7b2cb731201d3ceedbf5dd50fc429d962c5b60efcbca5bfd"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/arm64-dynamic-execution.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/arm64-dynamic-execution.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/arm64-dynamic-execution.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/arm64-dynamic-execution.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/arm64-dynamic.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/arm64-dynamic.ll",
+      "bytes": 4676,
+      "sha256": "00c3e7175085837db758a6f1f444db7319e341a7bb6b8c7afcc84d07b1d133e7"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/arm64-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/arm64-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/arm64-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/arm64-generate.stdout",
+      "bytes": 164,
+      "sha256": "2761e5b83ba198a3acf18afb7cfbfb582f4eca20bc2de17b2aa17ac738ee8698"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/arm64-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/arm64-native-ir.stderr",
+      "bytes": 1053,
+      "sha256": "66d6f14469999fc0d8747d0ebe6215c934dd9dee12c978b1414cd26283c882e4"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/arm64-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/arm64-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/arm64-native.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/arm64-native.ll",
+      "bytes": 4112,
+      "sha256": "b54932791e9ebd1d9efbc68467f4cf25be46481aa0716f2dcfe6489ba5faaff2"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/arm64-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/arm64-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/arm64-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/arm64-oracle.stdout",
+      "bytes": 6054,
+      "sha256": "61518501937b4dd2b25e2c73fbadcedf6a56624c6182e925efaf795823ab0f1d"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/arm64-tmp/core-answers-c12cn6h4/queries.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/arm64-tmp/core-answers-c12cn6h4/queries.i",
+      "bytes": 13106,
+      "sha256": "df75ab35b433ecdf13c482f3015f611bc34af4af9e98f208d9072e9a598ee74e"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/arm64-tmp/core-answers-c12cn6h4/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/arm64-tmp/core-answers-c12cn6h4/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/build-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/build-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/build-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/build-oracle.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/oracle.bpf.o",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/oracle.bpf.o",
+      "bytes": 12248,
+      "sha256": "d8aeca0766b34bc02a1d2116af4419906e5764ab9abc1372d93a8ce537e3a463"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/x86-answers.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/x86-answers.h",
+      "bytes": 3448,
+      "sha256": "b469e44b1eaf7e3e64778518219f91ed79ca6f0d0d8f533f48d279ea886a5c98"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/x86-answers.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/x86-answers.json",
+      "bytes": 3055,
+      "sha256": "f6ca50e2a025511819e824cd1136f112a7dcffaf325e340ccb28aab708c65286"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/x86-dynamic-execution.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/x86-dynamic-execution.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/x86-dynamic-execution.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/x86-dynamic-execution.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/x86-dynamic.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/x86-dynamic.ll",
+      "bytes": 4672,
+      "sha256": "47974d1047e6814d8bca72740a42871a8892f87006ab67dafc9e6ab0b74df41e"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/x86-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/x86-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/x86-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/x86-generate.stdout",
+      "bytes": 162,
+      "sha256": "610ea243e2e6e3da5afb4b6abe8df0bd2aa51ba58daa4e9d1e3576b225a345a5"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/x86-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/x86-native-ir.stderr",
+      "bytes": 1049,
+      "sha256": "e8137147a1fcebb4d7869860e405164b98c1c29da9b7eedcafbc8333fac90ab7"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/x86-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/x86-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/x86-native.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/x86-native.ll",
+      "bytes": 4108,
+      "sha256": "3bda02f9ba38530beb270c3b40ac905ab0b879382739b0d5e89cb982e1ba6259"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/x86-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/x86-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/x86-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/x86-oracle.stdout",
+      "bytes": 6052,
+      "sha256": "583885fb650633945e306238ebd34ea9216c87599d0064cc61daab0d818d0685"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/x86-tmp/core-answers-tpj1e4xk/queries.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/x86-tmp/core-answers-tpj1e4xk/queries.i",
+      "bytes": 13555,
+      "sha256": "a5d0ca2ac2f52dd111121be139ace0583efeb4db9763320113161bfd5933b6da"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-baseline/x86-tmp/core-answers-tpj1e4xk/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-baseline/x86-tmp/core-answers-tpj1e4xk/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "real-source-scoped-types-fixture-controller.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-fixture-controller.json",
+      "bytes": 7499,
+      "sha256": "bb3f2811d25046074d38e7c60d8df17701d4eba1bef885775425d2009a7d004b"
+    },
+    {
+      "name": "real-source-scoped-types-job.log",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-scoped-types-job.log",
+      "bytes": 65568,
+      "sha256": "db7b439d62f1702479bcb6d76ff9f95bf6720bcb442f7369d178aad4f08aab98"
+    },
+    {
+      "name": "scoped-baseline/arm64-answers.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/arm64-answers.h",
+      "bytes": 3293,
+      "sha256": "8d314813f47ff45b1642d2343fb640aacb743836588f02a8220ff8d5e57cfbf4"
+    },
+    {
+      "name": "scoped-baseline/arm64-answers.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/arm64-answers.json",
+      "bytes": 2852,
+      "sha256": "ef888e96d0a54baad6ea1df7f2b38140b3c3e15379c5dc4a0ea2e2ddbbd9eeda"
+    },
+    {
+      "name": "scoped-baseline/arm64-dynamic-execution.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/arm64-dynamic-execution.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "scoped-baseline/arm64-dynamic-execution.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/arm64-dynamic-execution.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "scoped-baseline/arm64-dynamic.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/arm64-dynamic.ll",
+      "bytes": 4463,
+      "sha256": "c9ec679241df6a293138dc914ba88f46d02f988486dd49059b13ff9995c73b50"
+    },
+    {
+      "name": "scoped-baseline/arm64-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/arm64-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "scoped-baseline/arm64-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/arm64-generate.stdout",
+      "bytes": 138,
+      "sha256": "c83ed4cce0aac5e0110a4a9d6300301b3f357234bc760d569bb512c5810ade56"
+    },
+    {
+      "name": "scoped-baseline/arm64-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/arm64-native-ir.stderr",
+      "bytes": 1001,
+      "sha256": "261cf80d329332452289b330b66be4460ab4228e14553edb25bd1ba42a090a6a"
+    },
+    {
+      "name": "scoped-baseline/arm64-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/arm64-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "scoped-baseline/arm64-native.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/arm64-native.ll",
+      "bytes": 3899,
+      "sha256": "55c3bfac401e28b009772674422903fb7818e57133c17789cbfd5e7dcc4d5f30"
+    },
+    {
+      "name": "scoped-baseline/arm64-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/arm64-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "scoped-baseline/arm64-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/arm64-oracle.stdout",
+      "bytes": 5571,
+      "sha256": "6e20fe5aada52036d1e6d76b64db08eb584717143694a35d56ed83cb0442e78a"
+    },
+    {
+      "name": "scoped-baseline/arm64-tmp/core-answers-exaby9ss/queries.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/arm64-tmp/core-answers-exaby9ss/queries.i",
+      "bytes": 12810,
+      "sha256": "b84a66d0cca79fece2893a041286455da1fa8ac7835706127f4f8474869edcc4"
+    },
+    {
+      "name": "scoped-baseline/arm64-tmp/core-answers-exaby9ss/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/arm64-tmp/core-answers-exaby9ss/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "scoped-baseline/build-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/build-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "scoped-baseline/build-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/build-oracle.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "scoped-baseline/oracle.bpf.o",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/oracle.bpf.o",
+      "bytes": 11608,
+      "sha256": "7d0a2b1c3f5dc1587ab9f1283923fc86c918c9bab5651fa92cf520293fc45c22"
+    },
+    {
+      "name": "scoped-baseline/x86-answers.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/x86-answers.h",
+      "bytes": 3293,
+      "sha256": "55d0bf9adb92ce4b931e3ee10b9e5a86e2ce28b3b63b3bdee9084cd8e547447d"
+    },
+    {
+      "name": "scoped-baseline/x86-answers.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/x86-answers.json",
+      "bytes": 2852,
+      "sha256": "15110d4ce49a1b5f681002a3602d9300d6ac13863a2ad255107d54f2c0cd26ab"
+    },
+    {
+      "name": "scoped-baseline/x86-dynamic-execution.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/x86-dynamic-execution.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "scoped-baseline/x86-dynamic-execution.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/x86-dynamic-execution.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "scoped-baseline/x86-dynamic.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/x86-dynamic.ll",
+      "bytes": 4459,
+      "sha256": "3e05eec5a6ebbb65f30f0a16f1dd896198ebf452494e88839ed98346d76d77f3"
+    },
+    {
+      "name": "scoped-baseline/x86-generate.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/x86-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "scoped-baseline/x86-generate.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/x86-generate.stdout",
+      "bytes": 136,
+      "sha256": "70dbe2e043062be3f7e66262b1e47c5b33a6d694a4a6b3154ce67fa20ad97aec"
+    },
+    {
+      "name": "scoped-baseline/x86-native-ir.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/x86-native-ir.stderr",
+      "bytes": 997,
+      "sha256": "0883ed2a87864508c6885cb4ffd8652d2ce171333f7eef5f65a043dedc26cfee"
+    },
+    {
+      "name": "scoped-baseline/x86-native-ir.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/x86-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "scoped-baseline/x86-native.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/x86-native.ll",
+      "bytes": 3895,
+      "sha256": "4240f486e55757d5bbad9e9ee38d51b4d45903e26d5e70ed51ae1382c59572d0"
+    },
+    {
+      "name": "scoped-baseline/x86-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/x86-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "scoped-baseline/x86-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/x86-oracle.stdout",
+      "bytes": 5569,
+      "sha256": "af970041191286def99e2d47813ba7fa70dead997fe61d1f31c916a9fb68bc11"
+    },
+    {
+      "name": "scoped-baseline/x86-tmp/core-answers-v4i_q_n_/queries.i",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/x86-tmp/core-answers-v4i_q_n_/queries.i",
+      "bytes": 13259,
+      "sha256": "71f91c44c816a8554acf02cb47011caf1f7f315adb8eeb75008aad0769ea6526"
+    },
+    {
+      "name": "scoped-baseline/x86-tmp/core-answers-v4i_q_n_/scan.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-baseline/x86-tmp/core-answers-v4i_q_n_/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "scoped-controller.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-controller.json",
+      "bytes": 7071,
+      "sha256": "0c7b3b5a511cd8e6b6b5075217fcce38e23d2e2da618d255ab78a57c71acc497"
+    },
+    {
+      "name": "scoped-job.log",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/scoped-job.log",
+      "bytes": 7071,
+      "sha256": "0c7b3b5a511cd8e6b6b5075217fcce38e23d2e2da618d255ab78a57c71acc497"
+    }
+  ],
+  "every_member_and_original_verified": true,
+  "parts": [
+    {
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/source-extension-failed-records.tar.zst.part-aa",
+      "bytes": 50331648,
+      "sha256": "e9e9cae9c58274c3c899035b16725e821c85ed4d49c096885e99a67643d30846"
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/source-extension-failed-records.tar.zst.part-ab",
+      "bytes": 20011623,
+      "sha256": "92dbb02c2b7613cd28bac9702a1d264aeeecf72d601344d2e5cfebfebc19b75b"
+    }
+  ],
+  "concatenated_parts_verified": true
+}

@@ -1,0 +1,263 @@
+{
+  "attempts": [
+    {
+      "label": "scoped",
+      "status": "complete",
+      "cases": [
+        {
+          "arch": "x86",
+          "status": "complete"
+        },
+        {
+          "arch": "arm64",
+          "status": "complete"
+        }
+      ],
+      "all_match": true,
+      "all_sources_compile": null
+    },
+    {
+      "label": "real-source-scoped",
+      "status": "complete",
+      "cases": [
+        {
+          "arch": "x86",
+          "app": "bcc",
+          "status": "complete",
+          "query_count": 17,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "x86",
+          "app": "tetragon",
+          "status": "complete",
+          "query_count": 168,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "x86",
+          "app": "tetragon-iter",
+          "status": "complete",
+          "query_count": 1,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "x86",
+          "app": "tracee",
+          "status": "failed"
+        },
+        {
+          "arch": "arm64",
+          "app": "bcc",
+          "status": "complete",
+          "query_count": 17,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "arm64",
+          "app": "tetragon",
+          "status": "complete",
+          "query_count": 168,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "arm64",
+          "app": "tetragon-iter",
+          "status": "complete",
+          "query_count": 1,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "arm64",
+          "app": "tracee",
+          "status": "failed"
+        }
+      ],
+      "all_match": null,
+      "all_sources_compile": false
+    },
+    {
+      "label": "real-source-scoped-types",
+      "status": "complete",
+      "cases": [
+        {
+          "arch": "x86",
+          "app": "bcc",
+          "status": "complete",
+          "query_count": 17,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "x86",
+          "app": "tetragon",
+          "status": "complete",
+          "query_count": 168,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "x86",
+          "app": "tetragon-iter",
+          "status": "complete",
+          "query_count": 1,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "x86",
+          "app": "tracee",
+          "status": "failed"
+        },
+        {
+          "arch": "arm64",
+          "app": "bcc",
+          "status": "complete",
+          "query_count": 17,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "arm64",
+          "app": "tetragon",
+          "status": "complete",
+          "query_count": 168,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "arm64",
+          "app": "tetragon-iter",
+          "status": "complete",
+          "query_count": 1,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "arm64",
+          "app": "tracee",
+          "status": "failed"
+        }
+      ],
+      "all_match": null,
+      "all_sources_compile": false
+    },
+    {
+      "label": "real-source-flat",
+      "status": "complete",
+      "cases": [
+        {
+          "arch": "x86",
+          "app": "bcc",
+          "status": "complete",
+          "query_count": 17,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "x86",
+          "app": "tetragon",
+          "status": "complete",
+          "query_count": 168,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "x86",
+          "app": "tetragon-iter",
+          "status": "complete",
+          "query_count": 1,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "x86",
+          "app": "tracee",
+          "status": "failed",
+          "unresolved_core_calls": true
+        },
+        {
+          "arch": "arm64",
+          "app": "bcc",
+          "status": "complete",
+          "query_count": 17,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "arm64",
+          "app": "tetragon",
+          "status": "complete",
+          "query_count": 168,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "arm64",
+          "app": "tetragon-iter",
+          "status": "complete",
+          "query_count": 1,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "arm64",
+          "app": "tracee",
+          "status": "failed",
+          "unresolved_core_calls": true
+        }
+      ],
+      "all_match": null,
+      "all_sources_compile": false
+    },
+    {
+      "label": "real-source-arrays",
+      "status": "complete",
+      "cases": [
+        {
+          "arch": "x86",
+          "app": "bcc",
+          "status": "complete",
+          "query_count": 17,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "x86",
+          "app": "tetragon",
+          "status": "complete",
+          "query_count": 168,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "x86",
+          "app": "tetragon-iter",
+          "status": "complete",
+          "query_count": 1,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "x86",
+          "app": "tracee",
+          "status": "failed"
+        },
+        {
+          "arch": "arm64",
+          "app": "bcc",
+          "status": "complete",
+          "query_count": 17,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "arm64",
+          "app": "tetragon",
+          "status": "complete",
+          "query_count": 168,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "arm64",
+          "app": "tetragon-iter",
+          "status": "complete",
+          "query_count": 1,
+          "unresolved_core_calls": false
+        },
+        {
+          "arch": "arm64",
+          "app": "tracee",
+          "status": "failed"
+        }
+      ],
+      "all_match": null,
+      "all_sources_compile": false
+    }
+  ],
+  "scope": "Preserved sequential diagnostic attempts, including failed Tracee type-size/bracket/array queries; no runtime image or measurement."
+}
