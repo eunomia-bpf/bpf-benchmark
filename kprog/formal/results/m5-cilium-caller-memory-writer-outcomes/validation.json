@@ -1,0 +1,80 @@
+{
+  "scope": "same actual SP/R30 prefix, actual linked provider outcome and all original memory-writer stores to caller rest",
+  "source_sha256": "34d7cb62c34c935d817014d8c936cf4c9194d921b5ee8bd1eb6f505e8e5c3109",
+  "parent_commit": "ab0b3b00c4fd4189d35aa81dd8e0d46b2b1cf33a",
+  "receipts": {
+    "stage1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-outcomes/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.5482170581817627,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerMemoryWriterOutcomes"
+      ],
+      "exit": 0,
+      "seconds": 1.934722900390625,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.624593734741211,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-outcomes/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.2640492916107178,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 310,
+  "full_jobs": 1577,
+  "root_queries": [
+    "outcomes"
+  ],
+  "execution": "original202-step SP/R30 prefix, actual kind3 external Step2, same return-cache writes and materialization, actual164 writer prefix, real payload/tag builtins and original12-step tail; complete provider trace retained",
+  "witnesses": "one SP store, two cache stores and three data/payload/tag stores retained on the same execution; final data=base, payload=0, tag=(original&~255)|10 and SP=-32 on final tag-store heap",
+  "boundary": "post-provider access/SP/ABI/tag-slot/tag/current-tagword and initialwidth8 explicit; no provider purity or existence, no native/global/whole-entry claim",
+  "resource_assignment": "CPU17/j1/nice0/32GiB/timing shared; default proof limits; full root uses formal-full-check exclusive nonblocking lock",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
