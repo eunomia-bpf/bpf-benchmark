@@ -1,0 +1,173 @@
+{
+  "scope": "original sixteen tail RHS expression values, actual local/global bindings, assignment casts and load results",
+  "source_sha256": "823aa01ce66d128987029948ad3faa8767d36077d5f792768319dc06247b54fc",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage5": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-header-tail-values/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 45.6883111000061,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderTailValues"
+      ],
+      "exit": 0,
+      "seconds": 42.250593423843384,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.620109796524048,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-header-tail-values/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.341521739959717,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "failed_stages": {
+    "stage1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-header-tail-values/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 47.207597494125366,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-header-tail-values/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 56.9473352432251,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "stage3": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-header-tail-values/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 53.728490114212036,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "stage4": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-header-tail-values/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 42.18477773666382,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "diagnostic": "generic environment lemma avoids full allocation reduction; explicit original-expression constructor goals normalize finite-index matches before binding rewrites; volatile type constructors expanded; explicit empty Fin0 True endpoint closed; original caps unchanged",
+  "focused_jobs": 237,
+  "full_jobs": 1527,
+  "root_queries": [
+    "declared",
+    "storage",
+    "symbols",
+    "not_local",
+    "global_bindings",
+    "union_layout",
+    "global_modes",
+    "source_form",
+    "casts",
+    "source_values"
+  ],
+  "actual_tail_source_commit": "35a453ed95ce8d8781a97aab816fe883b163ce3f",
+  "actual_local_objects": 9,
+  "actual_global_callbacks": 2,
+  "local_addresses": "actual795allocator bindings for volatile stackunion/payload/tag arrays, helper_ctx/helper_abi_base/is_xdp/abi_kind/skb_ctx/ABI",
+  "global_addresses": "actual Genv.findSymbol payload_load/store; actual allocation leaves both names unbound by imported allocVariables_env_other, no address oracle",
+  "union_layout": "actual anonymous union b/q members both offset0; original array/address-of expressions derive genuine pointers without scalar loads",
+  "scalars": "original sizeof/division yield Vlong32/1/8 and bias Vlong32; original assignment casts yield destination Vint32/1/8 or unchanged pointer/long",
+  "source_form": "all sixteen original RHS ASTs exactly match evaluated expressions; actual cast and chunk loadResult facts retained",
+  "actual_stores_proved_here": 0,
+  "actual_sequential_execution_proved_here": false,
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
