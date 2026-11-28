@@ -1,0 +1,1018 @@
+{
+  "archive": {
+    "path": "/workspaces/repository/kprog/results/core-header-route-20261128/producer-failed-records.tar.zst",
+    "bytes": 190453,
+    "sha256": "3f78bc619d172eaaaf14bf0623356c5aea6e93faa1fb8b0b3ed369aa302d24fa"
+  },
+  "members": [
+    {
+      "name": "kprog/results/core-header-route-20261128/producer-regeneration/arm64-build.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/producer-regeneration/arm64-build.stderr",
+      "bytes": 227268,
+      "sha256": "180c4b17c4b6516c432222b46305cab1a1e8c1f4b7dc6615a4538e4c4a2f15d0"
+    },
+    {
+      "name": "kprog/results/core-header-route-20261128/producer-regeneration/arm64-build.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/producer-regeneration/arm64-build.stdout",
+      "bytes": 70401,
+      "sha256": "7bac9f38f54b0bbbd88ded4af32b2ded4be22fbda4d69986037a23a255ce7714"
+    },
+    {
+      "name": "kprog/results/core-header-route-20261128/producer-regeneration/x86-build.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/producer-regeneration/x86-build.stderr",
+      "bytes": 227809,
+      "sha256": "3cdce62c48fa96160bb97abba7213dee33b683142e77f1cc003c8c13edbc9594"
+    },
+    {
+      "name": "kprog/results/core-header-route-20261128/producer-regeneration/x86-build.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/producer-regeneration/x86-build.stdout",
+      "bytes": 68650,
+      "sha256": "d66286a42da3eb949368276874222cf9810f624752b4a351781d13b2a06e5de5"
+    },
+    {
+      "name": "kprog/results/core-header-route-20261128/producer-regeneration-controller.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/producer-regeneration-controller.json",
+      "bytes": 823098,
+      "sha256": "5ccec08007bdd10c8b10e2badf5c81d0a8d438c99c5a4d8fd4015edcb2de75fd"
+    },
+    {
+      "name": "kprog/results/core-header-route-20261128/producer-regeneration-job.log",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/producer-regeneration-job.log",
+      "bytes": 511,
+      "sha256": "0c0af8aeeadd75ff19e033b5f0e60d24a75ac3c5541366708f925e811b55364b"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/biosnoop.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/biosnoop.native.o.core.h",
+      "bytes": 2732,
+      "sha256": "97b950e4968a2fd96e25810e60e1eff9cbda06a8a19d6baadc9a9e0ddb783d7b"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/biosnoop.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/biosnoop.native.o.core.json",
+      "bytes": 3004,
+      "sha256": "de1a7f4a57d372028ece05998a26b06aee3ec5e93edf1a7fb20f7df71cc65f74"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/capable.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/capable.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/capable.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/capable.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/opensnoop.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/opensnoop.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/opensnoop.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/opensnoop.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/runqlat.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/runqlat.native.o.core.h",
+      "bytes": 3137,
+      "sha256": "e39c29ac2315dc7cac57beb513edf705aa08fe0668558f28132b8602193177ee"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/runqlat.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/runqlat.native.o.core.json",
+      "bytes": 3992,
+      "sha256": "aab93512e39d53c68929786074dd7a88a3f77a53793ffa4e8509e2bb3c405a9c"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/syscount.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/syscount.native.o.core.h",
+      "bytes": 1421,
+      "sha256": "facd487bedc92393735d30df34cfe65c9ada21257d99fbf11f5b47b99bd8ce86"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/syscount.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/syscount.native.o.core.json",
+      "bytes": 342,
+      "sha256": "111979637b024d3dcecc3654d9bba5591051eb3c0279452d55ca72240312f9e3"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/tcpconnect.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/tcpconnect.native.o.core.h",
+      "bytes": 1808,
+      "sha256": "54831ee15f9d376ca73185488a07f490ff3961777cd807c052c65f6bfdb28460"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/tcpconnect.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/tcpconnect.native.o.core.json",
+      "bytes": 1145,
+      "sha256": "dc88be1e39a42e3f7aa870d29095307ffa9e87adbfb35a0dea3d607da483d249"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/tcplife.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/tcplife.native.o.core.h",
+      "bytes": 2125,
+      "sha256": "0bd26b93a10f69d3838289475381ce76428ce25c1ff4bc73bb24b674ba435b76"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/tcplife.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/tcplife.native.o.core.json",
+      "bytes": 2044,
+      "sha256": "46b05d26b5a87f6bddfaafebf36deb3e2dd9c542f9bba58012e5e80b3e804ec2"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/vfsstat.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/vfsstat.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/vfsstat.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/vfsstat.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_alignchecker.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_alignchecker.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_alignchecker.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_alignchecker.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_host.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_host.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_host.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_host.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_lxc.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_lxc.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_lxc.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_lxc.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_overlay.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_overlay.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_overlay.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_overlay.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_sock.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_sock.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_sock.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_sock.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_wireguard.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_wireguard.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_wireguard.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_wireguard.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_xdp.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_xdp.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_xdp.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_xdp.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/cilium_placeholders.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/cilium_placeholders.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/cilium_placeholders.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/cilium_placeholders.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/balancer.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/balancer.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/balancer.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/balancer.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/healthchecking.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/healthchecking.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/healthchecking.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/healthchecking.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/healthchecking_ipip.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/healthchecking_ipip.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/healthchecking_ipip.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/healthchecking_ipip.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/xdp_root.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/xdp_root.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/xdp_root.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/xdp_root.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/custom_trace.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/custom_trace.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/custom_trace.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/custom_trace.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/dotnet_tracer.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/dotnet_tracer.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/dotnet_tracer.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/dotnet_tracer.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/go_labels.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/go_labels.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/go_labels.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/go_labels.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/hotspot_tracer.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/hotspot_tracer.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/hotspot_tracer.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/hotspot_tracer.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/interpreter_dispatcher.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/interpreter_dispatcher.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/interpreter_dispatcher.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/interpreter_dispatcher.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/native_stack_trace.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/native_stack_trace.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/native_stack_trace.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/native_stack_trace.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/off_cpu.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/off_cpu.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/off_cpu.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/off_cpu.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/perl_tracer.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/perl_tracer.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/perl_tracer.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/perl_tracer.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/php_tracer.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/php_tracer.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/php_tracer.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/php_tracer.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/python_tracer.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/python_tracer.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/python_tracer.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/python_tracer.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/ruby_tracer.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/ruby_tracer.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/ruby_tracer.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/ruby_tracer.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/sched_monitor.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/sched_monitor.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/sched_monitor.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/sched_monitor.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/system_config.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/system_config.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/system_config.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/system_config.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/uprobe.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/uprobe.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/uprobe.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/uprobe.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/v8_tracer.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/v8_tracer.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/v8_tracer.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/v8_tracer.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tetragon/bpf_cgroup.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tetragon/bpf_cgroup.native.o.core.h",
+      "bytes": 3422,
+      "sha256": "bb3fcc6a48d243f98f643a2bbf7aab62e761a758129a8a4c0ad973ad17b8955d"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tetragon/bpf_cgroup.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tetragon/bpf_cgroup.native.o.core.json",
+      "bytes": 5063,
+      "sha256": "4c489ac0e383f5881549e0b5c2792699c1a3204a0792606040c3eee083ba3826"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tetragon/bpf_loader.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tetragon/bpf_loader.native.o.core.h",
+      "bytes": 3397,
+      "sha256": "a3e878bc12857198daad314ea1c162e4854cae697801e015a1d38111e61f9827"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tetragon/bpf_loader.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tetragon/bpf_loader.native.o.core.json",
+      "bytes": 5036,
+      "sha256": "958be601d288b773202ce35ce0437975efc8f5b1c1524ec5a6115ccba3dc9806"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tetragon/core-answers-1wqpqlrm/scan.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tetragon/core-answers-1wqpqlrm/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tracee/core-answers-j0gb2_zh/scan.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tracee/core-answers-j0gb2_zh/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tracee/core-answers-j0gb2_zh/tracee.bpf.i",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tracee/core-answers-j0gb2_zh/tracee.bpf.i",
+      "bytes": 597021,
+      "sha256": "86910110d593da28c1723aa4b9a42753e8b995d5921adca26e4e43a6d9df9d9d"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tracee/lsm_support/kprobe_check.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tracee/lsm_support/kprobe_check.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tracee/lsm_support/kprobe_check.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tracee/lsm_support/kprobe_check.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tracee/lsm_support/lsm_check.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tracee/lsm_support/lsm_check.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tracee/lsm_support/lsm_check.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tracee/lsm_support/lsm_check.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/biosnoop.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/biosnoop.native.o.core.h",
+      "bytes": 2732,
+      "sha256": "4cdeb62834f1fe60a15faca4b8583851bc385d8618bad0d543cf56ede9e3893c"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/biosnoop.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/biosnoop.native.o.core.json",
+      "bytes": 3004,
+      "sha256": "b4f4735b4e9ce8325dfe1c6564ea87ae36c3da808895afef4d5fca567cc73fe4"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/capable.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/capable.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/capable.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/capable.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/opensnoop.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/opensnoop.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/opensnoop.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/opensnoop.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/runqlat.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/runqlat.native.o.core.h",
+      "bytes": 3137,
+      "sha256": "e4df84a5d7e8aaad01c15c2054a1a743800b269f8030e66bab431016a9d4e2c6"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/runqlat.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/runqlat.native.o.core.json",
+      "bytes": 3992,
+      "sha256": "27c44dcc0d0bbf6edf30d19d00c26400792d88f98b4b7fd51367140ecd692457"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/syscount.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/syscount.native.o.core.h",
+      "bytes": 1421,
+      "sha256": "facd487bedc92393735d30df34cfe65c9ada21257d99fbf11f5b47b99bd8ce86"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/syscount.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/syscount.native.o.core.json",
+      "bytes": 342,
+      "sha256": "111979637b024d3dcecc3654d9bba5591051eb3c0279452d55ca72240312f9e3"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/tcpconnect.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/tcpconnect.native.o.core.h",
+      "bytes": 1808,
+      "sha256": "54831ee15f9d376ca73185488a07f490ff3961777cd807c052c65f6bfdb28460"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/tcpconnect.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/tcpconnect.native.o.core.json",
+      "bytes": 1145,
+      "sha256": "dc88be1e39a42e3f7aa870d29095307ffa9e87adbfb35a0dea3d607da483d249"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/tcplife.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/tcplife.native.o.core.h",
+      "bytes": 2125,
+      "sha256": "0bd26b93a10f69d3838289475381ce76428ce25c1ff4bc73bb24b674ba435b76"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/tcplife.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/tcplife.native.o.core.json",
+      "bytes": 2044,
+      "sha256": "46b05d26b5a87f6bddfaafebf36deb3e2dd9c542f9bba58012e5e80b3e804ec2"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/vfsstat.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/vfsstat.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/vfsstat.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/vfsstat.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_alignchecker.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_alignchecker.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_alignchecker.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_alignchecker.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_host.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_host.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_host.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_host.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_lxc.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_lxc.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_lxc.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_lxc.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_overlay.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_overlay.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_overlay.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_overlay.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_sock.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_sock.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_sock.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_sock.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_wireguard.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_wireguard.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_wireguard.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_wireguard.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_xdp.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_xdp.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_xdp.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_xdp.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/cilium_placeholders.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/cilium_placeholders.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/cilium_placeholders.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/cilium_placeholders.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/balancer.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/balancer.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/balancer.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/balancer.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/healthchecking.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/healthchecking.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/healthchecking.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/healthchecking.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/healthchecking_ipip.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/healthchecking_ipip.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/healthchecking_ipip.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/healthchecking_ipip.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/xdp_root.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/xdp_root.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/xdp_root.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/xdp_root.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/custom_trace.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/custom_trace.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/custom_trace.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/custom_trace.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/dotnet_tracer.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/dotnet_tracer.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/dotnet_tracer.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/dotnet_tracer.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/go_labels.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/go_labels.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/go_labels.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/go_labels.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/hotspot_tracer.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/hotspot_tracer.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/hotspot_tracer.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/hotspot_tracer.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/interpreter_dispatcher.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/interpreter_dispatcher.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/interpreter_dispatcher.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/interpreter_dispatcher.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/native_stack_trace.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/native_stack_trace.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/native_stack_trace.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/native_stack_trace.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/off_cpu.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/off_cpu.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/off_cpu.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/off_cpu.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/perl_tracer.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/perl_tracer.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/perl_tracer.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/perl_tracer.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/php_tracer.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/php_tracer.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/php_tracer.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/php_tracer.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/python_tracer.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/python_tracer.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/python_tracer.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/python_tracer.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/ruby_tracer.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/ruby_tracer.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/ruby_tracer.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/ruby_tracer.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/sched_monitor.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/sched_monitor.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/sched_monitor.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/sched_monitor.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/system_config.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/system_config.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/system_config.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/system_config.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/uprobe.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/uprobe.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/uprobe.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/uprobe.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/v8_tracer.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/v8_tracer.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/v8_tracer.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/v8_tracer.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/tetragon/bpf_cgroup.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tetragon/bpf_cgroup.native.o.core.h",
+      "bytes": 3422,
+      "sha256": "bb3fcc6a48d243f98f643a2bbf7aab62e761a758129a8a4c0ad973ad17b8955d"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/tetragon/bpf_cgroup.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tetragon/bpf_cgroup.native.o.core.json",
+      "bytes": 5063,
+      "sha256": "4c489ac0e383f5881549e0b5c2792699c1a3204a0792606040c3eee083ba3826"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/tetragon/bpf_loader.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tetragon/bpf_loader.native.o.core.h",
+      "bytes": 3397,
+      "sha256": "a1dfab6efa9b048169e7071a9a2ed8b64f51ca95746bb8d73c5e4f4df11ba091"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/tetragon/bpf_loader.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tetragon/bpf_loader.native.o.core.json",
+      "bytes": 5036,
+      "sha256": "69339ad64fb3c18c544a195eefe936c0b40e179d3f12fc87f643084429409377"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/tetragon/core-answers-xdxvnqt8/scan.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tetragon/core-answers-xdxvnqt8/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/core-answers-jvt4aaay/scan.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/core-answers-jvt4aaay/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/core-answers-jvt4aaay/tracee.bpf.i",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/core-answers-jvt4aaay/tracee.bpf.i",
+      "bytes": 601939,
+      "sha256": "7b5a2db8ca85c6772487ff59a2f69227df4a14a02b529d47f0a4512a1c0900a6"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/lsm_support/kprobe_check.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/lsm_support/kprobe_check.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/lsm_support/kprobe_check.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/lsm_support/kprobe_check.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/lsm_support/lsm_check.native.o.core.h",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/lsm_support/lsm_check.native.o.core.h",
+      "bytes": 1199,
+      "sha256": "fa54db339f2165ff1ee5e232823c198b18b78603635147964bb4f4965d01cc06"
+    },
+    {
+      "name": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/lsm_support/lsm_check.native.o.core.json",
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/lsm_support/lsm_check.native.o.core.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    }
+  ],
+  "every_member_and_original_verified": true
+}
