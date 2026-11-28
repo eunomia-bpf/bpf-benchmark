@@ -1,0 +1,86 @@
+{
+  "reviewed_utc": "2026-11-28T10:23:27Z",
+  "source_anchors": [
+    {
+      "path": "vendor/repos/tetragon/pkg/sensors/tracing/generic.go",
+      "sha256": "ceba65854eeb4d74c5e1993b23e4a8ac7a06f86e0d1c9c1fbd620b2e554bd89e",
+      "first_line": 101,
+      "last_line": 103,
+      "excerpt": "101: func hasPtRegsSource(arg *v1alpha1.KProbeArg) bool {\n102: \treturn arg.Source == \"pt_regs\"\n103: }"
+    },
+    {
+      "path": "vendor/repos/tetragon/pkg/sensors/tracing/args_linux.go",
+      "sha256": "3c33bb70a13b5b563a0dc1b53199e8282f4e9e7ff63288b9e8be34072005ef59",
+      "first_line": 77,
+      "last_line": 99,
+      "excerpt": "77: func getMetaValue(arg *v1alpha1.KProbeArg) (int, error) {\n78: \tvar meta int\n79: \n80: \tif arg.SizeArgIndex > 0 {\n81: \t\tif arg.SizeArgIndex > 15 {\n82: \t\t\treturn 0, fmt.Errorf(\"invalid SizeArgIndex value (>15): %v\", arg.SizeArgIndex)\n83: \t\t}\n84: \t\tmeta = int(arg.SizeArgIndex)\n85: \t}\n86: \tif arg.ReturnCopy {\n87: \t\tmeta = meta | argReturnCopyBit\n88: \t}\n89: \tif arg.MaxData {\n90: \t\tmeta = meta | argMaxDataBit\n91: \t}\n92: \tif hasCurrentTaskSource(arg) {\n93: \t\tmeta = meta | argCurrentTaskBit\n94: \t}\n95: \tif hasPtRegsSource(arg) {\n96: \t\tmeta = meta | argPtRegsBit\n97: \t}\n98: \treturn meta, nil\n99: }"
+    },
+    {
+      "path": "vendor/repos/tetragon/pkg/sensors/tracing/generickprobe.go",
+      "sha256": "22501ac6baa77f723c2cc115d697990ec24a61e32c12c2903258d7cf236e4976",
+      "first_line": 772,
+      "last_line": 785,
+      "excerpt": "772: \n773: \t\tvar (\n774: \t\t\tregArg api.ConfigRegArg\n775: \t\t\tok     bool\n776: \t\t)\n777: \n778: \t\tif hasPtRegsSource(a) {\n779: \t\t\tregArg.Offset, regArg.Size, ok = asm.RegOffsetSize(a.Resolve)\n780: \t\t\tif !ok {\n781: \t\t\t\treturn fmt.Errorf(\"error: Failed to retrieve register argument '%s'\", a.Resolve)\n782: \t\t\t}\n783: \t\t} else if a.Resolve != \"\" && j < api.EventConfigMaxArgs {\n784: \t\t\tif !bpf.HasProgramLargeSize() {\n785: \t\t\t\treturn errors.New(\"error: Resolve flag can't be used for your kernel version. Please update to version 5.4 or higher or disable Resolve flag\")"
+    },
+    {
+      "path": "vendor/repos/tetragon/pkg/sensors/tracing/generickprobe.go",
+      "sha256": "22501ac6baa77f723c2cc115d697990ec24a61e32c12c2903258d7cf236e4976",
+      "first_line": 818,
+      "last_line": 823,
+      "excerpt": "818: \t\t}\n819: \t\teventConfig.ArgType[j] = int32(argType)\n820: \t\teventConfig.ArgMeta[j] = uint32(argMValue)\n821: \t\teventConfig.ArgIndex[j] = int32(a.Index)\n822: \t\teventConfig.RegArg[j] = regArg\n823: "
+    },
+    {
+      "path": "vendor/repos/tetragon/pkg/sensors/tracing/genericuprobe.go",
+      "sha256": "5ada0d298a6718dbbead1f3db9797a00f70db0fc6c681d34f9cc4bef48ac8638",
+      "first_line": 625,
+      "last_line": 638,
+      "excerpt": "625: \t\targType := gt.GenericTypeFromString(a.Type)\n626: \n627: \t\tif data {\n628: \t\t\t// Data specific config\n629: \t\t\tif hasPtRegsSource(a) {\n630: \t\t\t\tvar ok bool\n631: \n632: \t\t\t\tregArg[i].Offset, regArg[i].Size, ok = asm.RegOffsetSize(a.Resolve)\n633: \t\t\t\tif !ok {\n634: \t\t\t\t\treturn fmt.Errorf(\"error: Failed to retrieve register argument '%s'\", a.Resolve)\n635: \t\t\t\t}\n636: \n637: \t\t\t\t// If we are getting string type from pt_regs register we can safely assume\n638: \t\t\t\t// it's from user address, so we need to read it through preload."
+    },
+    {
+      "path": "vendor/repos/tetragon/pkg/asm/regoffset_linux_amd64.go",
+      "sha256": "6f94e626e3755602a4a2f960adb3b1d716fb6b99e0916e8c10d82d904ef90482",
+      "first_line": 50,
+      "last_line": 73,
+      "excerpt": "50: func RegOffsetSize(name string) (uint16, uint8, bool) {\n51: \tsize := func(idx int) uint8 {\n52: \t\tswitch idx {\n53: \t\tcase 0:\n54: \t\t\treturn 8 // index 0: 8 bytes\n55: \t\tcase 1:\n56: \t\t\treturn 4 // index 1: 4 bytes\n57: \t\tcase 2:\n58: \t\t\treturn 2 // index 2: 2 bytes\n59: \t\tcase 3:\n60: \t\t\treturn 1 // index 3: 1 byte\n61: \t\t}\n62: \t\treturn 0\n63: \t}\n64: \n65: \tfor _, off := range offsets {\n66: \t\tfor idx, n := range off.name {\n67: \t\t\tif n == name {\n68: \t\t\t\treturn off.val, size(idx), true\n69: \t\t\t}\n70: \t\t}\n71: \t}\n72: \treturn 0, 0, false\n73: }"
+    },
+    {
+      "path": "vendor/repos/tetragon/pkg/asm/regoffset_linux_arm64.go",
+      "sha256": "351af8f262983a3334d8b0e77b794b2e4fff063079ccc25c9bce7434b1ce53d2",
+      "first_line": 43,
+      "last_line": 59,
+      "excerpt": "43: func RegOffsetSize(name string) (uint16, uint8, bool) {\n44: \toff, ok := RegOffset(name)\n45: \tif !ok {\n46: \t\treturn 0, 0, false\n47: \t}\n48: \n49: \tvar idx int\n50: \t_, err := fmt.Sscanf(name, \"w%d\", &idx)\n51: \tif err == nil {\n52: \t\treturn off, 4, true\n53: \t}\n54: \n55: \treturn off, 8, true\n56: }"
+    },
+    {
+      "path": "vendor/bpf/tetragon/bpf/process/generic_calls.h",
+      "sha256": "e040cf15de5165697eaa542e0c5cd0007ccab76739ab4abddfe85a2f70f9e5f3",
+      "first_line": 519,
+      "last_line": 533,
+      "excerpt": "519: #if defined(GENERIC_KPROBE) || defined(GENERIC_UPROBE)\n520: FUNC_INLINE long get_pt_regs_arg(struct pt_regs *ctx, struct event_config *config, int index)\n521: {\n522: \tstruct config_reg_arg *reg;\n523: \t__u8 shift;\n524: \n525: \tindex &= EVENT_CONFIG_MAX_REG_ARG_MASK;\n526: \treg = &config->reg_arg[index];\n527: \tshift = 64 - reg->size * 8;\n528: \n529: \tif (config->syscall)\n530: \t\treturn get_pt_regs_arg_syscall(ctx, reg->offset, shift);\n531: \n532: \treturn read_reg(ctx, reg->offset, shift);\n533: }"
+    },
+    {
+      "path": "vendor/bpf/tetragon/bpf/process/generic_calls.h",
+      "sha256": "e040cf15de5165697eaa542e0c5cd0007ccab76739ab4abddfe85a2f70f9e5f3",
+      "first_line": 624,
+      "last_line": 636,
+      "excerpt": "624: \tif (am & ARGM_PRELOAD) {\n625: \t\ta = get_preload_arg(ctx, ty, &e->arg_status[index & MAX_POSSIBLE_ARGS_MASK]);\n626: \t} else {\n627: \t\tindex &= MAX_POSSIBLE_ARGS_MASK;\n628: \t\tif (am & ARGM_PT_REGS) {\n629: \t\t\ta = get_pt_regs_arg(ctx, config, index);\n630: \t\t} else if (am & ARGM_CURRENT_TASK) {\n631: \t\t\ta = get_current_task();\n632: \t\t} else {\n633: \t\t\targ_index = config->idx[index & MAX_POSSIBLE_ARGS_MASK];\n634: \t\t\ta = (&e->a0)[arg_index & MAX_ACCESSIBLE_ARGS_MASK];\n635: \t\t}\n636: \t\textract_arg(config, index, &a, false, &e->arg_status[index & MAX_POSSIBLE_ARGS_MASK]);"
+    },
+    {
+      "path": "vendor/bpf/tetragon/bpf/process/user_preload.h",
+      "sha256": "e79a1ac200b8a907b056a8309d2af4f30920e7b8e8553933149099e57a3d2a99",
+      "first_line": 55,
+      "last_line": 76,
+      "excerpt": "55: FUNC_INLINE int\n56: preload_pt_regs_arg(struct pt_regs *ctx, struct event_config *config, int index)\n57: {\n58: \tstruct config_reg_arg *reg;\n59: \tunsigned long val;\n60: \t__u8 shift;\n61: \t__s32 ty;\n62: \targ_status_t status = 0;\n63: \n64: #ifdef MICRO_NATIVE\n65: \tindex &= EVENT_CONFIG_MAX_REG_ARG_MASK;\n66: #else\n67: \tasm volatile(\"%[index] &= %1 ;\\n\"\n68: \t\t     : [index] \"+r\"(index)\n69: \t\t     : \"i\"(EVENT_CONFIG_MAX_REG_ARG_MASK));\n70: #endif\n71: \n72: \treg = &config->reg_arg[index];\n73: \tshift = 64 - reg->size * 8;\n74: \n75: \tval = read_reg(ctx, reg->offset, shift);\n76: \tty = config->arg[index];"
+    },
+    {
+      "path": "vendor/bpf/tetragon/bpf/process/uprobe_offload.h",
+      "sha256": "b70fccdd6b18ef0c3a8f2fef13376a5805cfadc9ad80e9213c82a153d45de07c",
+      "first_line": 65,
+      "last_line": 72,
+      "excerpt": "65: FUNC_INLINE __u64\n66: read_reg_ass(struct pt_regs *ctx, struct reg_assignment *ass)\n67: {\n68: \t__u32 src = ass->src;\n69: \t__u8 shift = 64 - ass->src_size * 8;\n70: \n71: \treturn read_reg(ctx, src, shift);\n72: }"
+    }
+  ],
+  "source_producer_fact": "hasPtRegsSource tests Source==pt_regs. getMetaValue sets argPtRegsBit under the same predicate. Kprobe register-size producer calls RegOffsetSize and rejects failure, then writes the same config slot. x86 accepted size set1/2/4/8 and ARM4/8 imply shift64-size*8 in0/32/48/56. The BPF consumer invokes get_pt_regs_arg only under ARGM_PT_REGS after the preload branch.",
+  "zero_default_interpretation": "Default-zero ConfigRegArg exists in producer source. It is not by itself an admissible zero-size pt_regs invocation because the source metadata branch and register resolver must also be followed.",
+  "pending": "Actual bit correspondence/loaded config-map bytes/program-map binding/entry path and config update validity still need joining. Uprobe preload and offload have separate callers; do not extend kprobe source construction to every read_reg invocation or delete1184candidate records.",
+  "conclusion": "Source-side candidate narrowing only. No new bug, live invariant or native/eBPF equivalence claim; no production guard/mask/app change."
+}
