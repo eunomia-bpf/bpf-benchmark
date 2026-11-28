@@ -1,0 +1,19 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerStoreTag.source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerStoreTag.source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerStoreTag.reader_source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerStoreTag.reader_source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerStoreTag.pointer_value
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerStoreTag.pointer_value
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerStoreTag.tag_value
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerStoreTag.tag_value
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerStoreTag.resources
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerStoreTag.resources
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerStoreTag.execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerStoreTag.execute
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerStoreTag.temp_frame
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerStoreTag.temp_frame
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerStoreTag.values
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerStoreTag.values
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerStoreTag.advance
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerStoreTag.advance
