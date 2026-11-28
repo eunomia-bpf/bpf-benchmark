@@ -43,8 +43,8 @@
       "sha256": "707ca03aba5c5a407799fe1fa50dc229c734e0f333062d5033cc9517fbd99101"
     },
     "fixed-app-work/bpf-prog-info-uapi.txt": {
-      "bytes": 5620,
-      "sha256": "c48774408189fd293f41db70e740b7db27cdc650fd63d973483bdf65b7db6525"
+      "bytes": 1009,
+      "sha256": "2c8910010996d6fca6ff0c568cefd534c114a07a8ba254ae70a5822193d7d5c9"
     },
     "fixed-app-work/check_arm_otel.py": {
       "bytes": 5859,
@@ -75,5 +75,6 @@
     "dump_prog.py": true
   },
   "activation_state": "Prepared, current x86 rotate holds imageSH; activation and full profiler functional check follow imageEX availability.",
-  "scope": "Existing ARM image/root rules, same successful app product, generic read-only global map values and actual program map IDs. Existing benchmark/settings/kernel/P/x86 timing preserved."
+  "scope": "Existing ARM image/root rules, same successful app product, generic read-only global map values and actual program map IDs. Existing benchmark/settings/kernel/P/x86 timing preserved.",
+  "uapi_receipt_scope": "Exact bpf_prog_info declaration only; map and unrelated later declarations omitted."
 }
