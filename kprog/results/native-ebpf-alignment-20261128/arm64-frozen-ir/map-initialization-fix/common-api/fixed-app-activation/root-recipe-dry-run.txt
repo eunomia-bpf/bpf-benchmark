@@ -1,0 +1,15 @@
+make: Entering directory '/workspaces/repository'
+test -n "/usr/bin/qemu-system-aarch64"
+install -d "/workspaces/repository/.cache"
+rm -rf "/workspaces/repository/.cache/qemu-arm64-root.tmp"
+install -d "/workspaces/repository/.cache/qemu-arm64-root.tmp"
+docker load -i "/workspaces/repository/.cache/container-images/arm64-runner-runtime.image.tar" >/dev/null
+cid=$(docker create --platform linux/arm64 "bpf-benchmark/runner-runtime:arm64" /bin/true); \
+	trap 'docker rm -f '"$cid"' >/dev/null 2>&1 || true; rm -rf "/workspaces/repository/.cache/qemu-arm64-root.tmp"' EXIT; \
+	docker export "$cid" | tar -C "/workspaces/repository/.cache/qemu-arm64-root.tmp" -xf -; \
+	docker rm "$cid" >/dev/null; \
+	trap - EXIT; \
+		rm -rf "/workspaces/repository/.cache/qemu-arm64-root"; \
+		mv "/workspaces/repository/.cache/qemu-arm64-root.tmp" "/workspaces/repository/.cache/qemu-arm64-root"
+install -m 0755 "/workspaces/repository/runner/scripts/qemu-arm64-init" "/workspaces/repository/.cache/qemu-arm64-root/qemu-init"
+make: Leaving directory '/workspaces/repository'

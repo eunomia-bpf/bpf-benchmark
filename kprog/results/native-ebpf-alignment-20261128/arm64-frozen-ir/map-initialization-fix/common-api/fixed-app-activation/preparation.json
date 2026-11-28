@@ -1,0 +1,79 @@
+{
+  "utc": "2026-11-28T06:32:14Z",
+  "app_source_commit": "6cfd48e9705c263a89839d5e7b34c716d1cdfc27",
+  "kernel_regression_publication": {
+    "commit": "819349af89c3cf5ac810ba94c19ac3f4e2563ce5",
+    "remote": "819349af89c3cf5ac810ba94c19ac3f4e2563ce5\trefs/heads/master"
+  },
+  "files": {
+    "fixed-app-activation/README.md": {
+      "bytes": 1649,
+      "sha256": "a690c340a3dc1ddf3e5fb47114c77d7c9a9aa7bd9bd2982a02db055cd096de2f"
+    },
+    "fixed-app-activation/activate_fixed_app.py": {
+      "bytes": 7100,
+      "sha256": "e822dc1d652cae527d6875410b2d28c7b1b0effa0a4023ab93d25dbf4433b0bf"
+    },
+    "fixed-app-activation/image-recipe-dry-run.txt": {
+      "bytes": 2525,
+      "sha256": "0bc8d4ae55f53ffc9b412318ff8fd0aaa9137002f9e4ca14a4652c06dd732885"
+    },
+    "fixed-app-activation/preserve_root.py": {
+      "bytes": 3140,
+      "sha256": "677bdf3cb4c1a50cfd2df91bd9385981b998e0da08766efb69a5a2fb5ab9fb05"
+    },
+    "fixed-app-activation/resource-status.txt": {
+      "bytes": 96,
+      "sha256": "4699acf7ba9c63464b33cbb5ea214456ecd817151b0e11701c07e9ecf8d63362"
+    },
+    "fixed-app-activation/root-data-before.tar.gz": {
+      "bytes": 13306197,
+      "sha256": "6638118ee85da1d649e194530b361317573a4cce85c4d7ae9a07571b72754c1d"
+    },
+    "fixed-app-activation/root-preflight.json": {
+      "bytes": 107441,
+      "sha256": "0c95fdc5700a82d691557d064523c00ee5d29491d96f2db6d9cf1955ce7bb23a"
+    },
+    "fixed-app-activation/root-recipe-dry-run.txt": {
+      "bytes": 1060,
+      "sha256": "3ba72c26629f15ddb0fe73ed76764c1af51c7259c2f2564dc145108a604e4018"
+    },
+    "fixed-app-work/README.md": {
+      "bytes": 1194,
+      "sha256": "707ca03aba5c5a407799fe1fa50dc229c734e0f333062d5033cc9517fbd99101"
+    },
+    "fixed-app-work/bpf-prog-info-uapi.txt": {
+      "bytes": 5620,
+      "sha256": "c48774408189fd293f41db70e740b7db27cdc650fd63d973483bdf65b7db6525"
+    },
+    "fixed-app-work/check_arm_otel.py": {
+      "bytes": 5859,
+      "sha256": "a1f94fbd26387de5ca81d7ccf254b95d2ffff60252cdac7cddfdd53afdf34894"
+    },
+    "fixed-app-work/dump_prog.py": {
+      "bytes": 2676,
+      "sha256": "3634165917bd74b6f4fdfc4c51c4d06a7383a47536b80ce5e1b1d2241e46ac03"
+    },
+    "fixed-app-work/observe_guest.py": {
+      "bytes": 2310,
+      "sha256": "9be3cd97e93783b556b12f62e1a0eea30e7c5b5d67683be8f009de7179e5d15d"
+    },
+    "fixed-app-work/observe_maps.py": {
+      "bytes": 4125,
+      "sha256": "f623e14c543579df44018b6152e8b4b4bcf23295db200874249b8487d4a99e81"
+    },
+    "fixed-app-work/observer-init.sh": {
+      "bytes": 437,
+      "sha256": "d4f15749f9176659cd6290093478e0e4deb04ee170fe8bdd0cb2be18f316bee2"
+    }
+  },
+  "preserved_root_files": 464,
+  "host_matching_files": 123,
+  "source_copies_equal": {
+    "observe_guest.py": true,
+    "observer-init.sh": true,
+    "dump_prog.py": true
+  },
+  "activation_state": "Prepared, current x86 rotate holds imageSH; activation and full profiler functional check follow imageEX availability.",
+  "scope": "Existing ARM image/root rules, same successful app product, generic read-only global map values and actual program map IDs. Existing benchmark/settings/kernel/P/x86 timing preserved."
+}

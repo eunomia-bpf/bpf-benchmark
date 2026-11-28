@@ -1,0 +1,28 @@
+make: Entering directory '/workspaces/repository'
+install -d "/workspaces/repository/.cache/container-images"
+docker build --platform linux/arm64 \
+	--target runner-runtime \
+	--build-context runner-runtime-host-runner-build="/workspaces/repository/runner/build-arm64-llvmbpf" \
+	--build-context runner-runtime-host-micro-programs="/workspaces/repository/micro/programs/build-arm64" \
+	--build-context runner-runtime-host-stage2-programs="/workspaces/repository/kprog/test/build-arm64" \
+	--build-context runner-runtime-host-negative="/workspaces/repository/tests/negative/build-arm64" \
+	--build-context runner-runtime-host-kernel-image="/workspaces/.agent-state/kprog-ck/build-arm64/arch/arm64/boot" \
+	--build-context runner-runtime-host-kernel-offsets="/workspaces/repository/micro/programs/build-arm64" \
+	--build-context runner-runtime-host-kernel-modules="/workspaces/.agent-state/kprog-ck/build-arm64/modules-install/lib/modules" \
+		--build-context runner-runtime-host-kinsn-artifacts="/workspaces/repository/kinsn/module/arm64/build" \
+		--build-context runner-runtime-host-shim="/workspaces/repository/bpfopt/shim/build-arm64" \
+		--build-context runner-runtime-host-native-bpf="/workspaces/repository/vendor/build/native-bpf/arm64/stage" \
+	--build-arg IMAGE_WORKSPACE="/workspaces/repository" \
+	--build-arg RUN_TARGET_ARCH=arm64 \
+	--build-arg VENDOR_BUILD_ARCH=arm64 \
+	--build-arg RUNNER_BUILD_DIR_NAME=build-arm64-llvmbpf \
+	--build-arg TEST_BUILD_DIR=build-arm64 \
+	--build-arg KERNEL_IMAGE_NAME=vmlinuz.efi \
+	--build-arg KERNEL_MANIFEST_JSON="$(printf '{"kernel_release":"%s","target_arch":"arm64","kernel_image":"vmlinuz.efi"}' "$(cat "/workspaces/.agent-state/kprog-ck/build-arm64/include/config/kernel.release")")" \
+	--build-arg BPFOPT_HOST_BIN="bpfopt/llvm/build-kinsn-arm64/bpfopt" \
+	--build-arg KINSNPROBER_HOST_BIN="bpfopt/target/aarch64-unknown-linux-gnu/release/kinsnprober" \
+	--build-arg NATIVE_LINK_HOST_BIN="kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link" \
+	-t "bpf-benchmark/runner-runtime:arm64" -f "/workspaces/repository/runner/containers/runner-runtime.Dockerfile" "/workspaces/repository"
+docker save -o "/workspaces/repository/.cache/container-images/arm64-runner-runtime.image.tar.tmp" "bpf-benchmark/runner-runtime:arm64"
+mv -f "/workspaces/repository/.cache/container-images/arm64-runner-runtime.image.tar.tmp" "/workspaces/repository/.cache/container-images/arm64-runner-runtime.image.tar"
+make: Leaving directory '/workspaces/repository'
