@@ -1,0 +1,182 @@
+{
+  "scope": "actual caller vector pointer loop dynamic address, unsigned condition and increment evaluation; no stores or loop execution",
+  "source_sha256": "a18ebcb1d64e78581d7d346d97fc17a7aad020945b5804d5d67ed9eec2b0fa60",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage6": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-vector-pointer-loop-values/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.110504388809204,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerVectorPointerLoopValues"
+      ],
+      "exit": 0,
+      "seconds": 2.3875105381011963,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.941864013671875,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-vector-pointer-loop-values/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.5221457481384277,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    }
+  },
+  "focused_jobs": 249,
+  "full_jobs": 1532,
+  "root_queries": [
+    "offsets",
+    "target_locations",
+    "source_values",
+    "condition_values",
+    "increment_values",
+    "assignment"
+  ],
+  "actual_loop_source_commit": "a0bb8df5deac9905448212c6579bdcf5883c5140",
+  "targets": "same actual Header binding and existing NullSource.array_values plus dynamic unsigned index; offsets96/352+8*i",
+  "values": "same actual caller VectorSource.Storage and actual5189 composite size16/lo0-hi8 give addresses at16*i+0/8 without pointee-load premise",
+  "reuse": "mature pure vector loop offset formulas; original imported CC unsigned cmpu/add computations checked over Fin33/Fin32; no old producer heap/allocation bridge",
+  "casts": "actual pointer-to-pointer assignment cast and Mint64 By_value access",
+  "loop_execution_and_memory_effects_proved_here": false,
+  "resource_assignment": "- COORDINATOR 2026-11-28T05:43Z: operator 05:40Z \"x86 \u91cd\u65b0\u6027\u80fd\u6d4b\u8bd5\u4e5f\u53ef\u4ee5? ...\": the coordinator started one x86 frozen-entry rotate (defaults, six apps, stats off then on) on the current image, kprog/results/x86-rotate-20261128/chain.sh; it holds the timing lock exclusive, the image lock shared and the batch lock for about six hours. Rebuild no x86 image and run no x86 timing until it ends; arm64 work on CPUs 16-19 and formal's builds outside the timing lock continue.",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
+  "failed_stages": {
+    "stage1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-vector-pointer-loop-values/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 47.636727809906006,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-vector-pointer-loop-values/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 2.0055177211761475,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "stage3": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-vector-pointer-loop-values/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 1.8889966011047363,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "stage4": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-vector-pointer-loop-values/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 1.9212968349456787,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "stage5": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-vector-pointer-loop-values/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 1.9676220417022705,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    }
+  },
+  "failure_history": "stage1: broad evaluator simplification bypassed derived addresses/binding and hit depth512; old-expression numeric/identifier wrappers did not normalize. stage2: generic array/record/field helpers and original CC arithmetic pass, target change had untyped Full/deep conversion and RHS array alias mismatch. stage3: explicit Full and pure RHS type expansion close source_values; only concrete target change depth remains. stage4: generic deref-location plus explicit pure type aliases avoids concrete allocator expansion. stage4 isolates actual pointer-width selector and zero-offset wrappers; stage5 reduces Archi.ptr64/Ptrofs.zero but leaves MI.zero; stage6 also reduces MI.zero and closes the original target. Statements/AST/caps unchanged; all actual failed logs/snapshots retained."
+}
