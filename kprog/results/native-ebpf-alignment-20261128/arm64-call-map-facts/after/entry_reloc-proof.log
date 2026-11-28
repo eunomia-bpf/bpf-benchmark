@@ -1,0 +1,4 @@
+native-link: arm64 entry=entry_reloc (44 bytes), 2 reachable symbol(s) total
+  - entry_reloc (vaddr 0x0, 44 bytes) [entry]
+  - pick_global (vaddr 0x0, 8 bytes) [entry]
+native-link: wrote proof object 60 bytes, 4 reloc(s) -> /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/after/entry_reloc.proof.o

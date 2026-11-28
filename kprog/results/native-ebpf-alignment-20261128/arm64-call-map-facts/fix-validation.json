@@ -1,0 +1,66 @@
+{
+  "reviewed_utc": "2026-11-28T07:52:00Z",
+  "validation_job": 1363722,
+  "validation_launcher": 1363721,
+  "controller_status": 0,
+  "all_four_stage_exits": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "existing_tests_passed": 14,
+  "source_sha256": "079f930e84aeeb096226c36eb02cfa1ef3badfb57de9c86ae692f5ed46b2ec6b",
+  "source_diff": "4 insertions/0 deletions; existing AAPCS map-fact invalidator in internalCALL26/decodedBL/inlineCPU/current_task branches",
+  "canonical_products": {
+    "x86": {
+      "path": "kprog/x86/native_lab/native_link/target/release/native-link",
+      "bytes": 2762264,
+      "sha256": "959b3b2407eff3c15f6df30caa49a85681a47e2acd501122c60429d3635d8173",
+      "elf_machine": 62
+    },
+    "arm64": {
+      "path": "kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link",
+      "bytes": 2686096,
+      "sha256": "47fd72eccc5a9d0b7f03f168e64c0632930cddf6ab8293b7fc0fc537a85dcd31",
+      "elf_machine": 183
+    }
+  },
+  "witness_changes": [
+    {
+      "entry": "entry_reloc",
+      "before_bytes": 76,
+      "after_bytes": 76,
+      "changed_byte_offsets": [
+        28,
+        29,
+        30,
+        31
+      ],
+      "before_instruction_at_0x1c": "0x52800222",
+      "after_instruction_at_0x1c": "0xb9400002",
+      "original_exit": 34,
+      "before_native_exit": 17,
+      "after_native_exit": 34
+    },
+    {
+      "entry": "entry_local",
+      "before_bytes": 76,
+      "after_bytes": 76,
+      "changed_byte_offsets": [
+        28,
+        29,
+        30,
+        31
+      ],
+      "before_instruction_at_0x1c": "0x52800222",
+      "after_instruction_at_0x1c": "0xb9400002",
+      "original_exit": 34,
+      "before_native_exit": 17,
+      "after_native_exit": 34
+    }
+  ],
+  "before_case_scope": "The two original input call forms may normalize in proof extraction; their exact original/proof/blob artifacts remain retained.",
+  "scope": "Validated general ARM linker correctness fix using existing tests and actual canonical proof/kernel-link/QEMU execution. No actual corpus affected-program, kernel-installed, useful-work, timing or image acceptance claim.",
+  "newest_resume_followed": "COORDINATOR 2026-11-28T07:17Z; frozen app pin/root/image activation hold remains."
+}

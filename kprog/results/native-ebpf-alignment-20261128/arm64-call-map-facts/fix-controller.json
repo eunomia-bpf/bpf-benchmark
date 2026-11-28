@@ -1,0 +1,116 @@
+{
+  "pid": 1363722,
+  "started_utc": "2026-11-28T07:48:30Z",
+  "controller_status": 0,
+  "stages": [
+    {
+      "name": "host-build",
+      "args": [
+        "make",
+        "-C",
+        "kprog/results/arm64-common-flags-20261126",
+        "native-link-build"
+      ],
+      "started_utc": "2026-11-28T07:48:30Z",
+      "ended_utc": "2026-11-28T07:48:56Z",
+      "returncode": 0,
+      "log": {
+        "path": "kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/host-build.log",
+        "bytes": 1497,
+        "sha256": "9aff099adf3f40200bfed29cde44e6be7d4aec8aa27debdf2319ae087683ec46"
+      },
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "name": "existing-linker-tests",
+      "args": [
+        "make",
+        "-C",
+        "kprog/results/arm64-common-flags-20261126",
+        "native-link-tests"
+      ],
+      "started_utc": "2026-11-28T07:48:56Z",
+      "ended_utc": "2026-11-28T07:49:20Z",
+      "returncode": 0,
+      "log": {
+        "path": "kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/existing-linker-tests.log",
+        "bytes": 3454,
+        "sha256": "ddc3e6c05c7f5654f3636be5b5ba5e70968b9e82191764aa670d6749f0bf6854"
+      },
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "name": "same-witness-after",
+      "args": [
+        "make",
+        "-C",
+        "kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts",
+        "after"
+      ],
+      "started_utc": "2026-11-28T07:49:20Z",
+      "ended_utc": "2026-11-28T07:49:20Z",
+      "returncode": 0,
+      "log": {
+        "path": "kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/same-witness-after.log",
+        "bytes": 262,
+        "sha256": "b52beafda3eb597c4332ed87a6d7b0162551e67ba6b03b23672b70f8d8cf7744"
+      },
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "name": "arm-build",
+      "args": [
+        "make",
+        "-C",
+        "kprog/results/arm64-common-flags-20261126",
+        "native-link-arm-build"
+      ],
+      "started_utc": "2026-11-28T07:49:20Z",
+      "ended_utc": "2026-11-28T07:49:48Z",
+      "returncode": 0,
+      "log": {
+        "path": "kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/arm-build.log",
+        "bytes": 1600,
+        "sha256": "37949d9c0625d68952ea7f267312d19cc474260fdf35d310b674021aaba1131c"
+      },
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    }
+  ],
+  "source_sha256": "079f930e84aeeb096226c36eb02cfa1ef3badfb57de9c86ae692f5ed46b2ec6b",
+  "products": {
+    "x86": {
+      "path": "kprog/x86/native_lab/native_link/target/release/native-link",
+      "bytes": 2762264,
+      "sha256": "959b3b2407eff3c15f6df30caa49a85681a47e2acd501122c60429d3635d8173"
+    },
+    "arm64": {
+      "path": "kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link",
+      "bytes": 2686096,
+      "sha256": "47fd72eccc5a9d0b7f03f168e64c0632930cddf6ab8293b7fc0fc537a85dcd31"
+    }
+  },
+  "after_cases": [
+    {
+      "entry": "entry_reloc",
+      "original_exit": 34,
+      "native_exit": 34,
+      "expected_live_value": 34,
+      "stale_frozen_value": 17,
+      "regression_passed": true
+    },
+    {
+      "entry": "entry_local",
+      "original_exit": 34,
+      "native_exit": 34,
+      "expected_live_value": 34,
+      "stale_frozen_value": 17,
+      "regression_passed": true
+    }
+  ],
+  "witness_regression_passed": true,
+  "ended_utc": "2026-11-28T07:49:48Z"
+}
