@@ -1,0 +1,12 @@
+{
+  "pid": 1201399,
+  "command": [
+    "taskset",
+    "-c",
+    "19",
+    "python3",
+    "/workspaces/repository/kprog/results/x86-otel-perf-20261127/collect_profile.py"
+  ],
+  "log": "kprog/results/x86-otel-perf-20261127/profile-20261127T205918Z/collection.log",
+  "purpose": "Continue archive after unrelated concurrently-copied ELF failed llvm-nm; preserve inventory diagnostics/all raw files, select only actual parseable unwinder symbol, no guest rerun."
+}

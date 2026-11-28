@@ -23,7 +23,16 @@ try:
   g={ph:dict(samples=sum(v['samples'] for n,v in d['phases'][ph]['symbols'].items() if member(name,n)),sampled_period_per_entry=sum(v['period_per_entry_call'] for n,v in d['phases'][ph]['symbols'].items() if member(name,n))) for ph in ['baseline','post_rejit']}
   g['native_over_ebpf']=g['post_rejit']['sampled_period_per_entry']/g['baseline']['sampled_period_per_entry'];groups[name]=g
  boot={line.split()[2]:int(line.split()[0],16) for line in (raw/'kallsyms.txt').read_text().splitlines() if len(line.split())>=3}
- objects=[p for p in (raw/'linkcache/native_kernel_link_cache').glob('*.proof.o') if re.fullmatch(r'[0-9a-f]{16}\.proof\.o',p.name) and any(line.split()[-1:] == ['perf_unwind_native'] for line in subprocess.check_output(['llvm-nm-18','--defined-only',str(p)],text=True).splitlines())];assert len(objects)==1,objects;obj=objects[0]
+ objects=[];inventory=[]
+ for p in sorted((raw/'linkcache/native_kernel_link_cache').glob('*.proof.o')):
+  if not re.fullmatch(r'[0-9a-f]{16}\.proof\.o',p.name):continue
+  nm=subprocess.run(['llvm-nm-18','--defined-only',str(p)],stdin=subprocess.DEVNULL,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+  target=nm.returncode==0 and any(line.split()[-1:] == ['perf_unwind_native'] for line in nm.stdout.splitlines())
+  inventory.append(dict(path=str(p.relative_to(raw)),bytes=p.stat().st_size,sha256=sha(p),nm_returncode=nm.returncode,nm_diagnostic=nm.stderr,selected_symbol_present=target))
+  if target:objects.append(p)
+ record['proof_inventory']=inventory;save()
+ (out/'proof-inventory.json').write_text(json.dumps(inventory,indent=2)+'\n')
+ assert len(objects)==1,objects;obj=objects[0]
  prefix=obj.name.split('.')[0];blob=obj.with_name(prefix+'.blob.bin');relocs=obj.with_name(prefix+'.relocs.bin');trie=boot['trie_lookup_elem']
  input_proof=obj;optimized=list(obj.parent.glob(prefix+'*.frozen.proof.o'));assert len(optimized)<=1,optimized
  if optimized:obj=optimized[0]

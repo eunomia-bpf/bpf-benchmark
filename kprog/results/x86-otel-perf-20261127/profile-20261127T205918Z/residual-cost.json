@@ -1,0 +1,641 @@
+{
+  "scope": "Same completed 205918 recording, no new guest or causal optimization claim.",
+  "image": "sha256:c103a86a0636c7a07aee29dcd91a8f814291e62f38fb4b45a8df95bb745527f3",
+  "qemu_pid": 1165484,
+  "entry_ratio": 0.9906186812450939,
+  "groups": {
+    "unwinder": {
+      "values": {
+        "baseline": 987.932239318163,
+        "post_rejit": 789.4842332501933
+      },
+      "native_over_ebpf": 0.7991279177153569
+    },
+    "trie_lookup_elem": {
+      "values": {
+        "baseline": 2378.270464973194,
+        "post_rejit": 2768.335860209193
+      },
+      "native_over_ebpf": 1.1640122101253085
+    },
+    "array_map_lookup_elem": {
+      "values": {
+        "baseline": 204.99955538049883,
+        "post_rejit": 118.43138441299118
+      },
+      "native_over_ebpf": 0.5777153232999515
+    },
+    "hash": {
+      "values": {
+        "baseline": 652.5804161772503,
+        "post_rejit": 674.5325707232441
+      },
+      "native_over_ebpf": 1.033639002951678
+    },
+    "copy_from_user_nofault": {
+      "values": {
+        "baseline": 1462.6903157351092,
+        "post_rejit": 1704.2505439204917
+      },
+      "native_over_ebpf": 1.1651478960288193
+    }
+  },
+  "lpm_plan": {
+    "plan": "linkcache/native_kernel_link_cache/d933e3c6378a052c.tmp.2981.2981.link-plan.json",
+    "plan_sha256": "2a8527b6d6fbc4bbe20846da2d5ea2cea212341db786ce2e3fd8224242d12feb",
+    "proof": "d933e3c6378a052c.proof.o",
+    "actual_defined_entry": "perf_unwind_native",
+    "lookup_sites": [
+      {
+        "kind": "call",
+        "target_addr": 18446744072120757504,
+        "key_offset": 0,
+        "max_entries": 0,
+        "elem_size": 0,
+        "index_mask": 0,
+        "value_offset": 0,
+        "percpu_base_addr": 0,
+        "map_name": "pid_page_to_map"
+      },
+      {
+        "kind": "call",
+        "target_addr": 18446744072120757504,
+        "key_offset": 0,
+        "max_entries": 0,
+        "elem_size": 0,
+        "index_mask": 0,
+        "value_offset": 0,
+        "percpu_base_addr": 0,
+        "map_name": "pid_page_to_map"
+      },
+      {
+        "kind": "call",
+        "target_addr": 18446744072120757504,
+        "key_offset": 0,
+        "max_entries": 0,
+        "elem_size": 0,
+        "index_mask": 0,
+        "value_offset": 0,
+        "percpu_base_addr": 0,
+        "map_name": "pid_page_to_map"
+      },
+      {
+        "kind": "call",
+        "target_addr": 18446744072120757504,
+        "key_offset": 0,
+        "max_entries": 0,
+        "elem_size": 0,
+        "index_mask": 0,
+        "value_offset": 0,
+        "percpu_base_addr": 0,
+        "map_name": "pid_page_to_map"
+      }
+    ],
+    "lookup_maps": [
+      {
+        "name": "pid_page_to_map",
+        "kind": "call",
+        "target_addr": 18446744072120757504,
+        "key_offset": 0,
+        "max_entries": 0,
+        "elem_size": 0,
+        "index_mask": 0,
+        "value_offset": 0,
+        "percpu_base_addr": 0,
+        "map_name": "pid_page_to_map"
+      },
+      {
+        "name": "pid_page_to_mapping_info",
+        "kind": "call",
+        "target_addr": 18446744072120757504,
+        "key_offset": 0,
+        "max_entries": 0,
+        "elem_size": 0,
+        "index_mask": 0,
+        "value_offset": 0,
+        "percpu_base_addr": 0,
+        "map_name": "pid_page_to_mapping_info"
+      }
+    ]
+  },
+  "calls": {
+    "baseline": [
+      {
+        "address": 18446744072640022775,
+        "offset": 8959,
+        "target": 18446744072120757504,
+        "target_symbol": "trie_lookup_elem",
+        "via_literal_thunk": null,
+        "window": [
+          {
+            "address": 18446744072640022743,
+            "opcode": "mov",
+            "operands": "rsi,rbx"
+          },
+          {
+            "address": 18446744072640022746,
+            "opcode": "bswap",
+            "operands": "rsi"
+          },
+          {
+            "address": 18446744072640022749,
+            "opcode": "mov",
+            "operands": "QWORD PTR [rbp-0x58],rsi"
+          },
+          {
+            "address": 18446744072640022753,
+            "opcode": "bswap",
+            "operands": "edi"
+          },
+          {
+            "address": 18446744072640022755,
+            "opcode": "mov",
+            "operands": "DWORD PTR [rbp-0x5c],edi"
+          },
+          {
+            "address": 18446744072640022758,
+            "opcode": "mov",
+            "operands": "rsi,rbp"
+          },
+          {
+            "address": 18446744072640022761,
+            "opcode": "add",
+            "operands": "rsi,0xffffffffffffffa0"
+          },
+          {
+            "address": 18446744072640022765,
+            "opcode": "movabs",
+            "operands": "rdi,0xffff8b0f875cb000"
+          },
+          {
+            "address": 18446744072640022775,
+            "opcode": "call",
+            "operands": "0xffffffffa14ced00"
+          },
+          {
+            "address": 18446744072640022780,
+            "opcode": "test",
+            "operands": "rax,rax"
+          },
+          {
+            "address": 18446744072640022783,
+            "opcode": "je",
+            "operands": "0xffffffffc040780d"
+          }
+        ]
+      },
+      {
+        "address": 18446744072640027944,
+        "offset": 14128,
+        "target": 18446744072120757504,
+        "target_symbol": "trie_lookup_elem",
+        "via_literal_thunk": null,
+        "window": [
+          {
+            "address": 18446744072640027912,
+            "opcode": "mov",
+            "operands": "rsi,rbx"
+          },
+          {
+            "address": 18446744072640027915,
+            "opcode": "bswap",
+            "operands": "rsi"
+          },
+          {
+            "address": 18446744072640027918,
+            "opcode": "mov",
+            "operands": "QWORD PTR [rbp-0x58],rsi"
+          },
+          {
+            "address": 18446744072640027922,
+            "opcode": "bswap",
+            "operands": "edi"
+          },
+          {
+            "address": 18446744072640027924,
+            "opcode": "mov",
+            "operands": "DWORD PTR [rbp-0x5c],edi"
+          },
+          {
+            "address": 18446744072640027927,
+            "opcode": "mov",
+            "operands": "rsi,rbp"
+          },
+          {
+            "address": 18446744072640027930,
+            "opcode": "add",
+            "operands": "rsi,0xffffffffffffffa0"
+          },
+          {
+            "address": 18446744072640027934,
+            "opcode": "movabs",
+            "operands": "rdi,0xffff8b0f875cb000"
+          },
+          {
+            "address": 18446744072640027944,
+            "opcode": "call",
+            "operands": "0xffffffffa14ced00"
+          },
+          {
+            "address": 18446744072640027949,
+            "opcode": "test",
+            "operands": "rax,rax"
+          },
+          {
+            "address": 18446744072640027952,
+            "opcode": "je",
+            "operands": "0xffffffffc040780d"
+          }
+        ]
+      },
+      {
+        "address": 18446744072640034419,
+        "offset": 20603,
+        "target": 18446744072120757504,
+        "target_symbol": "trie_lookup_elem",
+        "via_literal_thunk": null,
+        "window": [
+          {
+            "address": 18446744072640034387,
+            "opcode": "mov",
+            "operands": "rsi,rbx"
+          },
+          {
+            "address": 18446744072640034390,
+            "opcode": "bswap",
+            "operands": "rsi"
+          },
+          {
+            "address": 18446744072640034393,
+            "opcode": "mov",
+            "operands": "QWORD PTR [rbp-0x58],rsi"
+          },
+          {
+            "address": 18446744072640034397,
+            "opcode": "bswap",
+            "operands": "edi"
+          },
+          {
+            "address": 18446744072640034399,
+            "opcode": "mov",
+            "operands": "DWORD PTR [rbp-0x5c],edi"
+          },
+          {
+            "address": 18446744072640034402,
+            "opcode": "mov",
+            "operands": "rsi,rbp"
+          },
+          {
+            "address": 18446744072640034405,
+            "opcode": "add",
+            "operands": "rsi,0xffffffffffffffa0"
+          },
+          {
+            "address": 18446744072640034409,
+            "opcode": "movabs",
+            "operands": "rdi,0xffff8b0f875cb000"
+          },
+          {
+            "address": 18446744072640034419,
+            "opcode": "call",
+            "operands": "0xffffffffa14ced00"
+          },
+          {
+            "address": 18446744072640034424,
+            "opcode": "test",
+            "operands": "rax,rax"
+          },
+          {
+            "address": 18446744072640034427,
+            "opcode": "je",
+            "operands": "0xffffffffc040780d"
+          }
+        ]
+      },
+      {
+        "address": 18446744072640034819,
+        "offset": 21003,
+        "target": 18446744072120757504,
+        "target_symbol": "trie_lookup_elem",
+        "via_literal_thunk": null,
+        "window": [
+          {
+            "address": 18446744072640034787,
+            "opcode": "mov",
+            "operands": "rsi,rbx"
+          },
+          {
+            "address": 18446744072640034790,
+            "opcode": "bswap",
+            "operands": "rsi"
+          },
+          {
+            "address": 18446744072640034793,
+            "opcode": "mov",
+            "operands": "QWORD PTR [rbp-0x58],rsi"
+          },
+          {
+            "address": 18446744072640034797,
+            "opcode": "bswap",
+            "operands": "edi"
+          },
+          {
+            "address": 18446744072640034799,
+            "opcode": "mov",
+            "operands": "DWORD PTR [rbp-0x5c],edi"
+          },
+          {
+            "address": 18446744072640034802,
+            "opcode": "mov",
+            "operands": "rsi,rbp"
+          },
+          {
+            "address": 18446744072640034805,
+            "opcode": "add",
+            "operands": "rsi,0xffffffffffffffa0"
+          },
+          {
+            "address": 18446744072640034809,
+            "opcode": "movabs",
+            "operands": "rdi,0xffff8b0f875cb000"
+          },
+          {
+            "address": 18446744072640034819,
+            "opcode": "call",
+            "operands": "0xffffffffa14ced00"
+          },
+          {
+            "address": 18446744072640034824,
+            "opcode": "test",
+            "operands": "rax,rax"
+          },
+          {
+            "address": 18446744072640034827,
+            "opcode": "jne",
+            "operands": "0xffffffffc040783a"
+          }
+        ]
+      }
+    ],
+    "post_rejit": [
+      {
+        "address": 18446744072640043878,
+        "offset": 3510,
+        "target": 18446744072120757504,
+        "target_symbol": "trie_lookup_elem",
+        "via_literal_thunk": null,
+        "window": [
+          {
+            "address": 18446744072640043819,
+            "opcode": "xor",
+            "operands": "r12d,r12d"
+          },
+          {
+            "address": 18446744072640043822,
+            "opcode": "jmp",
+            "operands": "0xffffffffc040bf3f"
+          },
+          {
+            "address": 18446744072640043827,
+            "opcode": "mov",
+            "operands": "eax,DWORD PTR [rbp+0x0]"
+          },
+          {
+            "address": 18446744072640043830,
+            "opcode": "mov",
+            "operands": "DWORD PTR [rsp+0x80],0x60"
+          },
+          {
+            "address": 18446744072640043841,
+            "opcode": "movbe",
+            "operands": "DWORD PTR [rsp+0x84],eax"
+          },
+          {
+            "address": 18446744072640043850,
+            "opcode": "movbe",
+            "operands": "QWORD PTR [rsp+0x88],rbx"
+          },
+          {
+            "address": 18446744072640043860,
+            "opcode": "movabs",
+            "operands": "rdi,0xffff8b1007da4400"
+          },
+          {
+            "address": 18446744072640043870,
+            "opcode": "lea",
+            "operands": "rsi,[rsp+0x80]"
+          },
+          {
+            "address": 18446744072640043878,
+            "opcode": "call",
+            "operands": "0xffffffffa14ced00"
+          },
+          {
+            "address": 18446744072640043883,
+            "opcode": "test",
+            "operands": "rax,rax"
+          },
+          {
+            "address": 18446744072640043886,
+            "opcode": "je",
+            "operands": "0xffffffffc040c5b0"
+          }
+        ]
+      },
+      {
+        "address": 18446744072640047150,
+        "offset": 6782,
+        "target": 18446744072120757504,
+        "target_symbol": "trie_lookup_elem",
+        "via_literal_thunk": null,
+        "window": [
+          {
+            "address": 18446744072640047086,
+            "opcode": "cmp",
+            "operands": "rbx,0x1000"
+          },
+          {
+            "address": 18446744072640047093,
+            "opcode": "jb",
+            "operands": "0xffffffffc0409b1b"
+          },
+          {
+            "address": 18446744072640047099,
+            "opcode": "mov",
+            "operands": "eax,DWORD PTR [rbp+0x0]"
+          },
+          {
+            "address": 18446744072640047102,
+            "opcode": "mov",
+            "operands": "DWORD PTR [rsp+0x80],0x60"
+          },
+          {
+            "address": 18446744072640047113,
+            "opcode": "movbe",
+            "operands": "DWORD PTR [rsp+0x84],eax"
+          },
+          {
+            "address": 18446744072640047122,
+            "opcode": "movbe",
+            "operands": "QWORD PTR [rsp+0x88],rbx"
+          },
+          {
+            "address": 18446744072640047132,
+            "opcode": "movabs",
+            "operands": "rdi,0xffff8b1007da4400"
+          },
+          {
+            "address": 18446744072640047142,
+            "opcode": "lea",
+            "operands": "rsi,[rsp+0x80]"
+          },
+          {
+            "address": 18446744072640047150,
+            "opcode": "call",
+            "operands": "0xffffffffa14ced00"
+          },
+          {
+            "address": 18446744072640047155,
+            "opcode": "test",
+            "operands": "rax,rax"
+          },
+          {
+            "address": 18446744072640047158,
+            "opcode": "je",
+            "operands": "0xffffffffc040c5b0"
+          }
+        ]
+      },
+      {
+        "address": 18446744072640050492,
+        "offset": 10124,
+        "target": 18446744072120757504,
+        "target_symbol": "trie_lookup_elem",
+        "via_literal_thunk": null,
+        "window": [
+          {
+            "address": 18446744072640050428,
+            "opcode": "cmp",
+            "operands": "rbx,0x1000"
+          },
+          {
+            "address": 18446744072640050435,
+            "opcode": "jb",
+            "operands": "0xffffffffc0409b1b"
+          },
+          {
+            "address": 18446744072640050441,
+            "opcode": "mov",
+            "operands": "eax,DWORD PTR [rbp+0x0]"
+          },
+          {
+            "address": 18446744072640050444,
+            "opcode": "mov",
+            "operands": "DWORD PTR [rsp+0x80],0x60"
+          },
+          {
+            "address": 18446744072640050455,
+            "opcode": "movbe",
+            "operands": "DWORD PTR [rsp+0x84],eax"
+          },
+          {
+            "address": 18446744072640050464,
+            "opcode": "movbe",
+            "operands": "QWORD PTR [rsp+0x88],rbx"
+          },
+          {
+            "address": 18446744072640050474,
+            "opcode": "movabs",
+            "operands": "rdi,0xffff8b1007da4400"
+          },
+          {
+            "address": 18446744072640050484,
+            "opcode": "lea",
+            "operands": "rsi,[rsp+0x80]"
+          },
+          {
+            "address": 18446744072640050492,
+            "opcode": "call",
+            "operands": "0xffffffffa14ced00"
+          },
+          {
+            "address": 18446744072640050497,
+            "opcode": "test",
+            "operands": "rax,rax"
+          },
+          {
+            "address": 18446744072640050500,
+            "opcode": "je",
+            "operands": "0xffffffffc040c5b0"
+          }
+        ]
+      },
+      {
+        "address": 18446744072640054439,
+        "offset": 14071,
+        "target": 18446744072120757504,
+        "target_symbol": "trie_lookup_elem",
+        "via_literal_thunk": null,
+        "window": [
+          {
+            "address": 18446744072640054375,
+            "opcode": "cmp",
+            "operands": "rbx,0x1000"
+          },
+          {
+            "address": 18446744072640054382,
+            "opcode": "jb",
+            "operands": "0xffffffffc0409b1b"
+          },
+          {
+            "address": 18446744072640054388,
+            "opcode": "mov",
+            "operands": "eax,DWORD PTR [rbp+0x0]"
+          },
+          {
+            "address": 18446744072640054391,
+            "opcode": "mov",
+            "operands": "DWORD PTR [rsp+0x80],0x60"
+          },
+          {
+            "address": 18446744072640054402,
+            "opcode": "movbe",
+            "operands": "DWORD PTR [rsp+0x84],eax"
+          },
+          {
+            "address": 18446744072640054411,
+            "opcode": "movbe",
+            "operands": "QWORD PTR [rsp+0x88],rbx"
+          },
+          {
+            "address": 18446744072640054421,
+            "opcode": "movabs",
+            "operands": "rdi,0xffff8b1007da4400"
+          },
+          {
+            "address": 18446744072640054431,
+            "opcode": "lea",
+            "operands": "rsi,[rsp+0x80]"
+          },
+          {
+            "address": 18446744072640054439,
+            "opcode": "call",
+            "operands": "0xffffffffa14ced00"
+          },
+          {
+            "address": 18446744072640054444,
+            "opcode": "test",
+            "operands": "rax,rax"
+          },
+          {
+            "address": 18446744072640054447,
+            "opcode": "je",
+            "operands": "0xffffffffc040c5b0"
+          }
+        ]
+      }
+    ]
+  },
+  "next_candidate": "Common load-time LPM specialization using actual map shape/helper binding. Existing perf_context_lto.cpp has generic importLpmLookup, but this captured kernel link plan exposes its target only as kind=call and frozen_ir.rs supplies immutable facts, not map-type facts. Need faithful general map-shape propagation through allowed headers/linker; do not infer LPM type from app/map names or assume prior lowering was lost.",
+  "limits": "PMU normalized by attached entry calls, not actual helper calls. Same symbol/hot offsets and larger normalized periods do not isolate latency versus dynamic path/lookup frequency/cache behavior. Snapshot program metadata has no contemporaneous run_cnt, so metric deltas cannot be exactly paired with these samples. No count gate or result exclusion."
+}

@@ -1,0 +1,8 @@
+{
+  "pid": 1168505,
+  "started_utc": "2026-11-27T21:17:03Z",
+  "controller_status": 1,
+  "raw": "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261127T205918Z",
+  "exception": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/results/x86-otel-perf-20261127/collect_profile.py\", line 26, in <module>\n    objects=[p for p in (raw/'linkcache/native_kernel_link_cache').glob('*.proof.o') if re.fullmatch(r'[0-9a-f]{16}\\.proof\\.o',p.name) and any(line.split()[-1:] == ['perf_unwind_native'] for line in subprocess.check_output(['llvm-nm-18','--defined-only',str(p)],text=True).splitlines())];assert len(objects)==1,objects;obj=objects[0]\n                                                                                                                                                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/subprocess.py\", line 466, in check_output\n    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/subprocess.py\", line 571, in run\n    raise CalledProcessError(retcode, process.args,\nsubprocess.CalledProcessError: Command '['llvm-nm-18', '--defined-only', '/workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261127T205918Z/linkcache/native_kernel_link_cache/3fdabd877365437a.proof.o']' returned non-zero exit status 1.\n",
+  "ended_utc": "2026-11-27T21:17:03Z"
+}
