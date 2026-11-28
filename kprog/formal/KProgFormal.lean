@@ -470,3 +470,4 @@ import KProgFormal.ClightRefinement.Arm64CiliumCallerSPWriterCall
 import KProgFormal.ClightRefinement.Arm64CiliumCallerSPWriterEntry
 import KProgFormal.ClightRefinement.Arm64CiliumCallerLinkedProgram
 import KProgFormal.ClightRefinement.Arm64CiliumCallerLinkedSPCall
+import KProgFormal.ClightRefinement.Arm64CiliumCallerSPWriteMemory

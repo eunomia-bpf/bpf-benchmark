@@ -1,0 +1,9 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerSPWriteMemory.sp_cell
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerSPWriteMemory.sp_cell
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerSPWriteMemory.header_pointer
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerSPWriteMemory.header_pointer
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerSPWriteMemory.write
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerSPWriteMemory.write
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerSPWriteMemory.borrowed_after
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerSPWriteMemory.borrowed_after
