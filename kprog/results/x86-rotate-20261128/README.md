@@ -22,3 +22,8 @@
 - 每次调用：OTel、BCC、Tracee 比 30e401e37 高；Cilium、Katran 相近；Cilium 1.234x 低于 05-29 的 1.319x。
 - Tetragon：eBPF 732.2 ns 和 11-23 的 748.0 ns 相近，原生 580.0 ns 比 11-23 的 318.1 ns、11-22 的 330.9 ns 高，比值从 2.35x 到 1.26x，作为待查的问题交给 perf。
 - BCC stats 关吞吐 0.877x：三个样本都在 0.86–0.89，同一个镜像 stats 开时 1.020x、每次调用 1.041x，作为待查的问题交给 perf。
+
+## 更新（协调者，2026-11-28T12:17Z）
+
+- Tetragon：perf 的 aaba957ee 证实 11-22/23 的原生 318–331 ns 是跳过 tail call 的数（过滤程序的 PFILTER_CONTINUE 跳到返回，2d006f5d8 修好），这次的 580.0 ns 是做了完整工作的数；那一条从“待查的问题”改为“缺陷修好之后的数字”。
+- BCC：stats 关的 0.877x 集中在 sockfd 组件（stats 关 0.728x、stats 开 1.022x；4153eb39d），perf 在同一镜像上做 stats 关 / 开的成对采样和代码观测。

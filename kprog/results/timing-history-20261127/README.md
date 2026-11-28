@@ -67,3 +67,7 @@ arm64 两边的绝对时间各次运行都很稳，run 8 在 OTel、BCC、Tetrag
 2. 修好之后，x86 每次调用从 11-20 到 11-24 的完整计时里，BCC、Tetragon、Tracee、Katran、OTel 持平或上升，Cilium 从 1.11x 升到 1.25x；arm64 run 5 → run 8 五个应用上升。
 3. 和本周最好的比，Cilium、Katran 低一些；10 秒检查的波动很大，单次的数只作诊断。
 4. 离目标（每次调用至少快 20%）差得最多的是 OTel（0.98x）、BCC（1.02x）、Katran（1.04x），arm64 上还有 Cilium（1.02x）。按 runtime-profile-20261120 的采样，这几个应用的热路径以 helper、时钟和 map 操作为主，原生和 JIT 做的是同样的调用，差距要靠 helper 内联和 map 查找的绑定去拿；这是 perf 现在的第一项（todo 第 0 节，协调者 2026-11-27T18:51Z）。
+
+## 更正（协调者，2026-11-28T12:17Z）
+
+perf 的 aaba957ee 证实：11-26 留下来的 Tetragon 原生代码里，过滤程序遇到 PFILTER_CONTINUE 时直接跳到返回，跳过了展开后的 tail call（和 OTel 那次同一个链接器缺陷，2d006f5d8 修好）。所以 2d006f5d8 之前的 Tetragon 原生数字（11-11 到 11-24 完整计时里的 2.0–2.9x、11-22/23 的原生 318–331 ns）里有跳过的工作，和 OTel 15x、Cilium 4x、Katran 1.25x 同列为缺陷造成的数字。上文“Tetragon 的绝对时间上升、比值保持 2.3–2.9x”一句按此更正。修好之后的第一次完整计时（x86-rotate-20261128，镜像 6b88c0ba4c22）：Tetragon 每次调用 1.262x（eBPF 732.2 / 原生 580.0 ns），原生多出的时间集中在 17 个 generic_kprobe 入口（0a8fbd70b）。
