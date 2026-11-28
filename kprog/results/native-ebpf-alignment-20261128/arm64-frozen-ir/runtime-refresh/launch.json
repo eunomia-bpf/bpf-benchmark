@@ -1,0 +1,27 @@
+{
+  "started_utc": "2026-11-28T04:43:55Z",
+  "source_revision": "9931dfdc8754a42c80ff491907ba56a0fdb58397",
+  "source_sha256": {
+    "kprog/libnativeloader/src/native_loader_trusted.cpp": "835590d2649a63b71b1a9cb749f86dc0c063ded771e7c349932194c6286a9387",
+    "kprog/libnativeloader/src/native_loader_link_plan.hpp": "066c196ae632936b4c06f4bdfb0008826818cde5393566a6c3e04aec4062dd70",
+    "kprog/libnativeloader/src/native_loader_manifest.hpp": "83408e19fe8556de13cfeb1620a95eb692d516ef0f91050e27b505263a4d19c8",
+    "kprog/libnativeloader/src/native_loader_lto.hpp": "da845464694c908dfb465369b320813aaff37f9b8dc505c67bf74065fb381b11",
+    "kprog/libnativeloader/src/native_loader.cpp": "8409eba58ece8705db7fe4b80cfba4fba414433fe05bc089e71fdcc21f46e46c",
+    "kprog/libnativeloader/src/native_loader_helper_query.hpp": "32a34a039a8640c1b37191fd0e5193e3ffa0c4808d7b2c617c66a17a7e4bf624",
+    "kprog/libnativeloader/src/native_loader_bytecode.hpp": "69693005155d8d5507c2252621840c33880adcdfae52a075487f6c604277897e",
+    "kprog/libnativeloader/src/native_loader_kfunc.hpp": "4c66fab69335853ab2b0d9f5748c063a2def4d063e3e73283c4dfce5e48fa287",
+    "kprog/libnativeloader/src/native_loader_source_maps.hpp": "2f400e8f4884cc1ef9fe2cb7b12708c34839a5759f0dd4e971bde0fd977f3c36",
+    "kprog/libnativeloader/src/native_loader_timings.hpp": "06980e75d132141fbf9b946cc0fe6bfe912eb486c57cc3c7b6f3bbcac2fd83b3",
+    "kprog/libnativeloader/src/native_loader_subprocess.hpp": "3c2e4a32ccaa0487a49323dae75c934b75192eb64846cb8b838da7fb04d96fab",
+    "kprog/libnativeloader/src/native_loader_internal.hpp": "31204bdfd23a7b4b02c9392eb08a8f358f3c779068716d697a6c3bbe96ec998c",
+    "kprog/libnativeloader/src/native_loader_context_lto.hpp": "cbc907bf5622592456394212a8487f0c2261017e4f440b0a60f524ac30df5d63",
+    "kprog/libnativeloader/src/native_loader_data_layout.hpp": "78bd59be7377ba938298c9a095ea7287720be867a6384acd2a22bb049736d28c",
+    "kprog/libnativeloader/src/native_loader_trusted_link_plan.hpp": "122b070649cdd1f7cae57d8626e87bd4d6a28f47912dad5a846b0a71d4ff462f",
+    "kprog/libnativeloader/src/native_loader_link_schema.hpp": "8ed8b287f18be964921fabde04d2deef75d7dcea40e0993d5240f34927391548",
+    "kprog/libnativeloader/src/native_loader_entry_data.hpp": "b31da43e9b991586b3e0e7d0db8142db9bc2566678a297d309860cb999b925f4",
+    "kprog/libnativeloader/src/native_loader_trusted_link_schema.hpp": "fe37b5e916d31ca89204c2f96d816205d5fbc4d14b21e64a0fc5e9f84b6b27c4",
+    "kprog/libnativeloader/src/native_loader_function_bodies.hpp": "96082adbcfcce3cb84526fd18c37dbfb8a0f190d20cf99e5aa5527db13e1c8e7"
+  },
+  "script": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/runtime-refresh/refresh_image.py",
+  "log": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/runtime-refresh/job.log"
+}
