@@ -1,0 +1,204 @@
+{
+  "scope": "actual original numeric prepost offset computation on same SP-updated memory",
+  "source_sha256": "a49223232090ebc44073f4e61eb95a34a23cc26c958d9cd335e68fd778545553",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage5": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-mem-offset/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 4.417108058929443,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerMemOffset"
+      ],
+      "exit": 0,
+      "seconds": 4.793385982513428,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.795520782470703,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-mem-offset/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.201817750930786,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "failed_stage1": {
+    "phase": "stage1",
+    "receipt": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-mem-offset/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 8.443893194198608,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "source_sha256": "a72feb755b6b8cee0742a43e378d101fd8705e4176af69bf1cd01ae4cd56cb93",
+    "root_errors": [
+      "execute simp did not match read lemmas whose left environment used opaque env0..12; first original immediate read remained unreduced"
+    ],
+    "repair": "add equivalent read lemmas with explicitly unfolded env0..12 on their left sides; add actual condition type and unsigned true bool fact",
+    "source_or_step_count_changed": false,
+    "focus_full_public_publish_started": false
+  },
+  "failed_stage2": {
+    "phase": "stage2",
+    "receipt": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-mem-offset/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 9.665028810501099,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "source_sha256": "a59f3e946d870028a07497868b28211ccede249a13769c0564eaca14e2c19b8a",
+    "root_errors": [
+      "flat readback lemmas progressed past initial assignments; execute stopped at packed condition boolVal whose typeof was prematurely unfolded into match condition, bypassing checked condition_type"
+    ],
+    "repair": "remove generic CC.typeof unfold from execute reducer; use condition_type and generic Etempvar type equation",
+    "source_or_step_count_changed": false,
+    "focus_full_public_publish_started": false
+  },
+  "failed_stage3": {
+    "phase": "stage3",
+    "receipt": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-mem-offset/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 9.13998532295227,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "source_sha256": "73e4942934f73deee159b4578099e9ab1020e3bd37df6cb2d33da45d8e8d45e4",
+    "root_errors": [
+      "condition/type/boolean now reduced; execute stopped at raw Econst_int1 assignment _t150 because only casted integer constants had evaluator lemmas"
+    ],
+    "repair": "add generic Econst_int evaluator fact to execution reducer",
+    "source_or_step_count_changed": false,
+    "focus_full_public_publish_started": false
+  },
+  "failed_stage4": {
+    "phase": "stage4",
+    "receipt": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-mem-offset/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 9.559265613555908,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "source_sha256": "3562c7bf6a142f7664c877e795fc4acb54ffa922665cafde36f8a550ef6faa52",
+    "root_errors": [
+      "raw constant rule progressed through t150 and branch; execution stopped at casted Int.repr1 source literal because evaluator lemma used BitVec literal syntax and simp did not match representations"
+    ],
+    "repair": "state zero_int/one_int/zero_long evaluator left sides using exact exported Int.repr0/Int.repr1/Int64.repr0 source literals, preserving rfl proofs and result values",
+    "source_or_step_count_changed": false,
+    "focus_full_public_publish_started": false
+  },
+  "focused_jobs": 290,
+  "full_jobs": 1557,
+  "root_queries": [
+    "source",
+    "temp_frame",
+    "values",
+    "execute",
+    "advance"
+  ],
+  "actual_memory_offset_prefix_commit": "202fe5e4a8dfc5c7dce3a702fe8d57773d109c62",
+  "source": "private parts extracted from original afterIndex AST; exact body/loop/break/finish source checked; original alternatives retained",
+  "prefix": "44 pure internal steps; actual prepost1/has_index0/base0/result0/store_off0; no second application of preindex immediate",
+  "temps": "only twelve numeric temporary assignments; every other incoming prefix lookup retained",
+  "composition": "accepted87 SP-update/memory-prefix plus actual44 numeric offset steps =131; SAME derived Store/newSP/frame/callerEnv/continuation",
+  "open": "actual addressing and data stores/subsequent instruction; linked whole-entry/provider transport; whole native refinement",
+  "old_allocator_or_successful_store_oracle_used": false,
+  "native_whole_state_proved_here": false,
+  "resource_assignment": "user CPU17/timingSH restored after coordinator2026-11-28T11:20Z rotate-ended notice; run.py/j1/nice0/32GiB/unchanged proof settings/fullEX-nformal-full-check",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
