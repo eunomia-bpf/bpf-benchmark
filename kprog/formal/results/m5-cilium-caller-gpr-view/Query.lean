@@ -1,0 +1,7 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRView.table_blocks
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRView.table_blocks
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRView.cell_readbacks
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRView.cell_readbacks
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRView.gpr_readbacks
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRView.gpr_readbacks
