@@ -1,0 +1,75 @@
+{
+  "collected": "2026-11-28T15:18:41.418716+00:00",
+  "same_launch_pid": 1524409,
+  "process_pid": 1524411,
+  "finished": "2026-11-28T15:15:12.933414+00:00",
+  "status": 0,
+  "all_7618_claimed_unlinks_independently_absent": true,
+  "all_46_index_snapshots_joined_to_pushed_commit_trees": true,
+  "counts": {
+    "index_files": 46,
+    "index_logical_bytes": 1360117908,
+    "index_allocated_bytes": 1360392192,
+    "raw_files": 7572,
+    "raw_logical_bytes": 934435288,
+    "raw_allocated_bytes": 956219392
+  },
+  "total_removed_logical_bytes": 2294553196,
+  "total_removed_allocated_bytes": 2316611584,
+  "retained": [
+    {
+      "path": "/workspaces/.agent-state/kprog-lanes/perf/collect-1415221.index",
+      "reason": "snapshot not equal to pushed commit tree",
+      "size": 29544898,
+      "sha256": "10c9038fc09bab6c62dd73036e063440a0fd9a646b740e25b9fe6a18637057ad"
+    }
+  ],
+  "preserved_tmp_paths": [
+    "/tmp/otel4_o0.llvm.ll",
+    "/tmp/otel4_o0.ll",
+    "/tmp/o8.ll",
+    "/tmp/o8.bc",
+    "/tmp/t72.ll",
+    "/tmp/t72.bc",
+    "/tmp/pkall",
+    "/tmp/arch"
+  ],
+  "archive_assets": [
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/collections/20261128T135218Z-1485279/archive/evidence.tar.zst.part-aa",
+      "commit": "d9da8d73bac331e967df91418753b58dc6a3783e",
+      "size": 48000000,
+      "sha256": "f5f027c3d2a32597f027991c9e56e4a5c60926723e59aa722cf1d87ba8c615ea"
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/collections/20261128T135218Z-1485279/archive/evidence.tar.zst.part-ab",
+      "commit": "d9da8d73bac331e967df91418753b58dc6a3783e",
+      "size": 48000000,
+      "sha256": "7f7ffba5bffdba73c0c69f9b628b04e3fffe575583042935a415baf1b67ea5a8"
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/collections/20261128T135218Z-1485279/archive/evidence.tar.zst.part-ac",
+      "commit": "d9da8d73bac331e967df91418753b58dc6a3783e",
+      "size": 28733473,
+      "sha256": "1a84e0c049d3854c6ccc5a748ab5727a2c6e92bf2422ed5e8eef910237aa22af"
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/core-field-predicates/census-records.tar.zst",
+      "commit": "884deec68a97439245a9eeba0565bfc7d1bfd2d3",
+      "size": 3007465,
+      "sha256": "917747c67ab7f27f29e98eaf3656e155cfe3b33a21581610ad4e11c588f79a8e"
+    }
+  ],
+  "worker_shared_index_before_after_under_git_lock": {
+    "path": "/workspaces/repository/.git/index",
+    "size": 29589865,
+    "sha256": "e325190f594b7d854784580fb4e1faa8a2fbae3fff9b67245e27c7e8abbde82a",
+    "allocated": 29597696
+  },
+  "current_shared_index_sha256": "61b995916373cb15732853929791f9aaf33af3db09283ee01b139625eeb95497",
+  "current_shared_index_matches_worker_snapshot": false,
+  "controller_sha256": "5fcbc93f9aa58336d8a6f2bacab15ea83ee5f2f2d715e660dbba8f76c3723b14",
+  "journal_sha256": "1c6dad465eef3691ddd09c585f34a4f0f074a6f631c820881bb540d05735d96b",
+  "space_claim_scope": "removed logical/allocated file bytes, not physical host-node or Longhorn replica reclamation",
+  "frontend_check_launched": false
+}

@@ -1,0 +1,80 @@
+{
+  "pid": 1524411,
+  "started": "2026-11-28T15:14:38.864776+00:00",
+  "status": "complete",
+  "latest_resume": "COORDINATOR2026-11-28T14:39Z",
+  "index_files": 46,
+  "index_logical_bytes": 1360117908,
+  "index_allocated_bytes": 1360392192,
+  "raw_files": 7572,
+  "raw_logical_bytes": 934435288,
+  "raw_allocated_bytes": 956219392,
+  "recipe": {
+    "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/storage-cleanup/cleanup.py",
+    "size": 10485,
+    "sha256": "00601c1f4d52a900475db57191cddeeca0bf49e0fd6ed649e19039afa021b96b",
+    "allocated": 12288
+  },
+  "workspace_free_before": 10713948160,
+  "pushed_remote_master": "d80bf6fd4b09c2c856047e0e895229f8121616cd",
+  "reader_scan_unreadable_same_uid": [],
+  "shared_index_unchanged": {
+    "path": "/workspaces/repository/.git/index",
+    "size": 29589865,
+    "sha256": "e325190f594b7d854784580fb4e1faa8a2fbae3fff9b67245e27c7e8abbde82a",
+    "allocated": 29597696
+  },
+  "pushed_commits": 12774,
+  "archives": [
+    {
+      "name": "current-six-app-check",
+      "commit": "d9da8d73bac331e967df91418753b58dc6a3783e",
+      "verified_members": 6891,
+      "eligible_files": 6884
+    },
+    {
+      "name": "core-census",
+      "commit": "884deec68a97439245a9eeba0565bfc7d1bfd2d3",
+      "verified_members": 692,
+      "eligible_files": 688
+    }
+  ],
+  "retained_named_tmp_scratch": [
+    {
+      "path": "/tmp/otel4_o0.llvm.ll",
+      "reason": "retain until exact ownership/rebuild provenance established; not a verified archived duplicate"
+    },
+    {
+      "path": "/tmp/otel4_o0.ll",
+      "reason": "retain until exact ownership/rebuild provenance established; not a verified archived duplicate"
+    },
+    {
+      "path": "/tmp/o8.ll",
+      "reason": "retain until exact ownership/rebuild provenance established; not a verified archived duplicate"
+    },
+    {
+      "path": "/tmp/o8.bc",
+      "reason": "retain until exact ownership/rebuild provenance established; not a verified archived duplicate"
+    },
+    {
+      "path": "/tmp/t72.ll",
+      "reason": "retain until exact ownership/rebuild provenance established; not a verified archived duplicate"
+    },
+    {
+      "path": "/tmp/t72.bc",
+      "reason": "retain until exact ownership/rebuild provenance established; not a verified archived duplicate"
+    },
+    {
+      "path": "/tmp/pkall",
+      "reason": "retain until exact ownership/rebuild provenance established; not a verified archived duplicate"
+    },
+    {
+      "path": "/tmp/arch",
+      "reason": "retain until exact ownership/rebuild provenance established; not a verified archived duplicate"
+    }
+  ],
+  "workspace_free_after": 12993753088,
+  "space_claim_scope": "removed logical/allocated file bytes, not physical host-node or Longhorn replica reclamation",
+  "returncode": 0,
+  "finished": "2026-11-28T15:15:12.933414+00:00"
+}
