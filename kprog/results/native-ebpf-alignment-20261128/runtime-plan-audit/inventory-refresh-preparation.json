@@ -1,0 +1,28 @@
+{
+  "utc": "2026-11-28T07:03:37Z",
+  "reader_before_sha256": "c9f5605b11f06b73eee6f839bc548c6256ee6eae6d1626984c4ffd0b292e69f2",
+  "reader_sha256": "186dd27fd0662d20b880532963f5c4f52fb4e501a1096ce412f6a1e24f8a65de",
+  "before_outputs": {
+    "programs.json": {
+      "sha256": "32a9b22c849faabe18339c34f3513514df8f9dd8adcb55db9cd9a7a3d94f4b0e",
+      "git_blob": "d0fa5953619df8df46cbc49307024279b05e595f"
+    },
+    "objects.json": {
+      "sha256": "88fb43dfc6238b7b2e0fc8c157d620982126c24f57472232b71df46ba24e85f3",
+      "git_blob": "87a9218e54700a619b3a1c6c99b4734abfb2e5a9"
+    },
+    "manifests.json": {
+      "sha256": "45d3ca238a54b12e545dc8962600aa57e5a952045cb91ad51c4fabb316a10193",
+      "git_blob": "d9f35da1ef54715403faf09285c47fd7cbac7bae"
+    },
+    "summary.json": {
+      "sha256": "6638559722f88ffd912623f15b85f4de0d01212cfbc0b41d04045d8131a49b90",
+      "git_blob": "466e6b3206603e955421972af8d94584aa8493b0"
+    },
+    "programs.tsv": {
+      "sha256": "c8a5d1190db372c66c45fca91fab05e24cd8fdf1af6c562bd9655761f2722202",
+      "git_blob": "d29d2b0702c8247a72da92c15f1c92b0a2fc0cd5"
+    }
+  },
+  "scope": "Generic static-census name resolution: explicit full manifest symbol keeps exact selection; unspecified symbols retain every function with the kernel15-byte name, including exact15-character siblings. Four affected rows across both architectures; runtime loader/source products remain as built."
+}
