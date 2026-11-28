@@ -1,0 +1,25 @@
+{
+  "phase": "stage1",
+  "source_sha256": "f9995344be6bdc2ef8d34fbc7bb307e34936e64a5411302769ca8ac559145b8d",
+  "source_lines": 160,
+  "full_log_bytes": 341,
+  "full_log_sha256": "5aa6ea44b4195f0655e1d5e77e6a5d819e83660adb860e6b0e999b49ac2ef3e5",
+  "receipt": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cilium-caller-memory-writer-tag-loop/Proof.lean"
+    ],
+    "exit": 1,
+    "seconds": 1.999523639678955,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "diagnosis": "from_payload rcases pattern uses reserved Lean keyword prefix as a local binder, causing parser errors at147 and158",
+  "repair": "rename only that local proof witness prefix to prefixRun; no semantic/premise/budget change"
+}

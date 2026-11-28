@@ -1,0 +1,134 @@
+{
+  "scope": "exact original tag-loop header/real volatile read-modify-write/loop exit composed with actual payload and164prefix",
+  "source_sha256": "ada280cff6f947f56d707823e7d267366390427c3a3a4a7b53cbb70e4d2ea370",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-tag-loop/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.9549469947814941,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerMemoryWriterTagLoop"
+      ],
+      "exit": 0,
+      "seconds": 2.293972969055176,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.551464080810547,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-tag-loop/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.128340482711792,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "prior_failed_phases": [
+    {
+      "phase": "stage1",
+      "source_sha256": "f9995344be6bdc2ef8d34fbc7bb307e34936e64a5411302769ca8ac559145b8d",
+      "source_lines": 160,
+      "full_log_bytes": 341,
+      "full_log_sha256": "5aa6ea44b4195f0655e1d5e77e6a5d819e83660adb860e6b0e999b49ac2ef3e5",
+      "receipt": {
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-j1",
+          "results/m5-cilium-caller-memory-writer-tag-loop/Proof.lean"
+        ],
+        "exit": 1,
+        "seconds": 1.999523639678955,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368,
+        "timing_lock": "shared"
+      },
+      "diagnosis": "from_payload rcases pattern uses reserved Lean keyword prefix as a local binder, causing parser errors at147 and158",
+      "repair": "rename only that local proof witness prefix to prefixRun; no semantic/premise/budget change"
+    }
+  ],
+  "focused_jobs": 308,
+  "full_jobs": 1575,
+  "root_queries": [
+    "source",
+    "shift_source",
+    "values",
+    "tag_frame",
+    "prepare",
+    "advance",
+    "incoming_tag",
+    "data_values",
+    "from_payload"
+  ],
+  "actual_memory_writer_tag_commit": "ebb4ee0cf961259650d3a3e6732781dc348e289d",
+  "source": "original Unmaterialize.tags loop, ti=stw_index>>3, original s79 ts=(ti&7)*8 and exact s80 body, original break retained",
+  "header": "7 actual internal steps from real stw_index0 derive ti0/ts0 and preserve actual store_tag; input ti0/ts0 premises discharged by real header",
+  "execution": "original imported EF_vload/vstore actual Step2+StarE0, original skip-loop/break exit; same concrete tag Store, exact final TempEnv; no builtin InternalRun claim",
+  "composition": "actual164 internal prefix + real payload Star + complete original tag-loop Star; derives incoming index0/tag10 from actual public temporary frames and current tagword through SAME cache-word-payload stores; three concrete store witnesses retained",
+  "data": "actual tag Store other-block frame preserves SAME data word/base and payload0 reads; tag readback is the actual (old&~255)|10 word",
+  "boundary": "supplied current numeric tagword, ABI1/SP=-32/table/tag/access and initialwidth8 remain explicit; preceding provider outcome/whole-entry width/global composition not claimed",
+  "open": "provider-outcome and whole-entry width composition, next exact original caller continuation, linked whole-entry/provider/Senv transport/native whole-state",
+  "old_allocator_or_successful_store_oracle_used": false,
+  "provider_success_existence_or_purity_claimed": false,
+  "native_whole_state_proved_here": false,
+  "resource_assignment": "existing run.py timingSH/CPU17/j1/nice0/32GiB/unchanged proof settings/fullEX-nformal-full-check; nonblocking shared timing preflight before launch",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
