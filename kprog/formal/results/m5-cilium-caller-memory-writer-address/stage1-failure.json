@@ -1,0 +1,29 @@
+{
+  "receipt": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cilium-caller-memory-writer-address/Proof.lean"
+    ],
+    "exit": 1,
+    "seconds": 7.038094520568848,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "source_sha256": "3bc1210598994538d392e2d969cf8755f9ecae69dc3517df737cf5670310dc42",
+  "source_lines": 254,
+  "log_bytes": 90422,
+  "errors": [
+    "results/m5-cilium-caller-memory-writer-address/Proof.lean:64:6: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern",
+    "results/m5-cilium-caller-memory-writer-address/Proof.lean:120:67: error: Tactic `assumption` failed",
+    "results/m5-cilium-caller-memory-writer-address/Proof.lean:120:67: error: Tactic `assumption` failed"
+  ],
+  "cause": "offset helper rewrite did not match the ambiguous zero literal; original offset doEvalExpr remained unreduced in execute path/exec",
+  "inferred_secondary": "SP parameter appears only in conditional premises/RHS of the generic offset/index evaluation lemmas, so specialize it explicitly for simplification",
+  "repair": "explicit0#64; exact initial offset evaluation and fixed-SP universal index evaluation; same AST/heap/width8 invariant/18-95counts/default settings"
+}

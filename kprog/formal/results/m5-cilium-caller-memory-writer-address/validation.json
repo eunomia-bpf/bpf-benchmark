@@ -1,0 +1,138 @@
+{
+  "scope": "original memory-writer signed stack offset, numeric value, stack index and width setup",
+  "source_sha256": "769e4d4cf23e10dbda88e721fd853eb3dd9d72a29cc82084dc645171f7de4f9d",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-address/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 4.533190011978149,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerMemoryWriterAddress"
+      ],
+      "exit": 0,
+      "seconds": 4.933370351791382,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.7323529720306396,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-address/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.7893779277801514,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 302,
+  "full_jobs": 1569,
+  "root_queries": [
+    "source",
+    "body_source",
+    "inner_source",
+    "execute",
+    "temp_frame",
+    "values",
+    "index_zero",
+    "literal_width",
+    "stored_value",
+    "width_preserved",
+    "advance"
+  ],
+  "actual_memory_writer_sp_commit": "0eeff9a06ef0ba26595c509d17a1e9f460c5200e",
+  "source": "exact original outer loss loop, inner stack-writer loop, all original width/mask/data-write alternatives and both continuations retained",
+  "execution": "18 actual internal steps copy effective SP+0 signed offset, width8 and provider scalar, then derive stack index32+SP and width8; same full heap and five changed temporary names",
+  "value_and_width": "actual ReturnOutcomes scalar follows StoreTag/Prefix/Guard/SP temporary frames; width follows all actual preindex/offset/R30/provider/cache/writer frames to its incoming width8 temporary invariant, with separate original WidthPrefix literal-width certificate",
+  "index": "actual SP+0 avoids a second preindex adjustment; index32+SP is0 when explicit supplied SP equals original delta -32, no provider preservation assumed",
+  "composition": "actual reader/writer77 plus address setup18 =95 steps on same cache heap and explicit ABI/SP/table/tag resources; incoming width8 is explicit and transported, not a successful-read/store oracle",
+  "open": "mask/value unmaterialization, aligned data stores, actual provider-outcome composition, whole-entry width invariant composition, linked whole-entry/provider/Senv transport/native whole-state",
+  "old_allocator_or_successful_store_oracle_used": false,
+  "provider_success_existence_or_purity_claimed": false,
+  "native_whole_state_proved_here": false,
+  "resource_assignment": "existing run.py timingSH/CPU17/j1/nice0/32GiB/unchanged proof settings/fullEX-nformal-full-check; nonblocking shared timing preflight before launch",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
+  "failed_stage1": {
+    "receipt": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-address/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 7.038094520568848,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "source_sha256": "3bc1210598994538d392e2d969cf8755f9ecae69dc3517df737cf5670310dc42",
+    "source_lines": 254,
+    "log_bytes": 90422,
+    "errors": [
+      "results/m5-cilium-caller-memory-writer-address/Proof.lean:64:6: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern",
+      "results/m5-cilium-caller-memory-writer-address/Proof.lean:120:67: error: Tactic `assumption` failed",
+      "results/m5-cilium-caller-memory-writer-address/Proof.lean:120:67: error: Tactic `assumption` failed"
+    ],
+    "cause": "offset helper rewrite did not match the ambiguous zero literal; original offset doEvalExpr remained unreduced in execute path/exec",
+    "inferred_secondary": "SP parameter appears only in conditional premises/RHS of the generic offset/index evaluation lemmas, so specialize it explicitly for simplification",
+    "repair": "explicit0#64; exact initial offset evaluation and fixed-SP universal index evaluation; same AST/heap/width8 invariant/18-95counts/default settings"
+  },
+  "proof_repair": "explicit0#64 and fixed-SP offset/index eval rewrites; same AST/heap/width8 premise/18-95counts/default settings"
+}
