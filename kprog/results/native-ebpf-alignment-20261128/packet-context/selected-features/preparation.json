@@ -1,0 +1,114 @@
+{
+  "prepared_utc": "2026-11-28T08:51:24Z",
+  "newest_resume": "COORDINATOR 2026-11-28T07:17Z",
+  "source_sha256": {
+    "vendor/bpf/native_compat.h": "906737856b4c533575095e11e090b125ed6bc95a676bd9087411234b44d74494",
+    "vendor/bpf/cilium/bpf/include/linux/bpf.h": "34cf8b6c978854bb115dceaf330c9be0f1dcc7c34d557868e27e61ea13a357e5",
+    "vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h": "c8a6251487d57123d098bf325cfc4b049f58701cae4abb775f4685b7b32835ed",
+    "vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h": "93bffd9691f1564c03d7b778ce57b20b80d4cecf3183e2c57ba23e97e9769911",
+    "vendor/bpf/cilium/bpf/lib/edt.h": "96f0a6d322b460b95082bd9058fbafd0802cd7a23ba923da15d4446dc38e84cc",
+    "vendor/bpf/cilium/bpf/lib/token_bucket.h": "5530d553ff6dc298abf352d5b79eeb55cfb58bf35807769cf075e9a0e2ca8b31",
+    "vendor/bpf/cilium/bpf/lib/overloadable_xdp.h": "c8f45d635a5aa35944f23b90effe47a8bfaeb628a05acbb28e7646324027dcda",
+    "vendor/linux-framework/net/core/filter.c": "629e5372b2d239485e75fc5c3f5bee98be4bbe6201794d4480de68a4fcd6f542",
+    "vendor/bpf/cilium/bpf/netdev_config.h": "c39a8fe59c863257ee163865dd723a891b02545917043b2054cbdcf0a5b7e153",
+    "vendor/bpf/cilium/bpf/ep_config.h": "dab0355b4af4ea96d90d75a8b84852cbba14d8d4170fa7a72582ef6f2c621df5",
+    "vendor/bpf/cilium/bpf/node_config.h": "8c65ab4e2cdd2372cd9d66e97a1102450809ab0c3a528234659f7ba17ae36f4e",
+    "vendor/bpf/cilium/bpf/filter_config.h": "b8c6c7b95951346cee75ac932462e1cbbdfa00755438d3e4e97fffb021ae7098",
+    "vendor/bpf/cilium/bpf/bpf_overlay.c": "2951230b8a1cb01e52c1027dbda5bf2710e2b015d94a184489f8f4907c5bf005",
+    "vendor/bpf/cilium/bpf/bpf_probes.c": "0b2c4767920abd1556a8e5a78a3f751839fe5d11b94bf4f32e861bfecb9da4be",
+    "vendor/bpf/cilium/bpf/bpf_sock.c": "4a1435ea4343e51dbb6c09a709375bf455204f7cb20446b7e93dc31367a515f5",
+    "vendor/bpf/cilium/bpf/bpf_host.c": "b18cca811286f753ffbae667fa467680f4ac444aa141b0af4833372af9674399",
+    "vendor/bpf/cilium/bpf/bpf_sock_term.c": "dfc569c2367fa4d18bf0023b1348cbe4d20607f08e754bd388dd77c4f5d5bf8b",
+    "vendor/bpf/cilium/bpf/bpf_alignchecker.c": "902a9070895aff18f981a72392a8d96f3b2b1189320bfc35a63ffc74e64d2e12",
+    "vendor/bpf/cilium/bpf/bpf_xdp.c": "5540ee62a23be573453087b46f8ce7da0feab112a77633a66f4d57ae8d4235f2",
+    "vendor/bpf/cilium/bpf/bpf_wireguard.c": "66daec8e995357aa9cecfe95d0cea8a87489bc13b14e92a1684de82e5aade122",
+    "vendor/bpf/cilium/bpf/bpf_lxc.c": "07011bf40676984b1fde2dabec629d64c15fcb35efee7176fd673ccb47cf0f02"
+  },
+  "source_anchors": {
+    "vendor/bpf/cilium/bpf/include/linux/bpf.h": [
+      {
+        "line": 6090,
+        "context": "\t/* BPF-visible cb[] is qdisc_skb_cb(skb)->data, eight bytes into\n\t * sk_buff.cb; bpf_convert_ctx_access() applies this pivot for JIT code. */\n\t__u8 __native_qdisc_cb_pad[8];\n\t__u32 cb[10];\n\t__u8 __native_pad88[24];\n\t__u32 len;\n\t__u32 data_len;\n\t__u16 mac_len;\n\t__u16 hdr_len;\n\t__u16 queue_mapping;\n\t__u8 __native_pad126[8];\n\t__u16 tc_index;"
+      }
+    ],
+    "vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h": [
+      {
+        "line": 143,
+        "context": "}\n\nstatic __always_inline __maybe_unused __u32\nctx_wire_len(const struct __sk_buff *ctx)\n{\n#ifdef MICRO_NATIVE\n\treturn ctx->len;\n#else\n\treturn ctx->wire_len;\n#endif\n}\n"
+      }
+    ],
+    "vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h": [
+      {
+        "line": 29,
+        "context": "#define CTX_DIRECT_WRITE_OK\t\t1\n\n\t\t\t\t\t/* cb + RECIRC_MARKER + XFER_MARKER */\n#define META_PIVOT\t\t\t((int)(field_sizeof(struct __sk_buff, cb) + \\\n\t\t\t\t\t       sizeof(__u32) * 2))\n\n/* This must be a mask and all offsets guaranteed to be less than that. */\n#define __CTX_OFF_MAX\t\t\t0xff\n\n#ifdef MICRO_NATIVE\nstatic __always_inline void *\nmicro_native_xdp_data(const struct xdp_md *ctx)"
+      },
+      {
+        "line": 489,
+        "context": "struct {\n\t__uint(type, BPF_MAP_TYPE_PERCPU_ARRAY);\n\t__uint(key_size, sizeof(int));\n\t__uint(value_size, META_PIVOT);\n\t__uint(pinning, LIBBPF_PIN_BY_NAME);\n\t__uint(max_entries, 1);\n} cilium_xdp_scratch __section_maps_btf;\n\nstatic __always_inline __maybe_unused void\nctx_store_meta(struct xdp_md *ctx __maybe_unused, const __u64 off, __u32 datum)\n{\n\t__u32 zero = 0, *data_meta = map_lookup_elem(&cilium_xdp_scratch, &zero);"
+      },
+      {
+        "line": 501,
+        "context": "\n\tif (always_succeeds(data_meta))\n\t\tdata_meta[off] = datum;\n\tbuild_bug_on((off + 1) * sizeof(__u32) > META_PIVOT);\n}\n\nstatic __always_inline __maybe_unused __u32\nctx_load_meta(const struct xdp_md *ctx __maybe_unused, const __u64 off)\n{\n\t__u32 zero = 0, *data_meta = map_lookup_elem(&cilium_xdp_scratch, &zero);\n\n\tif (always_succeeds(data_meta))"
+      },
+      {
+        "line": 511,
+        "context": "\n\tif (always_succeeds(data_meta))\n\t\treturn data_meta[off];\n\tbuild_bug_on((off + 1) * sizeof(__u32) > META_PIVOT);\n\treturn 0;\n}\n\nstatic __always_inline __maybe_unused __u32\nctx_load_and_clear_meta(const struct xdp_md *ctx __maybe_unused, const __u64 off)\n{\n\t__u32 val, zero = 0, *data_meta = map_lookup_elem(&cilium_xdp_scratch, &zero);\n"
+      },
+      {
+        "line": 526,
+        "context": "\t\treturn val;\n\t}\n\n\tbuild_bug_on((off + 1) * sizeof(__u32) > META_PIVOT);\n\treturn 0;\n}\n\nstatic __always_inline __maybe_unused __be16\nctx_get_protocol(const struct xdp_md *ctx)\n{\n\tvoid *data_end = ctx_data_end(ctx);\n\tstruct ethhdr *eth = ctx_data(ctx);"
+      }
+    ],
+    "vendor/bpf/cilium/bpf/lib/edt.h": [
+      {
+        "line": 44,
+        "context": "/* From XDP layer, we neither go through an egress hook nor qdisc\n * from here, hence nothing to be set.\n */\n#if defined(ENABLE_BANDWIDTH_MANAGER) && __ctx_is == __ctx_skb\nstatic __always_inline void edt_set_aggregate(struct __ctx_buff *ctx,\n\t\t\t\t\t      __u32 aggregate)\n{\n\t/* 16 bit as current used aggregate, and preserved in host ns. */\n\tctx->queue_mapping = aggregate;\n}\n\nstatic __always_inline __u32 edt_get_aggregate(struct __ctx_buff *ctx)"
+      },
+      {
+        "line": 122,
+        "context": "\t\t  __u32 aggregate __maybe_unused)\n{\n}\n#endif /* ENABLE_BANDWIDTH_MANAGER */"
+      }
+    ],
+    "vendor/bpf/cilium/bpf/lib/token_bucket.h": [
+      {
+        "line": 15,
+        "context": "\n/* For now the map is not thread safe, may add spin lock in the future */\n\n#if defined(ENABLE_BANDWIDTH_MANAGER) && __ctx_is == __ctx_skb\nstatic __always_inline int accept(struct __ctx_buff *ctx, __u32 ep_id)\n{\n\t__u64 tokens, now, t_last, elapsed_time, bps;\n\tstruct edt_id aggregate = {};\n\tstruct edt_info *info;\n\t__u32 ret = CTX_ACT_OK;\n\n\taggregate.id = ep_id;"
+      },
+      {
+        "line": 60,
+        "context": "{\n\treturn CTX_ACT_OK;\n}\n#endif /* ENABLE_BANDWIDTH_MANAGER */"
+      }
+    ],
+    "vendor/linux-framework/net/core/filter.c": [
+      {
+        "line": 8854,
+        "context": "\tcase bpf_ctx_range(struct __sk_buff, data_end):\n\tcase bpf_ctx_range_till(struct __sk_buff, family, local_port):\n\tcase bpf_ctx_range(struct __sk_buff, tstamp):\n\tcase bpf_ctx_range(struct __sk_buff, wire_len):\n\tcase bpf_ctx_range(struct __sk_buff, hwtstamp):\n\t\treturn false;\n\t}\n\n\tif (type == BPF_WRITE) {\n\t\tswitch (off) {\n\t\tcase bpf_ctx_range_till(struct __sk_buff, cb[0], cb[4]):\n\t\t\tbreak;"
+      },
+      {
+        "line": 8879,
+        "context": "\tswitch (off) {\n\tcase bpf_ctx_range(struct __sk_buff, tc_classid):\n\tcase bpf_ctx_range(struct __sk_buff, data_meta):\n\tcase bpf_ctx_range(struct __sk_buff, wire_len):\n\t\treturn false;\n\tcase bpf_ctx_range(struct __sk_buff, data):\n\tcase bpf_ctx_range(struct __sk_buff, data_end):\n\t\tif (!bpf_token_capable(prog->aux->token, CAP_BPF))\n\t\t\treturn false;\n\t\tbreak;\n\t}\n"
+      },
+      {
+        "line": 8925,
+        "context": "\tcase bpf_ctx_range_till(struct __sk_buff, family, local_port):\n\tcase bpf_ctx_range(struct __sk_buff, data_meta):\n\tcase bpf_ctx_range(struct __sk_buff, tstamp):\n\tcase bpf_ctx_range(struct __sk_buff, wire_len):\n\tcase bpf_ctx_range(struct __sk_buff, hwtstamp):\n\t\treturn false;\n\t}\n\n\tif (type == BPF_WRITE) {\n\t\tswitch (off) {\n\t\tcase bpf_ctx_range(struct __sk_buff, mark):\n\t\tcase bpf_ctx_range(struct __sk_buff, priority):"
+      },
+      {
+        "line": 9497,
+        "context": "\tcase bpf_ctx_range(struct __sk_buff, tc_classid):\n\tcase bpf_ctx_range(struct __sk_buff, data_meta):\n\tcase bpf_ctx_range(struct __sk_buff, tstamp):\n\tcase bpf_ctx_range(struct __sk_buff, wire_len):\n\tcase bpf_ctx_range(struct __sk_buff, hwtstamp):\n\t\treturn false;\n\t}\n\n\tif (type == BPF_WRITE) {\n\t\tswitch (off) {\n\t\tcase bpf_ctx_range(struct __sk_buff, tc_index):\n\t\tcase bpf_ctx_range(struct __sk_buff, priority):"
+      },
+      {
+        "line": 10087,
+        "context": "\t\t\t\t\t\t     gso_size, 2,\n\t\t\t\t\t\t     target_size));\n\t\tbreak;\n\tcase offsetof(struct __sk_buff, wire_len):\n\t\tBUILD_BUG_ON(sizeof_field(struct qdisc_skb_cb, pkt_len) != 4);\n\n\t\toff = si->off;\n\t\toff -= offsetof(struct __sk_buff, wire_len);\n\t\toff += offsetof(struct sk_buff, cb);\n\t\toff += offsetof(struct qdisc_skb_cb, pkt_len);\n\t\t*target_size = 4;\n\t\t*insn++ = BPF_LDX_MEM(BPF_W, si->dst_reg, si->src_reg, off);"
+      },
+      {
+        "line": 10091,
+        "context": "\t\tBUILD_BUG_ON(sizeof_field(struct qdisc_skb_cb, pkt_len) != 4);\n\n\t\toff = si->off;\n\t\toff -= offsetof(struct __sk_buff, wire_len);\n\t\toff += offsetof(struct sk_buff, cb);\n\t\toff += offsetof(struct qdisc_skb_cb, pkt_len);\n\t\t*target_size = 4;\n\t\t*insn++ = BPF_LDX_MEM(BPF_W, si->dst_reg, si->src_reg, off);\n\t\tbreak;\n\n\tcase offsetof(struct __sk_buff, sk):\n\t\t*insn++ = BPF_LDX_MEM(BPF_FIELD_SIZEOF(struct sk_buff, sk),"
+      }
+    ]
+  },
+  "objects_inventory": "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/objects.json",
+  "scope": "Read-only analysis of12 actual Cilium source objects across bothISAs. Replays actual cc1 preprocessing, analyzes retained IR under defaultO3, records all direct scratch pointer uses and unrecognized uses, joins saved map-shape candidates. No production recompile/replacement P/image/root/timing/app change.",
+  "prior_observation": "Native scratch declaration48 vs captured kernel map shape28 does not itself prove OOB. Current x86 saved plan candidates IDs47/134 have value28; exact program-map ID binding remains separate. Runtime perCPU elem_size8 is pointer stride, not value_size.",
+  "resources": "MetadataCPU19; serial compiler/preprocessor/IR-analysisCPU16, AS48GiB. No parallel compiles.",
+  "completion": "Collect SAME detached job next turn. No safety/equivalence verdict if unknown pointer uses, changed inputs, failed commands or missing source selection."
+}
