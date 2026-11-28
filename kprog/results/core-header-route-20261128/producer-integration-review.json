@@ -1,0 +1,107 @@
+{
+  "make_original_recipe_argv_preserved": true,
+  "all_eight_compiler_entries_replaced": true,
+  "cases": [
+    {
+      "arch": "x86",
+      "command": [
+        "python3",
+        "/workspaces/repository/vendor/bpf/core-answers.py",
+        "--btf",
+        "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "--bpftool",
+        "/workspaces/repository/vendor/build/x86/bpftool/bin/bpftool",
+        "--compile",
+        "-DMICRO_NATIVE",
+        "-I/workspaces/repository/vendor/bpf",
+        "-O3",
+        "-S",
+        "-emit-llvm",
+        "-o",
+        "/workspaces/repository/kprog/results/core-header-route-20261128/producer-entry-smoke/x86.ll",
+        "/workspaces/repository/kprog/results/core-header-route-20261128/input/queries.c"
+      ],
+      "returncode": 0,
+      "unresolved_calls": false,
+      "queue_disk_address_96": true
+    },
+    {
+      "arch": "arm64",
+      "command": [
+        "python3",
+        "/workspaces/repository/vendor/bpf/core-answers.py",
+        "--btf",
+        "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+        "--bpftool",
+        "/workspaces/repository/vendor/build/x86/bpftool/bin/bpftool",
+        "--compile",
+        "-DMICRO_NATIVE",
+        "-I/workspaces/repository/vendor/bpf",
+        "-O3",
+        "-S",
+        "-emit-llvm",
+        "--target=aarch64-linux-gnu",
+        "-o",
+        "/workspaces/repository/kprog/results/core-header-route-20261128/producer-entry-smoke/arm64.ll",
+        "/workspaces/repository/kprog/results/core-header-route-20261128/input/queries.c"
+      ],
+      "returncode": 0,
+      "unresolved_calls": false,
+      "queue_disk_address_96": true
+    }
+  ],
+  "make_dry_runs": [
+    {
+      "arch": "x86",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "--dry-run",
+        "--keep-going",
+        "-C",
+        "/workspaces/repository/vendor/bpf",
+        "ARCH=x86",
+        "KERNEL_RELEASE=7.0.0-rc2+",
+        "VMLINUX_BTF=/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "native-artifacts"
+      ],
+      "returncode": 0,
+      "common_compile_prefix_present": true
+    },
+    {
+      "arch": "arm64",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "--dry-run",
+        "--keep-going",
+        "-C",
+        "/workspaces/repository/vendor/bpf",
+        "ARCH=arm64",
+        "KERNEL_RELEASE=7.0.0-rc2+",
+        "VMLINUX_BTF=/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+        "native-artifacts"
+      ],
+      "returncode": 0,
+      "common_compile_prefix_present": true
+    }
+  ],
+  "inputs": [
+    {
+      "path": "vendor/bpf/Makefile",
+      "sha256": "0f630a987737d0df8f8392632d431b1dbcc83ae0a5c3ef096c2069979ea7431c"
+    },
+    {
+      "path": "vendor/bpf/core-answers.py",
+      "sha256": "9f3f6fb5b8d4a5c85c76695ad84bd114c197927b563598e6009086fb1046df30"
+    },
+    {
+      "path": "vendor/bpf/core-compat.h",
+      "sha256": "72ea7f82497033602ae2129efae038f1f65298c443b1622aec16a03c3b29e75c"
+    },
+    {
+      "path": "kprog/results/core-header-route-20261128/input/queries.c",
+      "sha256": "c5f337bb61f37e9c7371b766b3ad05c452721137cb6c66aa2f2c711b122499fd"
+    }
+  ]
+}

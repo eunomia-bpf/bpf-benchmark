@@ -25,6 +25,10 @@ BPFTOOL ?= $(VENDOR)/build/x86/bpftool/bin/bpftool
 VMLINUX_BTF ?= /sys/kernel/btf/vmlinux
 NATIVE_LINK ?= $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link
 NATIVE_IR_LINK ?= /workspaces/.agent-state/kprog-ck/verified-compiler/link-embedded-ir
+# One native compiler entry for every app: target-BTF metadata header, original C.
+NATIVE_CC = python3 "$(CURDIR)/core-answers.py" --btf "$(VMLINUX_BTF)" --bpftool "$(BPFTOOL)" --clang "$(CLANG)" --compile
+NATIVE_CORE_INPUTS := core-answers.py core-compat.h native_compat.h $(VMLINUX_BTF)
+
 
 OUT := $(BUILD)/$(ARCH)/$(KERNEL_RELEASE)
 VMLINUX_H := targets/$(ARCH)/$(KERNEL_RELEASE)/vmlinux.h
@@ -199,16 +203,16 @@ tracee:
 			-o "$(OUT)/tracee/lsm_support/$${src}.bpf.o"; \
 	done
 
-$(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c katran-helpers.h native-helpers.h
+$(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c katran-helpers.h native-helpers.h $(NATIVE_CORE_INPUTS)
 	install -d "$(dir $@)"
-	"$(CLANG)" $(KATRAN_NATIVE_CFLAGS) -include "$(CURDIR)/katran-helpers.h" \
+	$(NATIVE_CC) $(KATRAN_NATIVE_CFLAGS) -include "$(CURDIR)/katran-helpers.h" \
 		-I"$(CURDIR)/katran" -I"$(CURDIR)/katran/katran/lib/linux_includes" \
 		$(SYS_INC) \
 		-o "$@" "$<"
 
-$(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/$(BPF_ARCH)/vmlinux.h native_compat.h native-helpers.h
+$(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/$(BPF_ARCH)/vmlinux.h native_compat.h native-helpers.h $(NATIVE_CORE_INPUTS)
 	install -d "$(dir $@)"
-	"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/native_compat.h" \
+	$(NATIVE_CC) $(NATIVE_CFLAGS) -include "$(CURDIR)/native_compat.h" \
 		-I"$(CURDIR)/bcc/libbpf-tools" -I"$(CURDIR)/bcc/libbpf-tools/$(BPF_ARCH)" \
 		-I"$(CURDIR)/bcc/src/cc/libbpf/include/uapi" \
 		$(SYS_INC) \
@@ -222,9 +226,9 @@ $(NATIVE_OUT)/cilium/bpf_wireguard.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_M
 $(NATIVE_OUT)/cilium/bpf_xdp.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_AGENT_XDP_OPTIONS)
 $(NATIVE_OUT)/cilium/bpf_alignchecker.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_SIMPLE_OPTIONS)
 
-$(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c native_compat.h native-helpers.h
+$(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c native_compat.h native-helpers.h $(NATIVE_CORE_INPUTS)
 	install -d "$(dir $@)"
-	"$(CLANG)" $(CILIUM_NATIVE_OPTIONS) $(NATIVE_CFLAGS) \
+	$(NATIVE_CC) $(CILIUM_NATIVE_OPTIONS) $(NATIVE_CFLAGS) \
 		-include "$(CURDIR)/native_compat.h" \
 		-I"$(CURDIR)/cilium/bpf" -I"$(CURDIR)/cilium/bpf/include" \
 		-I"$(CURDIR)/cilium/bpf/include/bpf" \
@@ -233,9 +237,9 @@ $(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c native_compat.h native-helpers.h
 		$(SYS_INC) \
 		-o "$@" "$<"
 
-$(NATIVE_OUT)/cilium/cilium_placeholders.native.o: cilium_placeholders.c native_compat.h native-helpers.h
+$(NATIVE_OUT)/cilium/cilium_placeholders.native.o: cilium_placeholders.c native_compat.h native-helpers.h $(NATIVE_CORE_INPUTS)
 	install -d "$(dir $@)"
-	"$(CLANG)" $(NATIVE_CFLAGS) \
+	$(NATIVE_CC) $(NATIVE_CFLAGS) \
 		-include "$(CURDIR)/native_compat.h" \
 		$(SYS_INC) \
 		-o "$@" "$<"
@@ -243,9 +247,9 @@ $(NATIVE_OUT)/cilium/cilium_placeholders.native.o: cilium_placeholders.c native_
 $(OTEL_EBPF_DIR)/errors.h: otel/tools/errors-codegen/errors.json otel/tools/errors-codegen/main.go
 	$(MAKE) -C "$(CURDIR)/$(OTEL_EBPF_DIR)" errors.h
 
-$(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors.h $(OTEL_EBPF_DIR)/bpfdefs.h native-helpers.h
+$(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors.h $(OTEL_EBPF_DIR)/bpfdefs.h native-helpers.h $(NATIVE_CORE_INPUTS)
 	install -d "$(dir $@)"
-	"$(CLANG)" $(NATIVE_CFLAGS) \
+	$(NATIVE_CC) $(NATIVE_CFLAGS) \
 		-Wno-unused-function -Wno-unused-variable \
 		-I"$(CURDIR)/$(OTEL_EBPF_DIR)" \
 		-o "$@" "$<"
@@ -266,18 +270,18 @@ $(OTEL_NATIVE_OBJECT): $(OTEL_NATIVE_UNIT_OBJS) $(NATIVE_IR_LINK)
 	"$(LLVM_OBJCOPY)" --remove-section .llvmbc --remove-section .llvmcmd "$@"
 	"$(LLVM_OBJCOPY)" --add-section .llvmbc="$(OTEL_NATIVE_IR)" "$@"
 
-$(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h native-helpers.h
+$(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h native-helpers.h $(NATIVE_CORE_INPUTS)
 	install -d "$(dir $@)"
-	"$(CLANG)" $(NATIVE_CFLAGS) \
+	$(NATIVE_CC) $(NATIVE_CFLAGS) \
 		-include "$(CURDIR)/native_compat.h" \
 		-D__TARGET_ARCH_$(BPF_ARCH) -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
 		-I"$(CURDIR)/tracee/pkg/ebpf/c" \
 		$(SYS_INC) \
 		-o "$@" "$<"
 
-$(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h native-helpers.h
+$(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h native-helpers.h $(NATIVE_CORE_INPUTS)
 	install -d "$(dir $@)"
-	"$(CLANG)" $(NATIVE_CFLAGS) \
+	$(NATIVE_CC) $(NATIVE_CFLAGS) \
 		-include "$(CURDIR)/native_compat.h" \
 		-D__TARGET_ARCH_$(BPF_ARCH) -D__BPF_TRACING__ \
 		-I"$(CURDIR)/tracee/pkg/ebpf/c/lsmsupport" \
@@ -371,7 +375,7 @@ native-tracee: $(TRACEE_NATIVE_OBJS)
 		--object "$(TRACEE_NATIVE_STAGE_OUT)/tracee.native.o" \
 		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(TRACEE_NATIVE_STAGE_OUT)/$(src).native.o")
 
-native-tetragon: tetragon/bpf/include/vmlinux_generated_$(BPF_ARCH).h native_compat.h $(NATIVE_LINK)
+native-tetragon: tetragon/bpf/include/vmlinux_generated_$(BPF_ARCH).h native_compat.h $(NATIVE_LINK) $(NATIVE_CORE_INPUTS)
 	install -d "$(NATIVE_OUT)/tetragon"
 	install -d "$(TETRAGON_NATIVE_STAGE_OUT)"
 	rm -f "$(NATIVE_OUT)/tetragon"/*.native.o
@@ -392,7 +396,7 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_$(BPF_ARCH).h native_com
 		local name="$$1"; \
 		local src="$$2"; \
 		local extra="$${3:-}"; \
-		"$(CLANG)" "$${common_flags[@]}" $${extra} -o "$${native_out}/$${name}.native.o" "$${src}"; \
+		$(NATIVE_CC) "$${common_flags[@]}" $${extra} -o "$${native_out}/$${name}.native.o" "$${src}"; \
 	}; \
 	for name in bpf_loader bpf_cgroup bpf_prog_iter \
 		bpf_execve_event bpf_fork bpf_exit bpf_execve_bprm_commit_creds \

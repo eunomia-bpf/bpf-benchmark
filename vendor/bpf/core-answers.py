@@ -27,6 +27,7 @@ import argparse
 import json
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -342,8 +343,8 @@ def scan(sources: list[Path], clang: str, flags: list[str],
     per_tu: list[tuple[Path, set[tuple[str, str]]]] = []
     types: dict[tuple[str, str, str], list[tuple]] = {}
     for src in sorted(p for p in sources if p.suffix == ".c"):
-        out = subprocess.run([clang, "-Xclang", "-ast-dump=json", "-fsyntax-only", "-w",
-                              "-include", str(header)] + flags + [str(src)],
+        out = subprocess.run([clang, "-Xclang", "-ast-dump=json", "-fsyntax-only", "-w"
+                              ] + flags + ["-include", str(header), str(src)],
                              capture_output=True, text=True)
         # An incomplete AST can silently omit queries after a parse error.
         if out.returncode:
@@ -377,8 +378,8 @@ def scan(sources: list[Path], clang: str, flags: list[str],
                             if kind == "access_delta":
                                 if layout is None:
                                     dumped = subprocess.run([clang, "-Xclang", "-fdump-record-layouts-complete",
-                                        "-Xclang", "-fdump-record-layouts-simple", "-fsyntax-only", "-w",
-                                        "-include", str(header)] + flags + [str(src)],
+                                        "-Xclang", "-fdump-record-layouts-simple", "-fsyntax-only", "-w"
+                                        ] + flags + ["-include", str(header), str(src)],
                                         capture_output=True, text=True)
                                     if dumped.returncode:
                                         sys.exit(f"core-answers: source layout failed: {dumped.stderr}")
@@ -391,7 +392,7 @@ def scan(sources: list[Path], clang: str, flags: list[str],
             stack.extend(node.get("inner") or [])
         if tu:
             (work / f"{Path(src).stem}.i").write_text(
-                subprocess.run([clang, "-E", "-w", "-include", str(header)] + flags + [str(src)],
+                subprocess.run([clang, "-E", "-w"] + flags + ["-include", str(header), str(src)],
                                capture_output=True, text=True).stdout)
             per_tu.append((src, tu))
             found |= tu
@@ -595,15 +596,34 @@ def main() -> None:
                     default=Path("vendor/build/x86/bpftool/bin/bpftool"))
     ap.add_argument("--clang", default="clang-18")
     ap.add_argument("--cflags", default="", help="the app's compile flags, incl. -D and -I")
-    ap.add_argument("--out", required=True, type=Path, help="table to write")
+    ap.add_argument("--out", type=Path, help="table to write")
     ap.add_argument("--report", type=Path, help="JSON of every query and its answer")
-    ap.add_argument("dirs", nargs="+", type=Path, help="source files or trees to scan")
+    ap.add_argument("--compile", nargs=argparse.REMAINDER, help="original native Clang arguments; generate metadata then compile the unchanged C")
+    ap.add_argument("dirs", nargs="*", type=Path, help="source files or trees to scan")
     args = ap.parse_args()
+    compile_argv = args.compile
+    if compile_argv is not None:
+        # All producers use the same rule and retain their exact compiler argv.
+        source_args = [a for a in compile_argv if a.endswith(".c")]
+        if len(source_args) != 1 or "-o" not in compile_argv:
+            ap.error("--compile needs one C translation unit and its -o output")
+        output_index = compile_argv.index("-o")
+        output = Path(compile_argv[output_index + 1]).resolve()
+        flags = [a for i, a in enumerate(compile_argv)
+                 if i not in (output_index, output_index + 1) and a != source_args[0]]
+        args.dirs = [Path(source_args[0]).resolve()]
+        args.cflags = shlex.join(flags)
+        args.out = Path(str(output) + ".core.h")
+        args.report = Path(str(output) + ".core.json")
+    if args.out is None or not args.dirs:
+        ap.error("supply --out and sources, or --compile with the original Clang arguments")
+    args.out.parent.mkdir(parents=True, exist_ok=True)
 
     sources: list[Path] = []
     for d in args.dirs:
         sources += [d] if d.is_file() else sorted(p for p in d.rglob("*") if p.suffix in (".c", ".h"))
-    work = Path(tempfile.mkdtemp(prefix="core-answers-"))
+    work = Path(tempfile.mkdtemp(prefix="core-answers-",
+        dir=args.out.parent if compile_argv is not None else None))
     queries, per_tu, types = scan(sources, args.clang, shlex.split(args.cflags), work)
 
     # An app that makes no CO-RE query still gets a table: every lookup macro
@@ -661,7 +681,17 @@ def main() -> None:
     args.out.write_text("\n".join(out) + "\n")
     if args.report:
         args.report.write_text(json.dumps(report, indent=2) + "\n")
-    print(f"core-answers: {len(report)} queries, all answered -> {args.out}")
+    print(f"core-answers: {len(report)} queries, all answered -> {args.out}", flush=True)
+    if compile_argv is not None:
+        # Forced compatibility overlays follow the producer's existing headers.
+        # Only metadata is generated: Clang consumes the original source path.
+        code = subprocess.run([args.clang, *compile_argv, "-include",
+            str(Path(__file__).resolve().with_name("core-compat.h")),
+            "-D__KPROG_CORE_ANSWERS=" + json.dumps(str(args.out))],
+            stdin=subprocess.DEVNULL).returncode
+        if code == 0:
+            shutil.rmtree(work)  # Rebuildable compiler scratch, never run evidence.
+        raise SystemExit(code)
 
 
 if __name__ == "__main__":

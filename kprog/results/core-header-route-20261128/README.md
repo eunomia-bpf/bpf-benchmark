@@ -55,3 +55,15 @@ After publication, all47 archive members and original size/SHA values were verif
 SAME1581613 completed17:51:38Z: all4 actual BCC/Tetragon cases generate tables and nativeIR successfully, with ZERO unresolved CO-RE calls (was4 per case). Query counts remain17/148 on both architectures. All input/tool/header/target/table/IR hashes reverified; real-source-canonical-review.json retains actual query rows.
 
 The same-C original-BPF/libbpf fixture matches all10 functions on BOTH actual kernelBTFs, including queue_disk_address96 and the existing thread/loginuid/ancestor/enum cases. Dynamic ancestor indices0/1/7/31 execute correctly in LLVM IR interpretation for each target; this is not ARM machine execution. These are affected-source and focused semantics checks, not all-app coverage. Complete raw outputs are archived in real-source-canonical-records.tar.zst with every-member/original SHA verification; producer integration follows.
+
+## Common producer integration
+
+The current Makefile's eight native C compiler recipe entries all invoke the SAME core-answers.py --compile entry. It generates a target-BTF metadata header/table, then invokes Clang with the original argv plus that header; the original C path is unchanged. No C rewrite, app/program choice or optimization flag change. A reversible text comparison proves every existing flag, source list and recipe body is otherwise byte-identical to the prior Makefile. Clang -r for linking OTel objects remains a link.
+
+Compatibility overlay includes follow the producer's existing force-included headers in BOTH scan and compile, preserving app header setup. The generated per-unit .core.h/.core.json records are canonical build metadata; successful rebuildable scanning scratch is removed, failed scratch retained. Make tracks metadata-generator/compatibility/BTF dependencies. Existing helpers/context base is retained.
+
+The new compiler entry passes both-architecture focused native-IR smoke checks, with no unresolved calls and queue_disk_address96. Both full Make graphs dry-run successfully. producer-integration-review.json and producer-entry-records.tar.zst/manifest retain actual commands, IR, metadata and logs. This does not establish all-app producer or image acceptance.
+
+regenerate_producers.py is the next finite job: canonical native-artifacts for ALL six apps, x86 then arm64, current flags/target lists, CPU16/18,48GiBAS,make -k -j2,imageEX/build-cEX. It inventories the existing P/stage and new objects/tables, compares executable sections when a unit has zero queries, seals kernel/benchmark/header inputs and keeps OTel2689a430. One P/stage per architecture is replaced in place; no runtime image or timing job is part of it. Review actual compiler statuses/records next turn before any image refresh. Unreachable historical fallbacks in native_compat remain to remove after all-producer validation.
+
+After ef7e081d6 publication, all78 canonical-check archive members and originals were reverified, then only those exact duplicate raw files removed (real-source-canonical-cleanup.json). Use the committed archive for old controller/IR/oracle paths.
