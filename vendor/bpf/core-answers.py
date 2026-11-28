@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -599,7 +600,7 @@ def main() -> None:
     for d in args.dirs:
         sources += [d] if d.is_file() else sorted(p for p in d.rglob("*") if p.suffix in (".c", ".h"))
     work = Path(tempfile.mkdtemp(prefix="core-answers-"))
-    queries, per_tu, types = scan(sources, args.clang, args.cflags.split(), work)
+    queries, per_tu, types = scan(sources, args.clang, shlex.split(args.cflags), work)
 
     # An app that makes no CO-RE query still gets a table: every lookup macro
     # exists, so a query it starts to make fails the compile instead of
