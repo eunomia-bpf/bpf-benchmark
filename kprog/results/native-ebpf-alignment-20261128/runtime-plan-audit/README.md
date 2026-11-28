@@ -1,0 +1,7 @@
+# Captured runtime plan alignment audit
+
+This finite read-only analysis consumes the already-published current-image x86 six-app checks and the existing ARM OTel functional run. It streams the original archives and verifies archive parts plus every selected member against its published manifest. Native link-plan cache keys are joined to their actual proof-object entry symbols, ABI records and map patch metadata. Kernel program-name candidates and map shapes come from the captured snapshots; their identity scope remains explicit when IDs or full source-object identities are absent. The staged two-ISA inventory supplies full manifest/object candidates.
+
+The report retains actual constant name/hex values, lookup forms, observed map shapes and coverage per architecture/application. A plan record is a linker cache artifact; repeated installs can share artifacts and the archived observer can capture a subset. Raw install counts and useful-work evidence remain in the existing reports. Full baseline/native configuration equality, installed-code equivalence and useful ARM profiling require their dedicated live evidence.
+
+The source audit records the actual ordinary-loader cache key, which already hashes configured constant names/values and update sites on both architectures. The distinct verified-path structure that first prompted that question is recorded separately. This step applies read-only archive/source analysis while the existing x86 rotate owns imageSH; it preserves current source products, images, kernel, framework and ARM activation preparation.

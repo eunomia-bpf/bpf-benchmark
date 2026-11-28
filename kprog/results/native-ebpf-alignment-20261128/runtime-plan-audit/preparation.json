@@ -1,0 +1,11 @@
+{
+  "utc": "2026-11-28T06:45:54Z",
+  "script_sha256": "6aaf188c380e528dc40634a7bc10baa9206f3e6b76ce311226af0841d87664a4",
+  "scope": "Finite read-only analysis of archived runtime plans and snapshots on CPU19, outside timing/image locks. Current staged two-ISA inventory gives candidates; actual source-object/program-to-map IDs and equality claims remain separate.",
+  "inputs": [
+    "kprog/results/native-ebpf-alignment-20261128/check-20261128T034810Z/collection-controller.json",
+    "kprog/results/x86-otel-perf-20261127/profile-20261128T033629Z/collection-controller.json",
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/otel-work-check/raw-file-manifest.json",
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/programs.json"
+  ]
+}
