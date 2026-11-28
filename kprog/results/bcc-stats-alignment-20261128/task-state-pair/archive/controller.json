@@ -1,0 +1,234 @@
+{
+  "pid": 1466625,
+  "started_utc": "2026-11-28T12:58:07Z",
+  "controller_status": 0,
+  "phase": "complete",
+  "scope": "Closed1465233 taskstate captures plus originalcorpus files only. Preserve complete bytes, even incomplete sampledELFs; archival success is not profile/code/PMU validity. Analysis outputs are published separately after review. No source/native capture deletion.",
+  "preserved_prior_staging": [
+    "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0/prior-staging",
+    "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1/prior-staging"
+  ],
+  "files": {
+    "observations/stats0/bcc-task-states.jsonl": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0/bcc-task-states.jsonl",
+      "bytes": 17888288,
+      "sha256": "25e19fc67c71a76710f436eff248be12db2806968e98c99acd29df88013d5cae"
+    },
+    "observations/stats0/clock.txt": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0/clock.txt",
+      "bytes": 26,
+      "sha256": "ad2499485a8340f46c7fa2b28306aaa9cf6f76a535ca07dfafa98702ab70fe02"
+    },
+    "observations/stats0/controller.log": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0/controller.log",
+      "bytes": 2551,
+      "sha256": "cd2dee0e6449afccb1687fdfac3c9d185acd38ec91409121b3fb126b5b132f57"
+    },
+    "observations/stats0/dmesg-after.txt": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0/dmesg-after.txt",
+      "bytes": 36655,
+      "sha256": "23d9fe61e03a6858657fd156501f7206278978f7b046d5abb4f9439a3edc1f50"
+    },
+    "observations/stats0/dmesg-before.txt": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0/dmesg-before.txt",
+      "bytes": 34741,
+      "sha256": "844591ae938adb976ed56327695ed6d5d7c3184336a1259891b9537192607b44"
+    },
+    "observations/stats0/guest-exit.txt": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0/guest-exit.txt",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "observations/stats0/guest.log": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0/guest.log",
+      "bytes": 3850,
+      "sha256": "1edf599ca488c2745f2cf4ccc6144a8571fff73656a1154e3c8f06da8a012835"
+    },
+    "observations/stats0/guest.sh": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0/guest.sh",
+      "bytes": 658,
+      "sha256": "d626fcc7b55dd12176c228b5befd7ba61f9ad30b1dea0b2b585e179c0c23b432"
+    },
+    "observations/stats0/host-rt-minus-uptime.txt": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0/host-rt-minus-uptime.txt",
+      "bytes": 19,
+      "sha256": "afbb6c1a5bf6c0a5341f83fe140c4efe8721fbc69fc29203606c20903e14fcd2"
+    },
+    "observations/stats0/kallsyms.txt": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0/kallsyms.txt",
+      "bytes": 9270454,
+      "sha256": "ce636b022bd9c3043120fa21a5be1f264257b7e742c27ede9212d143653fb61b"
+    },
+    "observations/stats0/observe.sh": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0/observe.sh",
+      "bytes": 2631,
+      "sha256": "2a3abc5d6c4afc4bcb95a7a067a3a537a846ae9b2ffdcee1fb4b6437c8edb2e2"
+    },
+    "observations/stats0/profile-image.txt": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0/profile-image.txt",
+      "bytes": 72,
+      "sha256": "9f1816b1d9cf1430b0ab530afe8645aeb75d9df3538310bf10c4b6afe076b0f6"
+    },
+    "observations/stats0/profile-source.txt": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0/profile-source.txt",
+      "bytes": 41,
+      "sha256": "66d66d1e4d5af4d172139cb23f31caf7d5f8690baca6aa12feb16c8b98caa054"
+    },
+    "observations/stats0/run_dir": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0/run_dir",
+      "bytes": 76,
+      "sha256": "ce49b3bcff61f27f785e8ad77a1073bed58d2f1c70d7d915a7cd3ba9b7b17f5a"
+    },
+    "observations/stats1/bcc-task-states.jsonl": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1/bcc-task-states.jsonl",
+      "bytes": 17519580,
+      "sha256": "eb8bd3ec7a2d6a07fa8aded301718b550065eb30274553c67d8046cad60994d9"
+    },
+    "observations/stats1/clock.txt": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1/clock.txt",
+      "bytes": 26,
+      "sha256": "f587a9e3ec83692e5ea0c0a9a6687c1215c19467223c3474455614d3a61714dc"
+    },
+    "observations/stats1/controller.log": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1/controller.log",
+      "bytes": 2551,
+      "sha256": "cd2dee0e6449afccb1687fdfac3c9d185acd38ec91409121b3fb126b5b132f57"
+    },
+    "observations/stats1/dmesg-after.txt": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1/dmesg-after.txt",
+      "bytes": 36655,
+      "sha256": "42da5c8b441f577b229487c0b0cd8f08f15bd6cb9abce78280769c3ff280d14e"
+    },
+    "observations/stats1/dmesg-before.txt": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1/dmesg-before.txt",
+      "bytes": 34741,
+      "sha256": "1dfd2cc9e7d33d179391dc35f8c6d3f9cd2a24fb6e87df9f5594010789db9b7d"
+    },
+    "observations/stats1/guest-exit.txt": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1/guest-exit.txt",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "observations/stats1/guest.log": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1/guest.log",
+      "bytes": 3850,
+      "sha256": "7b36950f6110d0b60bfe8e41cf032e357348d8a6f9fa9037b228521775d49442"
+    },
+    "observations/stats1/guest.sh": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1/guest.sh",
+      "bytes": 658,
+      "sha256": "5a481e8aebc497a543c61fb7fa9844b3be576ec5d0a000bed0f5028fafc7a0e9"
+    },
+    "observations/stats1/host-rt-minus-uptime.txt": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1/host-rt-minus-uptime.txt",
+      "bytes": 18,
+      "sha256": "36efb2cece149c4cfae16a4b8514bd872a1b9f9d8b2c57e8435007f8b8201c5e"
+    },
+    "observations/stats1/kallsyms.txt": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1/kallsyms.txt",
+      "bytes": 9270454,
+      "sha256": "4eb2e65a9c3ad81d66940620f4494f51bf05454f5f32ca59c9142ec112555afe"
+    },
+    "observations/stats1/observe.sh": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1/observe.sh",
+      "bytes": 2631,
+      "sha256": "97c965d3f34a760f0027b1f17590ea1d37ce8a72ba9cf02ebf34ace9775d95a1"
+    },
+    "observations/stats1/profile-image.txt": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1/profile-image.txt",
+      "bytes": 72,
+      "sha256": "9f1816b1d9cf1430b0ab530afe8645aeb75d9df3538310bf10c4b6afe076b0f6"
+    },
+    "observations/stats1/profile-source.txt": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1/profile-source.txt",
+      "bytes": 41,
+      "sha256": "66d66d1e4d5af4d172139cb23f31caf7d5f8690baca6aa12feb16c8b98caa054"
+    },
+    "observations/stats1/run_dir": {
+      "original_path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1/run_dir",
+      "bytes": 76,
+      "sha256": "b21207e0600fcf60ab9a73c2877c5ae85e908f5178403b10ee5ce30825252887"
+    },
+    "corpus/results/x86_kvm_corpus_20261128_125148_240215/details/apps/bcc__set.json": {
+      "original_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125148_240215/details/apps/bcc__set.json",
+      "bytes": 17733,
+      "sha256": "e4d4c35eaf5f1a666ca7cd88eb9b6ef606bd67b0ae84dcc4c8c7930246f4797e"
+    },
+    "corpus/results/x86_kvm_corpus_20261128_125148_240215/details/progress.json": {
+      "original_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125148_240215/details/progress.json",
+      "bytes": 103,
+      "sha256": "6dd633e19126f83d9c444c279aab76b80e25887ad0e9cb6566ce920388448ba8"
+    },
+    "corpus/results/x86_kvm_corpus_20261128_125148_240215/details/result.json": {
+      "original_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125148_240215/details/result.json",
+      "bytes": 1759,
+      "sha256": "1f3e4027847cf665c4a6546758aa413cfcff5c5d0435445a95b2be2fa9a1fc79"
+    },
+    "corpus/results/x86_kvm_corpus_20261128_125148_240215/details/shim-logs/bcc__set.baseline.log": {
+      "original_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125148_240215/details/shim-logs/bcc__set.baseline.log",
+      "bytes": 62987,
+      "sha256": "7caa030fd09ce9da7136216a605b8b2a908ed6571f68b436dafe2eeffd6830bc"
+    },
+    "corpus/results/x86_kvm_corpus_20261128_125148_240215/details/shim-logs/bcc__set.post_rejit.log": {
+      "original_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125148_240215/details/shim-logs/bcc__set.post_rejit.log",
+      "bytes": 83688,
+      "sha256": "103b5d05c446c3eed4970856182de34be9dc5c01135c9ce05ce11bb12d9b983a"
+    },
+    "corpus/results/x86_kvm_corpus_20261128_125148_240215/metadata.json": {
+      "original_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125148_240215/metadata.json",
+      "bytes": 986,
+      "sha256": "6500583929eb4048a715aa9ab588692451263457450ed4b1a5d96859e39b5f04"
+    },
+    "corpus/results/x86_kvm_corpus_20261128_125438_541119/details/apps/bcc__set.json": {
+      "original_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125438_541119/details/apps/bcc__set.json",
+      "bytes": 18081,
+      "sha256": "944ccbc378096e2472c7116b7b7ea07857d0869b0ae26a3b75fe32d1d63f146a"
+    },
+    "corpus/results/x86_kvm_corpus_20261128_125438_541119/details/progress.json": {
+      "original_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125438_541119/details/progress.json",
+      "bytes": 103,
+      "sha256": "36542210146a4f6f7425e02b9ede79a3b494df19cbc3b72afe9ec99cd2621283"
+    },
+    "corpus/results/x86_kvm_corpus_20261128_125438_541119/details/result.json": {
+      "original_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125438_541119/details/result.json",
+      "bytes": 1758,
+      "sha256": "eb8a7950fe6744f46c8973cd4bf2e75a8d093c5081ba052f5f208090d71fee06"
+    },
+    "corpus/results/x86_kvm_corpus_20261128_125438_541119/details/shim-logs/bcc__set.baseline.log": {
+      "original_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125438_541119/details/shim-logs/bcc__set.baseline.log",
+      "bytes": 62987,
+      "sha256": "746e70e2428aa891d54fdf9a79f7b6d53a4cdc26f709826fb631283d734f7474"
+    },
+    "corpus/results/x86_kvm_corpus_20261128_125438_541119/details/shim-logs/bcc__set.post_rejit.log": {
+      "original_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125438_541119/details/shim-logs/bcc__set.post_rejit.log",
+      "bytes": 83688,
+      "sha256": "a00fb22bd460ecdf312db03d3093949790fb7e928e2d27c5341d717e98d83a77"
+    },
+    "corpus/results/x86_kvm_corpus_20261128_125438_541119/metadata.json": {
+      "original_path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125438_541119/metadata.json",
+      "bytes": 985,
+      "sha256": "52540e3707cc373784d81d3fba1364560eb8a473bd588b603eb2bac2d1884062"
+    },
+    "controller-logs/task-state-job.log": {
+      "original_path": "/workspaces/repository/kprog/results/bcc-stats-alignment-20261128/task-state-job.log",
+      "bytes": 2746,
+      "sha256": "3574ad24bb905700a096f87a9aa0476a0db6499056b5e746699ef236c0da11cd"
+    }
+  },
+  "file_count": 41,
+  "logical_bytes": 54449023,
+  "parts": [
+    {
+      "path": "kprog/results/bcc-stats-alignment-20261128/task-state-pair/archive/evidence.tar.zst.part-aa",
+      "bytes": 4019893,
+      "sha256": "9703605e87ff0fb79d42586b392570021491b5abb9a2c40b9e2d858e90c161ee"
+    }
+  ],
+  "archive_returncodes": [
+    0,
+    0
+  ],
+  "verified_files": 41,
+  "all_originals_preserved": true,
+  "ended_utc": "2026-11-28T12:58:07Z"
+}
