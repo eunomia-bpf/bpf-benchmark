@@ -1,0 +1,108 @@
+{
+  "scope": "original RETURN10 unmaterialization on the same actual word-store heap",
+  "source_sha256": "9906747d49937db9b590173a5b1f63ef2817c4588ebe8743bb4404bbf7e21dcc",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-unmaterialize/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 65.50463843345642,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerMemoryWriterUnmaterialize"
+      ],
+      "exit": 0,
+      "seconds": 71.77207064628601,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 4.4713475704193115,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-unmaterialize/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.8752732276916504,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 305,
+  "full_jobs": 1572,
+  "root_queries": [
+    "source",
+    "guard_source",
+    "body_source",
+    "break_source",
+    "cache_values",
+    "execute",
+    "temp_frame",
+    "values",
+    "incoming_value",
+    "incoming_tag",
+    "advance"
+  ],
+  "actual_memory_writer_mask_commit": "b1798bdc4d1053ab924a894d0001bc8c58e1e96e",
+  "source": "exact original post-word tag guard, RETURN/STACK branches, cold-provider branch and original volatile payload/tag continuations retained",
+  "cache": "real Word.Store cache_values frames actual numeric_return/default3 scalar and valid/default5 byte1 reads through the actual aligned stack store; actual bindings derive original Evar evaluations",
+  "execution": "35 actual internal steps choose RETURN10, read same valid1/base cache, skip cold provider branch, subtract base-base=0 and set payload0; word heap unchanged and seven assignments to six temporary names",
+  "composition": "actual129-step mask/word-write route plus35 original unmaterialization =164, using SAME Word.Store and actual scalar/tag10 derived through original temporary frames",
+  "boundary": "ends before original volatile payload-store loop; no EF_vstore/tag event, provider existence/purity or whole-entry width transport proved here; prior explicit ABI/SP=-32/table/tag/width8 inputs remain",
+  "open": "original volatile payload and tag writes with their actual semantics/traces, provider-outcome composition/whole-entry width invariant, linked whole-entry/provider/Senv transport/native whole-state",
+  "old_allocator_or_successful_store_oracle_used": false,
+  "provider_success_existence_or_purity_claimed": false,
+  "native_whole_state_proved_here": false,
+  "resource_assignment": "existing run.py timingSH/CPU17/j1/nice0/32GiB/unchanged proof settings/fullEX-nformal-full-check; nonblocking shared timing preflight before launch",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
