@@ -1,0 +1,9 @@
+# Selected packet feature findings
+
+SAME1393442/controller1393444 ended2026-11-28T08:52:27Z status0. All36 subprocesses succeeded for12 real Cilium source objects on bothISAs. All14 Cilium native objects and both stage manifests still match the retained inventory hashes;21 preparation source hashes and the saved runtime-plan hash also match. Coverage retains170program rows:166 audited-object rows and4 explicit placeholder rows.
+
+Current-header replay of the retained cc1 commands defines no ENABLE_BANDWIDTH_MANAGER in any of12 cases. The source wire_len divergence remains real, but its edt/token_bucket callers require that macro and skb context. This check does not establish the historical preprocessor state or the selected eBPF app feature set, and does not justify enabling a feature or changing a frozen header.
+
+Both actual XDP objects declare scratch value_size48 in debug type information. Their derived defaultO3 IR has14 direct scalar memory accesses each: tail_drop_notify5, tail_no_service_ipv4 6, cil_xdp_entry3. All28 recognized accesses fall in byte range[0,28), with no unrecognized direct lookup-result pointer use. Saved x86 cil_xdp_entry plans03399bfe53409db1/dd3669b2f37bea1c have scratch name/shape candidates IDs47/134, type6/key4/value28/entries1. Exact original-program map binding remains separate. The plan perCPU elem_size8 is pointer stride, not value payload.
+
+These two observations do not establish a new selected-use defect, so this step changes no production code. Bounds are direct IR-analysis evidence, not a final installed-code, transitive-path or full native/eBPF parity proof; ARM has no runtime-binding claim here. Existing preprocessor redefinition warnings are retained unchanged. Continue the remaining context/attach/JIT alignment list while existing image and OTel activation holds remain active.

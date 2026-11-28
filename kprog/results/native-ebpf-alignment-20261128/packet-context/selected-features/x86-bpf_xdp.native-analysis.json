@@ -1,0 +1,418 @@
+{
+  "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o",
+  "sha256": "7db6ead1b5ccc7d2715bd9230935c6ea866676db35e160185200c6210aabf496",
+  "architecture": "x86",
+  "source": "vendor/bpf/cilium/bpf/bpf_xdp.c",
+  "preprocess_returncode": 0,
+  "bandwidth_manager_defined": false,
+  "embedded_frontend_ir_sha256": "2b44c83d04f3b69e74a7a7585c1a504ce5efb91c99e0b1c9a6d79835536b1d89",
+  "analysis_optimized_ir_sha256": "adf5ecfbc82aa30f2f65e3abb7141c2297e84198c1f380d69b44edda9af81816",
+  "scratch_declaration": {
+    "value_size": 48,
+    "debug_type_trace": [
+      "!371 = !DIGlobalVariableExpression(var: !372, expr: !DIExpression())",
+      "!372 = distinct !DIGlobalVariable(name: \"cilium_xdp_scratch\", scope: !2, file: !373, line: 492, type: !374, isLocal: false, isDefinition: true)",
+      "!374 = distinct !DICompositeType(tag: DW_TAG_structure_type, file: !373, line: 486, size: 320, elements: !375)",
+      "!375 = !{!376, !381, !386, !391, !396}",
+      "!386 = !DIDerivedType(tag: DW_TAG_member, name: \"value_size\", scope: !374, file: !373, line: 489, baseType: !387, size: 64, offset: 128)",
+      "!387 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !388, size: 64)",
+      "!388 = !DICompositeType(tag: DW_TAG_array_type, baseType: !311, size: 1536, elements: !389)",
+      "!389 = !{!390}",
+      "!390 = !DISubrange(count: 48)"
+    ]
+  },
+  "scratch_direct_functions": [
+    {
+      "function": "tail_drop_notify",
+      "lookup_roots": [
+        "%13",
+        "%29",
+        "%94",
+        "%97",
+        "%101"
+      ],
+      "accesses": [
+        {
+          "line": 225,
+          "operation": "load",
+          "offsets": [
+            8
+          ],
+          "width": 4,
+          "ir": "  %16 = load i32, ptr %15, align 4, !dbg !1994, !tbaa !1915"
+        },
+        {
+          "line": 281,
+          "operation": "load",
+          "offsets": [
+            16
+          ],
+          "width": 4,
+          "ir": "  %32 = load i32, ptr %31, align 4, !dbg !2059, !tbaa !1915"
+        },
+        {
+          "line": 485,
+          "operation": "load",
+          "offsets": [
+            0
+          ],
+          "width": 4,
+          "ir": "  %96 = load i32, ptr %94, align 4, !dbg !2273, !tbaa !1915"
+        },
+        {
+          "line": 504,
+          "operation": "load",
+          "offsets": [
+            4
+          ],
+          "width": 4,
+          "ir": "  %100 = load i32, ptr %99, align 4, !dbg !2283, !tbaa !1915"
+        },
+        {
+          "line": 523,
+          "operation": "load",
+          "offsets": [
+            12
+          ],
+          "width": 4,
+          "ir": "  %104 = load i32, ptr %103, align 4, !dbg !2293, !tbaa !1915"
+        }
+      ],
+      "unresolved": [],
+      "uses": [
+        {
+          "line": 219,
+          "ir": "  call void @llvm.dbg.value(metadata ptr %13, metadata !1984, metadata !DIExpression()), !dbg !1985"
+        },
+        {
+          "line": 220,
+          "ir": "  %.not.i35 = icmp eq ptr %13, null, !dbg !1990"
+        },
+        {
+          "line": 224,
+          "ir": "  %15 = getelementptr inbounds i32, ptr %13, i64 2, !dbg !1994"
+        },
+        {
+          "line": 225,
+          "ir": "  %16 = load i32, ptr %15, align 4, !dbg !1994, !tbaa !1915"
+        },
+        {
+          "line": 275,
+          "ir": "  call void @llvm.dbg.value(metadata ptr %29, metadata !1984, metadata !DIExpression()), !dbg !2052"
+        },
+        {
+          "line": 276,
+          "ir": "  %.not.i32 = icmp eq ptr %29, null, !dbg !2057"
+        },
+        {
+          "line": 280,
+          "ir": "  %31 = getelementptr inbounds i32, ptr %29, i64 4, !dbg !2059"
+        },
+        {
+          "line": 281,
+          "ir": "  %32 = load i32, ptr %31, align 4, !dbg !2059, !tbaa !1915"
+        },
+        {
+          "line": 480,
+          "ir": "  call void @llvm.dbg.value(metadata ptr %94, metadata !1984, metadata !DIExpression()), !dbg !2266"
+        },
+        {
+          "line": 481,
+          "ir": "  %.not.i29 = icmp eq ptr %94, null, !dbg !2271"
+        },
+        {
+          "line": 485,
+          "ir": "  %96 = load i32, ptr %94, align 4, !dbg !2273, !tbaa !1915"
+        },
+        {
+          "line": 498,
+          "ir": "  call void @llvm.dbg.value(metadata ptr %97, metadata !1984, metadata !DIExpression()), !dbg !2276"
+        },
+        {
+          "line": 499,
+          "ir": "  %.not.i26 = icmp eq ptr %97, null, !dbg !2281"
+        },
+        {
+          "line": 503,
+          "ir": "  %99 = getelementptr inbounds i32, ptr %97, i64 1, !dbg !2283"
+        },
+        {
+          "line": 504,
+          "ir": "  %100 = load i32, ptr %99, align 4, !dbg !2283, !tbaa !1915"
+        },
+        {
+          "line": 517,
+          "ir": "  call void @llvm.dbg.value(metadata ptr %101, metadata !1984, metadata !DIExpression()), !dbg !2286"
+        },
+        {
+          "line": 518,
+          "ir": "  %.not.i = icmp eq ptr %101, null, !dbg !2291"
+        },
+        {
+          "line": 522,
+          "ir": "  %103 = getelementptr inbounds i32, ptr %101, i64 3, !dbg !2293"
+        },
+        {
+          "line": 523,
+          "ir": "  %104 = load i32, ptr %103, align 4, !dbg !2293, !tbaa !1915"
+        }
+      ],
+      "all_direct_uses_recognized": true,
+      "max_access_end": 20,
+      "min_access_offset": 0
+    },
+    {
+      "function": "tail_no_service_ipv4",
+      "lookup_roots": [
+        "%10",
+        "%546",
+        "%548",
+        "%551",
+        "%554",
+        "%557"
+      ],
+      "accesses": [
+        {
+          "line": 619,
+          "operation": "load",
+          "offsets": [
+            0
+          ],
+          "width": 4,
+          "ir": "  %12 = load i32, ptr %10, align 4, !dbg !2353, !tbaa !1915"
+        },
+        {
+          "line": 1728,
+          "operation": "store",
+          "offsets": [
+            0
+          ],
+          "width": 4,
+          "ir": "  store i32 %.0.i, ptr %546, align 4, !dbg !3000, !tbaa !1915"
+        },
+        {
+          "line": 1747,
+          "operation": "store",
+          "offsets": [
+            4
+          ],
+          "width": 4,
+          "ir": "  store i32 0, ptr %550, align 4, !dbg !3011, !tbaa !1915"
+        },
+        {
+          "line": 1766,
+          "operation": "store",
+          "offsets": [
+            8
+          ],
+          "width": 4,
+          "ir": "  store i32 134, ptr %553, align 4, !dbg !3021, !tbaa !1915"
+        },
+        {
+          "line": 1785,
+          "operation": "store",
+          "offsets": [
+            12
+          ],
+          "width": 4,
+          "ir": "  store i32 0, ptr %556, align 4, !dbg !3031, !tbaa !1915"
+        },
+        {
+          "line": 1804,
+          "operation": "store",
+          "offsets": [
+            16
+          ],
+          "width": 4,
+          "ir": "  store i32 151152897, ptr %559, align 4, !dbg !3041, !tbaa !1915"
+        }
+      ],
+      "unresolved": [],
+      "uses": [
+        {
+          "line": 614,
+          "ir": "  call void @llvm.dbg.value(metadata ptr %10, metadata !1984, metadata !DIExpression()), !dbg !2346"
+        },
+        {
+          "line": 615,
+          "ir": "  %.not.i = icmp eq ptr %10, null, !dbg !2351"
+        },
+        {
+          "line": 619,
+          "ir": "  %12 = load i32, ptr %10, align 4, !dbg !2353, !tbaa !1915"
+        },
+        {
+          "line": 1723,
+          "ir": "  call void @llvm.dbg.value(metadata ptr %546, metadata !2991, metadata !DIExpression()), !dbg !2992"
+        },
+        {
+          "line": 1724,
+          "ir": "  %.not.i33 = icmp eq ptr %546, null, !dbg !2997"
+        },
+        {
+          "line": 1728,
+          "ir": "  store i32 %.0.i, ptr %546, align 4, !dbg !3000, !tbaa !1915"
+        },
+        {
+          "line": 1741,
+          "ir": "  call void @llvm.dbg.value(metadata ptr %548, metadata !2991, metadata !DIExpression()), !dbg !3003"
+        },
+        {
+          "line": 1742,
+          "ir": "  %.not.i31 = icmp eq ptr %548, null, !dbg !3008"
+        },
+        {
+          "line": 1746,
+          "ir": "  %550 = getelementptr inbounds i32, ptr %548, i64 1, !dbg !3010"
+        },
+        {
+          "line": 1747,
+          "ir": "  store i32 0, ptr %550, align 4, !dbg !3011, !tbaa !1915"
+        },
+        {
+          "line": 1760,
+          "ir": "  call void @llvm.dbg.value(metadata ptr %551, metadata !2991, metadata !DIExpression()), !dbg !3013"
+        },
+        {
+          "line": 1761,
+          "ir": "  %.not.i29 = icmp eq ptr %551, null, !dbg !3018"
+        },
+        {
+          "line": 1765,
+          "ir": "  %553 = getelementptr inbounds i32, ptr %551, i64 2, !dbg !3020"
+        },
+        {
+          "line": 1766,
+          "ir": "  store i32 134, ptr %553, align 4, !dbg !3021, !tbaa !1915"
+        },
+        {
+          "line": 1779,
+          "ir": "  call void @llvm.dbg.value(metadata ptr %554, metadata !2991, metadata !DIExpression()), !dbg !3023"
+        },
+        {
+          "line": 1780,
+          "ir": "  %.not.i27 = icmp eq ptr %554, null, !dbg !3028"
+        },
+        {
+          "line": 1784,
+          "ir": "  %556 = getelementptr inbounds i32, ptr %554, i64 3, !dbg !3030"
+        },
+        {
+          "line": 1785,
+          "ir": "  store i32 0, ptr %556, align 4, !dbg !3031, !tbaa !1915"
+        },
+        {
+          "line": 1798,
+          "ir": "  call void @llvm.dbg.value(metadata ptr %557, metadata !2991, metadata !DIExpression()), !dbg !3033"
+        },
+        {
+          "line": 1799,
+          "ir": "  %.not.i26 = icmp eq ptr %557, null, !dbg !3038"
+        },
+        {
+          "line": 1803,
+          "ir": "  %559 = getelementptr inbounds i32, ptr %557, i64 4, !dbg !3040"
+        },
+        {
+          "line": 1804,
+          "ir": "  store i32 151152897, ptr %559, align 4, !dbg !3041, !tbaa !1915"
+        }
+      ],
+      "all_direct_uses_recognized": true,
+      "max_access_end": 20,
+      "min_access_offset": 0
+    },
+    {
+      "function": "cil_xdp_entry",
+      "lookup_roots": [
+        "%121",
+        "%124",
+        "%142"
+      ],
+      "accesses": [
+        {
+          "line": 2349,
+          "operation": "store",
+          "offsets": [
+            24
+          ],
+          "width": 4,
+          "ir": "  store i32 0, ptr %123, align 4, !dbg !3401, !tbaa !1915"
+        },
+        {
+          "line": 2369,
+          "operation": "store",
+          "offsets": [
+            20
+          ],
+          "width": 4,
+          "ir": "  store i32 0, ptr %126, align 4, !dbg !3417, !tbaa !1915"
+        },
+        {
+          "line": 2460,
+          "operation": "load",
+          "offsets": [
+            24
+          ],
+          "width": 4,
+          "ir": "  %144 = load i32, ptr %143, align 4, !dbg !3502, !tbaa !1915"
+        }
+      ],
+      "unresolved": [],
+      "uses": [
+        {
+          "line": 2343,
+          "ir": "  call void @llvm.dbg.value(metadata ptr %121, metadata !2991, metadata !DIExpression()), !dbg !3393"
+        },
+        {
+          "line": 2344,
+          "ir": "  %.not.i2 = icmp eq ptr %121, null, !dbg !3398"
+        },
+        {
+          "line": 2348,
+          "ir": "  %123 = getelementptr inbounds i32, ptr %121, i64 6, !dbg !3400"
+        },
+        {
+          "line": 2349,
+          "ir": "  store i32 0, ptr %123, align 4, !dbg !3401, !tbaa !1915"
+        },
+        {
+          "line": 2363,
+          "ir": "  call void @llvm.dbg.value(metadata ptr %124, metadata !2991, metadata !DIExpression()), !dbg !3409"
+        },
+        {
+          "line": 2364,
+          "ir": "  %.not.i.i = icmp eq ptr %124, null, !dbg !3414"
+        },
+        {
+          "line": 2368,
+          "ir": "  %126 = getelementptr inbounds i32, ptr %124, i64 5, !dbg !3416"
+        },
+        {
+          "line": 2369,
+          "ir": "  store i32 0, ptr %126, align 4, !dbg !3417, !tbaa !1915"
+        },
+        {
+          "line": 2449,
+          "ir": "  call void @llvm.dbg.value(metadata ptr %142, metadata !1984, metadata !DIExpression()), !dbg !3493"
+        },
+        {
+          "line": 2450,
+          "ir": "  %.not.i.i13 = icmp eq ptr %142, null, !dbg !3498"
+        },
+        {
+          "line": 2459,
+          "ir": "  %143 = getelementptr inbounds i32, ptr %142, i64 6, !dbg !3502"
+        },
+        {
+          "line": 2460,
+          "ir": "  %144 = load i32, ptr %143, align 4, !dbg !3502, !tbaa !1915"
+        }
+      ],
+      "all_direct_uses_recognized": true,
+      "max_access_end": 28,
+      "min_access_offset": 20
+    }
+  ],
+  "scope": "Default O3 IR analysis from retained actual frontend IR, not replacement P or installed code. Direct uses only; unknown uses retained, not authorized as safe."
+}

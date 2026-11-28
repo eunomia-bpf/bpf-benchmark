@@ -1,0 +1,13 @@
+{
+  "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+  "sha256": "a9abda8fb5d5c2e6f0c8edf1935af9c7b42a7364f03cb343e49391fe1d3a53ab",
+  "architecture": "x86",
+  "source": "vendor/bpf/cilium/bpf/bpf_wireguard.c",
+  "preprocess_returncode": 0,
+  "bandwidth_manager_defined": false,
+  "embedded_frontend_ir_sha256": "e007c224a1fb75767099ecb8e499f96ec25ae3261820ee139b40376118de9a0f",
+  "analysis_optimized_ir_sha256": "51f8589af0d853d23f7f804e61185423e52eb730df81624dcbc3f539fa552601",
+  "scratch_declaration": null,
+  "scratch_direct_functions": [],
+  "scope": "Default O3 IR analysis from retained actual frontend IR, not replacement P or installed code. Direct uses only; unknown uses retained, not authorized as safe."
+}

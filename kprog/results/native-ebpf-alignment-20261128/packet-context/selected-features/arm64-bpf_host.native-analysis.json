@@ -1,0 +1,13 @@
+{
+  "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+  "sha256": "2329ee0c89d3744e58a0cf65b1ba01d93e08f1b8e33483864bd023bd88e64d38",
+  "architecture": "arm64",
+  "source": "vendor/bpf/cilium/bpf/bpf_host.c",
+  "preprocess_returncode": 0,
+  "bandwidth_manager_defined": false,
+  "embedded_frontend_ir_sha256": "aa6bb99fc179dce12a1676c6bb1e2ffb27ea0f5d53166af86b341d861fe8c8ee",
+  "analysis_optimized_ir_sha256": "c9a445526e4ffd0ec986562ed4280d9cbd2a94abfff26b754cd66b2374b4c921",
+  "scratch_declaration": null,
+  "scratch_direct_functions": [],
+  "scope": "Default O3 IR analysis from retained actual frontend IR, not replacement P or installed code. Direct uses only; unknown uses retained, not authorized as safe."
+}

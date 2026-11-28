@@ -1,0 +1,67 @@
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/bpf_xdp.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:18:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../loader.h:8:9: warning: '__uint' macro redefined [-Wmacro-redefined]
+    8 | #define __uint(name, val) int(*(name))[val]
+      |         ^
+/workspaces/repository/vendor/bpf/native_compat.h:16:9: note: previous definition is here
+   16 | #define __uint(name, val) int (*name)[val]
+      |         ^
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/bpf_xdp.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:18:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../loader.h:9:9: warning: '__type' macro redefined [-Wmacro-redefined]
+    9 | #define __type(name, val) typeof(val) *(name)
+      |         ^
+/workspaces/repository/vendor/bpf/native_compat.h:19:9: note: previous definition is here
+   19 | #define __type(name, val) typeof(val) *name
+      |         ^
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/bpf_xdp.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:18:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../loader.h:10:9: warning: '__array' macro redefined [-Wmacro-redefined]
+   10 | #define __array(name, val) typeof(val) *(name)[]
+      |         ^
+/workspaces/repository/vendor/bpf/native_compat.h:22:9: note: previous definition is here
+   22 | #define __array(name, val) typeof(val) *name[]
+      |         ^
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/bpf_xdp.c:11:
+/workspaces/repository/vendor/bpf/cilium/bpf/filter_config.h:8:9: warning: 'CIDR4_HMAP_ELEMS' macro redefined [-Wmacro-redefined]
+    8 | #define CIDR4_HMAP_ELEMS 1024
+      |         ^
+<command line>:10:9: note: previous definition is here
+   10 | #define CIDR4_HMAP_ELEMS 20971520
+      |         ^
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/bpf_xdp.c:11:
+/workspaces/repository/vendor/bpf/cilium/bpf/filter_config.h:9:9: warning: 'CIDR4_LMAP_ELEMS' macro redefined [-Wmacro-redefined]
+    9 | #define CIDR4_LMAP_ELEMS 1024
+      |         ^
+<command line>:11:9: note: previous definition is here
+   11 | #define CIDR4_LMAP_ELEMS 65536
+      |         ^
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/bpf_xdp.c:11:
+/workspaces/repository/vendor/bpf/cilium/bpf/filter_config.h:10:9: warning: 'CIDR4_FILTER' macro redefined [-Wmacro-redefined]
+   10 | #define CIDR4_FILTER
+      |         ^
+<command line>:12:9: note: previous definition is here
+   12 | #define CIDR4_FILTER 1
+      |         ^
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/bpf_xdp.c:11:
+/workspaces/repository/vendor/bpf/cilium/bpf/filter_config.h:11:9: warning: 'CIDR4_LPM_PREFILTER' macro redefined [-Wmacro-redefined]
+   11 | #define CIDR4_LPM_PREFILTER
+      |         ^
+<command line>:13:9: note: previous definition is here
+   13 | #define CIDR4_LPM_PREFILTER 1
+      |         ^
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/bpf_xdp.c:11:
+/workspaces/repository/vendor/bpf/cilium/bpf/filter_config.h:12:9: warning: 'CIDR6_FILTER' macro redefined [-Wmacro-redefined]
+   12 | #define CIDR6_FILTER
+      |         ^
+<command line>:14:9: note: previous definition is here
+   14 | #define CIDR6_FILTER 1
+      |         ^
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/bpf_xdp.c:11:
+/workspaces/repository/vendor/bpf/cilium/bpf/filter_config.h:13:9: warning: 'CIDR6_LPM_PREFILTER' macro redefined [-Wmacro-redefined]
+   13 | #define CIDR6_LPM_PREFILTER
+      |         ^
+<command line>:15:9: note: previous definition is here
+   15 | #define CIDR6_LPM_PREFILTER 1
+      |         ^
+9 warnings generated.

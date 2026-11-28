@@ -1,0 +1,13 @@
+{
+  "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o",
+  "sha256": "86578195b5d0075c8104dc176dd30a6fb72652dd1b29d2e26bef95de054005e8",
+  "architecture": "arm64",
+  "source": "vendor/bpf/cilium/bpf/bpf_overlay.c",
+  "preprocess_returncode": 0,
+  "bandwidth_manager_defined": false,
+  "embedded_frontend_ir_sha256": "91e38b6fb092003ea5d9d6e28e79169ecc81f1c6608d4ef20ff96a2e400eb987",
+  "analysis_optimized_ir_sha256": "7d880759b67594e46a97c2e4cf4750b4fb58b719afd838a4c26884a9eada3cdc",
+  "scratch_declaration": null,
+  "scratch_direct_functions": [],
+  "scope": "Default O3 IR analysis from retained actual frontend IR, not replacement P or installed code. Direct uses only; unknown uses retained, not authorized as safe."
+}

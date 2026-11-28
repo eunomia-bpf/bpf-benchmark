@@ -1,0 +1,369 @@
+{
+  "reviewed_utc": "2026-11-28T08:56:45Z",
+  "job_launcher_pid": 1393442,
+  "controller_pid": 1393444,
+  "ended_utc": "2026-11-28T08:52:27Z",
+  "controller_status": 0,
+  "object_analyses": 12,
+  "command_successes": 36,
+  "program_rows": 170,
+  "audited_rows": 166,
+  "placeholder_rows_excluded": 4,
+  "bandwidth_macro_defined_count": 0,
+  "scratch_accesses": [
+    {
+      "architecture": "x86",
+      "function": "tail_drop_notify",
+      "reads": 5,
+      "writes": 0,
+      "accesses": 5,
+      "min_offset": 0,
+      "max_end": 20
+    },
+    {
+      "architecture": "x86",
+      "function": "tail_no_service_ipv4",
+      "reads": 1,
+      "writes": 5,
+      "accesses": 6,
+      "min_offset": 0,
+      "max_end": 20
+    },
+    {
+      "architecture": "x86",
+      "function": "cil_xdp_entry",
+      "reads": 1,
+      "writes": 2,
+      "accesses": 3,
+      "min_offset": 20,
+      "max_end": 28
+    },
+    {
+      "architecture": "arm64",
+      "function": "tail_drop_notify",
+      "reads": 5,
+      "writes": 0,
+      "accesses": 5,
+      "min_offset": 0,
+      "max_end": 20
+    },
+    {
+      "architecture": "arm64",
+      "function": "tail_no_service_ipv4",
+      "reads": 1,
+      "writes": 5,
+      "accesses": 6,
+      "min_offset": 0,
+      "max_end": 20
+    },
+    {
+      "architecture": "arm64",
+      "function": "cil_xdp_entry",
+      "reads": 1,
+      "writes": 2,
+      "accesses": 3,
+      "min_offset": 20,
+      "max_end": 28
+    }
+  ],
+  "scratch_direct_memory_accesses": 28,
+  "unresolved_direct_pointer_uses": 0,
+  "native_scratch_declarations": [
+    48,
+    48
+  ],
+  "captured_x86_map_candidates": [
+    {
+      "id": 47,
+      "name": "cilium_xdp_scra",
+      "type": 6,
+      "key_size": 4,
+      "value_size": 28,
+      "max_entries": 1,
+      "flags": 0
+    },
+    {
+      "id": 134,
+      "name": "cilium_xdp_scra",
+      "type": 6,
+      "key_size": 4,
+      "value_size": 28,
+      "max_entries": 1,
+      "flags": 0
+    }
+  ],
+  "captured_plan_variants": 2,
+  "source_sha256": {
+    "vendor/bpf/native_compat.h": "906737856b4c533575095e11e090b125ed6bc95a676bd9087411234b44d74494",
+    "vendor/bpf/cilium/bpf/include/linux/bpf.h": "34cf8b6c978854bb115dceaf330c9be0f1dcc7c34d557868e27e61ea13a357e5",
+    "vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h": "c8a6251487d57123d098bf325cfc4b049f58701cae4abb775f4685b7b32835ed",
+    "vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h": "93bffd9691f1564c03d7b778ce57b20b80d4cecf3183e2c57ba23e97e9769911",
+    "vendor/bpf/cilium/bpf/lib/edt.h": "96f0a6d322b460b95082bd9058fbafd0802cd7a23ba923da15d4446dc38e84cc",
+    "vendor/bpf/cilium/bpf/lib/token_bucket.h": "5530d553ff6dc298abf352d5b79eeb55cfb58bf35807769cf075e9a0e2ca8b31",
+    "vendor/bpf/cilium/bpf/lib/overloadable_xdp.h": "c8f45d635a5aa35944f23b90effe47a8bfaeb628a05acbb28e7646324027dcda",
+    "vendor/linux-framework/net/core/filter.c": "629e5372b2d239485e75fc5c3f5bee98be4bbe6201794d4480de68a4fcd6f542",
+    "vendor/bpf/cilium/bpf/netdev_config.h": "c39a8fe59c863257ee163865dd723a891b02545917043b2054cbdcf0a5b7e153",
+    "vendor/bpf/cilium/bpf/ep_config.h": "dab0355b4af4ea96d90d75a8b84852cbba14d8d4170fa7a72582ef6f2c621df5",
+    "vendor/bpf/cilium/bpf/node_config.h": "8c65ab4e2cdd2372cd9d66e97a1102450809ab0c3a528234659f7ba17ae36f4e",
+    "vendor/bpf/cilium/bpf/filter_config.h": "b8c6c7b95951346cee75ac932462e1cbbdfa00755438d3e4e97fffb021ae7098",
+    "vendor/bpf/cilium/bpf/bpf_overlay.c": "2951230b8a1cb01e52c1027dbda5bf2710e2b015d94a184489f8f4907c5bf005",
+    "vendor/bpf/cilium/bpf/bpf_probes.c": "0b2c4767920abd1556a8e5a78a3f751839fe5d11b94bf4f32e861bfecb9da4be",
+    "vendor/bpf/cilium/bpf/bpf_sock.c": "4a1435ea4343e51dbb6c09a709375bf455204f7cb20446b7e93dc31367a515f5",
+    "vendor/bpf/cilium/bpf/bpf_host.c": "b18cca811286f753ffbae667fa467680f4ac444aa141b0af4833372af9674399",
+    "vendor/bpf/cilium/bpf/bpf_sock_term.c": "dfc569c2367fa4d18bf0023b1348cbe4d20607f08e754bd388dd77c4f5d5bf8b",
+    "vendor/bpf/cilium/bpf/bpf_alignchecker.c": "902a9070895aff18f981a72392a8d96f3b2b1189320bfc35a63ffc74e64d2e12",
+    "vendor/bpf/cilium/bpf/bpf_xdp.c": "5540ee62a23be573453087b46f8ce7da0feab112a77633a66f4d57ae8d4235f2",
+    "vendor/bpf/cilium/bpf/bpf_wireguard.c": "66daec8e995357aa9cecfe95d0cea8a87489bc13b14e92a1684de82e5aade122",
+    "vendor/bpf/cilium/bpf/bpf_lxc.c": "07011bf40676984b1fde2dabec629d64c15fcb35efee7176fd673ccb47cf0f02"
+  },
+  "unchanged_objects": {
+    "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o": "1373794b9611d99815dd255edd47fd54707b404ae3256097fe6e360f0804d263",
+    "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o": "79db42e767775c7343bffe55ac498f062946bf3af34da452441bef696be98dc4",
+    "vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o": "21e265e92c9b906094d22ac87da9c64af8bf1df8b7877734029c9f9ff8be4152",
+    "vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o": "a9abda8fb5d5c2e6f0c8edf1935af9c7b42a7364f03cb343e49391fe1d3a53ab",
+    "vendor/build/native-bpf/x86/stage/cilium/cilium_placeholders.native.o": "600a811f7dfc0584e244d8cd1bd8711c223812bb51c45c4e97620e10d38bad4f",
+    "vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o": "f2299977fa0ffba5fab0075fb164701ba46fcbaa81c30dc5cd0bfc74a48b84fc",
+    "vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o": "7db6ead1b5ccc7d2715bd9230935c6ea866676db35e160185200c6210aabf496",
+    "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o": "e5959faa80f1d85b3035f507fd9e8cb8c586b4a91a25d36574a0789819a08f80",
+    "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o": "2329ee0c89d3744e58a0cf65b1ba01d93e08f1b8e33483864bd023bd88e64d38",
+    "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o": "86578195b5d0075c8104dc176dd30a6fb72652dd1b29d2e26bef95de054005e8",
+    "vendor/build/native-bpf/arm64/stage/cilium/bpf_wireguard.native.o": "bb8442d848b9c12bc54ad4e13c34773d1dafef47c84fbfec4af5515064517f2a",
+    "vendor/build/native-bpf/arm64/stage/cilium/cilium_placeholders.native.o": "4210d5ec923d87971211ae75206ef116c394ead34b7d889dda29902deab2b96a",
+    "vendor/build/native-bpf/arm64/stage/cilium/bpf_sock.native.o": "10e17ce4f1e731aad12d60445ff284b6a203f7f6a68494e3940ee63886ce6f76",
+    "vendor/build/native-bpf/arm64/stage/cilium/bpf_xdp.native.o": "9328d114a9d031a38685c4eaca2ee5795da6b03a23f1df8b186ac2f1b1666230"
+  },
+  "unchanged_manifests": {
+    "vendor/build/native-bpf/x86/stage/cilium/manifest.json": "ee3de799819ac8fab9f5aa7eabe86a98b479d1d756804ae10c0fe6f2c8291f05",
+    "vendor/build/native-bpf/arm64/stage/cilium/manifest.json": "ee3de799819ac8fab9f5aa7eabe86a98b479d1d756804ae10c0fe6f2c8291f05"
+  },
+  "outputs": {
+    "x86-bpf_overlay.native-opt.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "Makefile": {
+      "bytes": 39,
+      "sha256": "cefe6f0c3fea86777da8d240fd27df28eb80258302d464386e8266cb3953ce34"
+    },
+    "x86-bpf_host.native-preprocess.stderr": {
+      "bytes": 1608,
+      "sha256": "b18b2111ea533b9afc414f4c253aa78c0c84e9a02dd6bdfd4d5c98a83f92bf6b"
+    },
+    "arm64-bpf_wireguard.native-preprocess.stderr": {
+      "bytes": 1623,
+      "sha256": "c2d4a1d074b9941709f2f5097e7ab0d17bc3e7663600b05008638154a967653d"
+    },
+    "arm64-bpf_overlay.native-macros.txt": {
+      "bytes": 92656,
+      "sha256": "1d8dfe935d502e389f5aae104fc9870a24426ae48f47223b40afa8e6a645cd6a"
+    },
+    "x86-bpf_sock.native-preprocess.stderr": {
+      "bytes": 1608,
+      "sha256": "a47b89467ef1227a3f21b6c98fd4b2ac85cb4cbf6a9670fb461828eb43f6516a"
+    },
+    "arm64-bpf_wireguard.native-opt.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "launch.json": {
+      "bytes": 886,
+      "sha256": "3da246ff58ca46bb1c3656f179eddb70ab87973026e0a6ad773b01bdb53e6d53"
+    },
+    "x86-bpf_lxc.native-opt.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-bpf_overlay.native-macros.txt": {
+      "bytes": 92429,
+      "sha256": "867cb4388562af9d07ab55d6d7c8202329aef0916c195b1fdd2a01e31714b146"
+    },
+    "x86-bpf_lxc.native-preprocess.stderr": {
+      "bytes": 1605,
+      "sha256": "dbf4526b4766c6bc51512f9d7e53b9f140a1bc1635c569a91f8a20b3a7afc8a6"
+    },
+    "arm64-bpf_sock.native-macros.txt": {
+      "bytes": 80594,
+      "sha256": "3bb4d48e4a3ee0ee8aa01f38ce8b1b7a68289320270e28d5744b72fe6ca8f2d3"
+    },
+    "arm64-bpf_host.native-opt.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-bpf_xdp.native-opt.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-bpf_lxc.native-analysis.json": {
+      "bytes": 737,
+      "sha256": "5c7e6c0ddd46de0bdf1d018bb854336bd584b1032896f7b4b3d1949feaea30e3"
+    },
+    "arm64-bpf_host.native-macros.txt": {
+      "bytes": 92784,
+      "sha256": "105887aefc2710882d1e13d662b3be99da90991c646aab8ac66e623722c9f1c6"
+    },
+    "audit.py": {
+      "bytes": 7712,
+      "sha256": "fc26b2f91eee6aaac834daa0adc193939cb18039b11ca9b75c493c71e7c55406"
+    },
+    "preparation.json": {
+      "bytes": 10785,
+      "sha256": "85e8756df2a6d53fbc852ac031ba7995e80b2b1257804e017b8b4d58548c1f44"
+    },
+    "arm64-bpf_host.native-analysis.json": {
+      "bytes": 743,
+      "sha256": "203cc6462f88d9009ba2f329461552f0c7d7968a4a0277c419593650587694c4"
+    },
+    "x86-bpf_wireguard.native-analysis.json": {
+      "bytes": 749,
+      "sha256": "23c20affd2433afcfb49f53382b797e39ea329650600c96e4842ad23faec2dd6"
+    },
+    "arm64-bpf_overlay.native-analysis.json": {
+      "bytes": 749,
+      "sha256": "70f14336538e2c0d5f6f50e8c42a6a3b36bbf17961f95d8923884f07042af148"
+    },
+    "x86-bpf_wireguard.native-opt.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "job.log": {
+      "bytes": 272,
+      "sha256": "e70b5c4cb7b829247e069bcbdabdbe32b1aeb354bd574bb9ca782df87ce54fac"
+    },
+    "arm64-bpf_sock.native-preprocess.stderr": {
+      "bytes": 1608,
+      "sha256": "a47b89467ef1227a3f21b6c98fd4b2ac85cb4cbf6a9670fb461828eb43f6516a"
+    },
+    "x86-bpf_xdp.native-macros.txt": {
+      "bytes": 91235,
+      "sha256": "0189f9a7f94bf288fee9409f0e6b97ce9a0f711e1476162ead1718ab5c9d3d2e"
+    },
+    "x86-bpf_overlay.native-analysis.json": {
+      "bytes": 745,
+      "sha256": "f60e5dae2a494c21e17e660886eb6001ed0ae89302f67b99a81a88cb7d5afdc1"
+    },
+    "x86-bpf_host.native-macros.txt": {
+      "bytes": 92557,
+      "sha256": "a6caf41542703f07e13490543b4bd054f829c2461ff4e877c691b3a8a11849c3"
+    },
+    "arm64-bpf_wireguard.native-macros.txt": {
+      "bytes": 91543,
+      "sha256": "e256ae5f8a78a2aa2d53620fe8d16116b4f1805db68ff9a0097f4e937ede15ba"
+    },
+    "x86-bpf_wireguard.native-preprocess.stderr": {
+      "bytes": 1623,
+      "sha256": "c2d4a1d074b9941709f2f5097e7ab0d17bc3e7663600b05008638154a967653d"
+    },
+    "x86-bpf_wireguard.native-macros.txt": {
+      "bytes": 91316,
+      "sha256": "b747dc1bb2499ba7bba4c622bfe2e50dd91dceec791fe37a17f590212cd5ac9a"
+    },
+    "arm64-bpf_wireguard.native-analysis.json": {
+      "bytes": 753,
+      "sha256": "0abc5e3f7ca6078d4901ee0336e41e8dddcba9e7f1978ef13b30e006b72347d8"
+    },
+    "arm64-bpf_lxc.native-opt.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-bpf_lxc.native-preprocess.stderr": {
+      "bytes": 1605,
+      "sha256": "dbf4526b4766c6bc51512f9d7e53b9f140a1bc1635c569a91f8a20b3a7afc8a6"
+    },
+    "x86-bpf_host.native-analysis.json": {
+      "bytes": 739,
+      "sha256": "c1a35dcfe6b287cfaf07334fe10edfbf5ca7ed01466aa9f81388563ac3d47c1f"
+    },
+    "arm64-bpf_xdp.native-preprocess.stderr": {
+      "bytes": 3877,
+      "sha256": "bf46d5d0abc1183b76df40dbe0b6738221a940ccc367f495e0af31558f771773"
+    },
+    "x86-bpf_xdp.native-preprocess.stderr": {
+      "bytes": 3877,
+      "sha256": "bf46d5d0abc1183b76df40dbe0b6738221a940ccc367f495e0af31558f771773"
+    },
+    "arm64-bpf_overlay.native-preprocess.stderr": {
+      "bytes": 1617,
+      "sha256": "0b4b6afa26da061aa4af4f3fe83d7a12906c5a6587bf7346e5ec9ec2cc92c401"
+    },
+    "controller.json": {
+      "bytes": 120304,
+      "sha256": "fb2957083f2f546c870fc59973238aadcdfa45915f496fd2cadabb3529de1c41"
+    },
+    "x86-bpf_xdp.native-analysis.json": {
+      "bytes": 12719,
+      "sha256": "72dbde0b7054d597458b94ebcaf10abd58ee339b02c946f4471c9ed47dd51d09"
+    },
+    "arm64-bpf_lxc.native-macros.txt": {
+      "bytes": 97350,
+      "sha256": "6ff5b19d73dafe00e2d99420b3b08bbf2c7c53429477f4f77972cdebbe13fc33"
+    },
+    "arm64-bpf_overlay.native-opt.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-bpf_overlay.native-preprocess.stderr": {
+      "bytes": 1617,
+      "sha256": "0b4b6afa26da061aa4af4f3fe83d7a12906c5a6587bf7346e5ec9ec2cc92c401"
+    },
+    "arm64-bpf_xdp.native-macros.txt": {
+      "bytes": 91462,
+      "sha256": "76f7eaf228b74ee4f8fa9c6aae0da8fbce23b5afe23902aa88b826b7eb5f3dd2"
+    },
+    "arm64-bpf_host.native-preprocess.stderr": {
+      "bytes": 1608,
+      "sha256": "b18b2111ea533b9afc414f4c253aa78c0c84e9a02dd6bdfd4d5c98a83f92bf6b"
+    },
+    "arm64-bpf_sock.native-opt.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-bpf_xdp.native-analysis.json": {
+      "bytes": 12723,
+      "sha256": "d262041cabe31c7238e546ec6167a04fbe6fd1b38eee721fe4bb163802d7239d"
+    },
+    "arm64-bpf_lxc.native-analysis.json": {
+      "bytes": 741,
+      "sha256": "1d14bc3007a5e848b700a0c604a6ccd676ce3ee4f5a0f5ae710ca57857d21eda"
+    },
+    "arm64-bpf_xdp.native-opt.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-bpf_host.native-opt.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-bpf_sock.native-opt.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-bpf_lxc.native-macros.txt": {
+      "bytes": 97123,
+      "sha256": "8139016f744e3ed8b057e9ea50a4ca85c0d4111b635f3b8bcac2e820e0348c94"
+    },
+    "arm64-bpf_sock.native-analysis.json": {
+      "bytes": 743,
+      "sha256": "abe3299d14a4af03a73cca63ef9effda625be5357bfb70ccae42c5554da4368a"
+    },
+    "x86-bpf_sock.native-analysis.json": {
+      "bytes": 739,
+      "sha256": "fb5b109431d5248a71477fc8b92eeefb21edde4813780450f16afe65ea2a4fd8"
+    },
+    "x86-bpf_sock.native-macros.txt": {
+      "bytes": 80367,
+      "sha256": "275de75b01839f394bf266e4af72eff7a2f3ddc53d49c6c82a63b9dacc182e3f"
+    },
+    "per-program.json": {
+      "bytes": 107969,
+      "sha256": "492d7251b47101e72da8439a2a5e6ef6f5830aee877cde2f2cf2d21561e9d200"
+    }
+  },
+  "verdict": "No new selected-use defect established by these two observations; no production correction justified by this audit.",
+  "limits": [
+    "Macro replay uses recorded cc1 commands and current source headers, not a historical preprocessing dump or comparison with the selected app eBPF feature set.",
+    "Scratch bounds cover recognized direct lookup-result pointer uses in defaultO3 IR derived from actual staged objects, not final installed machine code, all transitive paths or runtime equal work.",
+    "Runtime map IDs47/134 are saved x86 name/shape candidates only; exact original program-map ID binding and ARM runtime binding remain separate.",
+    "2 placeholder objects/4program rows excluded from source replay; all170rows retain coverage status.",
+    "Native declaration48 versus public/captured28 is a shape difference; accesses within28 do not establish all metadata or map semantics."
+  ]
+}

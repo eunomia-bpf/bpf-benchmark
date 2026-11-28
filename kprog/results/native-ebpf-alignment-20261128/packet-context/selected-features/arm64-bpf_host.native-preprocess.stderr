@@ -1,0 +1,25 @@
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/bpf_host.c:5:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/api.h:17:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/loader.h:8:9: warning: '__uint' macro redefined [-Wmacro-redefined]
+    8 | #define __uint(name, val) int(*(name))[val]
+      |         ^
+/workspaces/repository/vendor/bpf/native_compat.h:16:9: note: previous definition is here
+   16 | #define __uint(name, val) int (*name)[val]
+      |         ^
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/bpf_host.c:5:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/api.h:17:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/loader.h:9:9: warning: '__type' macro redefined [-Wmacro-redefined]
+    9 | #define __type(name, val) typeof(val) *(name)
+      |         ^
+/workspaces/repository/vendor/bpf/native_compat.h:19:9: note: previous definition is here
+   19 | #define __type(name, val) typeof(val) *name
+      |         ^
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/bpf_host.c:5:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/api.h:17:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/loader.h:10:9: warning: '__array' macro redefined [-Wmacro-redefined]
+   10 | #define __array(name, val) typeof(val) *(name)[]
+      |         ^
+/workspaces/repository/vendor/bpf/native_compat.h:22:9: note: previous definition is here
+   22 | #define __array(name, val) typeof(val) *name[]
+      |         ^
+3 warnings generated.
