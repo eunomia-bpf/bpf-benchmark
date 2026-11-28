@@ -1,0 +1,103 @@
+{
+  "scope": "complete original RETURN materialization after the actual numeric-return cache stores",
+  "source_sha256": "fc3afc63b058163f9354d9d68145bdafd039b593cee5a81f68b4f4a9d5a02937",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-return-materialize/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.9351882934570312,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerReturnMaterialize"
+      ],
+      "exit": 0,
+      "seconds": 2.227997064590454,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.8575451374053955,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-return-materialize/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.4274401664733887,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 296,
+  "full_jobs": 1563,
+  "root_queries": [
+    "add_value",
+    "execute",
+    "temp_frame",
+    "values",
+    "input_zero",
+    "advance",
+    "write_and_advance"
+  ],
+  "actual_return_cache_commit": "b97439a47c3bcd72afb5b64baf9aca1626361212",
+  "reads": "actual original setBase Evar load from the SAME derived cache Store; original raw0 follows from original reached ReturnProvider.resultEnv and survives the original Kcall assignment",
+  "execution": "nine original internal setBase/loop-break/add/storeValue/loop-break steps, same after-cache heap and three temporary names; materialized/store value equals arbitrary returned base",
+  "composition": "accepted six original cache suffix steps plus nine completion steps = fifteen; actual current allocation rights derive both SAME stores via write_and_advance",
+  "provider_boundary": "arbitrary returned scalar and full supplied memory preserved at actual Returnstate; external provider execution/outcome/trace and whole-entry transport are not assumed or proved",
+  "open": "actual linked externalCall relation/trace/full supplied-memory outcome, real data-store continuation, linked whole-entry/provider/Senv transport, native whole-state refinement",
+  "old_allocator_or_successful_store_oracle_used": false,
+  "successful_provider_execution_assumed": false,
+  "native_whole_state_proved_here": false,
+  "resource_assignment": "existing run.py timingSH/CPU17/j1/nice0/32GiB/unchanged proof settings/fullEX-nformal-full-check; nonblocking shared timing preflight before launch",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
