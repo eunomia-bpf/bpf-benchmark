@@ -1,0 +1,57 @@
+{
+  "utc": "2026-11-28T11:08:07Z",
+  "authorization": "COORDINATOR2026-11-27T12:19Z and15:18Z: remove verified raw duplicates only after every file matches committed archive; archive remains.",
+  "archive_commit": "6747c86cc73d6f39a564cbf53de68ce6025e4207",
+  "archive_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/otel-vm/otel-shift-records.tar.zst",
+  "archive_git_blob": "a5b098cbbdc90bc59792d2dc5705409998c6bbd7",
+  "archive_sha256": "f2cef3d9aa6ac5b2d2afa8905da002136acf1f70ca7210cffe59ff3adb2ae1d0",
+  "index_git_blob": "c80b5bbc4e05e98f2bf0fb461b7667277a2b4565",
+  "verified_files": [
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/otel-vm/arm64-consumers.json",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/otel-vm/arm64-consumers.json",
+      "bytes": 370352,
+      "sha256": "0868352ad542ab07a673d33e305353876202a1fc8b419cd0c111d9a967b22783",
+      "allocated_bytes": 372736,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/otel-vm/arm64.stderr",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/otel-vm/arm64.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/otel-vm/controller.json",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/otel-vm/controller.json",
+      "bytes": 1680,
+      "sha256": "e39bbec020355d708e0891252d9d64dbf2fe912209fab3ded72af8f2237c90e4",
+      "allocated_bytes": 4096,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/otel-vm/x86-consumers.json",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/otel-vm/x86-consumers.json",
+      "bytes": 371247,
+      "sha256": "c0b9a031d92da26303d628a6144eb758b7ac9ff4ac1089f95008fc5a6dbebb72",
+      "allocated_bytes": 372736,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/otel-vm/x86.stderr",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/otel-vm/x86.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0,
+      "removed": true
+    }
+  ],
+  "logical_bytes": 743279,
+  "allocated_bytes_of_removed_copies": 749568,
+  "prior_lane_allocated_duplicate_bytes": 4883042304,
+  "status": "complete",
+  "cumulative_lane_allocated_duplicate_bytes": 4883791872,
+  "archive_preserved": true
+}
