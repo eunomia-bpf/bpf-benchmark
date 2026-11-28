@@ -1,0 +1,7 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorPointerLoopMemory.store
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorPointerLoopMemory.store
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorPointerLoopMemory.assign
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorPointerLoopMemory.assign
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorPointerLoopMemory.named_frame
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorPointerLoopMemory.named_frame
