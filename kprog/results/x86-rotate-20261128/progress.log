@@ -1,0 +1,24 @@
+2026-11-28T05:43:17Z start otelcol-ebpf-profiler/profiling stats=0
+2026-11-28T06:09:13Z end otelcol-ebpf-profiler/profiling stats=0 rc=0 run=/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_054448_639694
+2026-11-28T06:09:13Z start bcc/set stats=0
+2026-11-28T06:35:33Z end bcc/set stats=0 rc=0 run=/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_061040_622818
+2026-11-28T06:35:33Z start cilium/agent stats=0
+2026-11-28T07:01:55Z end cilium/agent stats=0 rc=0 run=/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_063705_533364
+2026-11-28T07:01:55Z start tetragon/observer stats=0
+2026-11-28T07:28:12Z end tetragon/observer stats=0 rc=0 run=/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_070323_148492
+2026-11-28T07:28:12Z start tracee/monitor stats=0
+2026-11-28T07:56:27Z end tracee/monitor stats=0 rc=0 run=/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_072950_324653
+2026-11-28T07:56:27Z start katran stats=0
+2026-11-28T08:22:14Z end katran stats=0 rc=0 run=/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_075746_398190
+2026-11-28T08:22:14Z start otelcol-ebpf-profiler/profiling stats=1
+2026-11-28T08:48:12Z end otelcol-ebpf-profiler/profiling stats=1 rc=0 run=/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_082351_778626
+2026-11-28T08:48:12Z start bcc/set stats=1
+2026-11-28T09:14:51Z end bcc/set stats=1 rc=0 run=/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_085002_496250
+2026-11-28T09:14:51Z start cilium/agent stats=1
+2026-11-28T09:41:34Z end cilium/agent stats=1 rc=0 run=/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_091645_012670
+2026-11-28T09:41:34Z start tetragon/observer stats=1
+2026-11-28T10:08:22Z end tetragon/observer stats=1 rc=0 run=/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_094333_560478
+2026-11-28T10:08:22Z start tracee/monitor stats=1
+2026-11-28T10:36:56Z end tracee/monitor stats=1 rc=0 run=/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_101016_986652
+2026-11-28T10:36:56Z start katran stats=1
+2026-11-28T11:03:03Z end katran stats=1 rc=0 run=/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_103835_229854
