@@ -1,0 +1,9 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorView.input_offsets
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorView.input_offsets
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorView.data_readbacks
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorView.data_readbacks
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorView.vector_readbacks
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorView.vector_readbacks
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorView.native_vectors
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorView.native_vectors
