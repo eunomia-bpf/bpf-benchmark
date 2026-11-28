@@ -1,0 +1,103 @@
+{
+  "utc": "2026-11-28T13:07:43Z",
+  "newest_resume": "COORDINATOR2026-11-28T11:20Z",
+  "recipe": "review_host_tasks.py",
+  "sha256": "0a1d1f34cd8bae32232c5f033213e6a524499ecae667345d29666e0cad8f7908",
+  "preflight": "Python compile0; no execution before SAME1467959 closes.",
+  "proc_stat_source": {
+    "path": "vendor/linux-framework/fs/proc/array.c",
+    "sha256": "b33ac7b8c8aa20c85d61c2eb77eec60716bbba7075870a9c358cb533c89ba85a",
+    "lines": [
+      {
+        "line": 548,
+        "text": ""
+      },
+      {
+        "line": 549,
+        "text": "\t\t\tif (whole) {"
+      },
+      {
+        "line": 550,
+        "text": "\t\t\t\tstruct task_struct *t;"
+      },
+      {
+        "line": 551,
+        "text": ""
+      },
+      {
+        "line": 552,
+        "text": "\t\t\t\tmin_flt = sig->min_flt;"
+      },
+      {
+        "line": 553,
+        "text": "\t\t\t\tmaj_flt = sig->maj_flt;"
+      },
+      {
+        "line": 554,
+        "text": "\t\t\t\tgtime = sig->gtime;"
+      },
+      {
+        "line": 555,
+        "text": ""
+      },
+      {
+        "line": 556,
+        "text": "\t\t\t\t__for_each_thread(sig, t) {"
+      },
+      {
+        "line": 557,
+        "text": "\t\t\t\t\tmin_flt += t->min_flt;"
+      },
+      {
+        "line": 558,
+        "text": "\t\t\t\t\tmaj_flt += t->maj_flt;"
+      },
+      {
+        "line": 559,
+        "text": "\t\t\t\t\tgtime += task_gtime(t);"
+      },
+      {
+        "line": 560,
+        "text": "\t\t\t\t}"
+      },
+      {
+        "line": 561,
+        "text": "\t\t\t}"
+      },
+      {
+        "line": 562,
+        "text": "\t\t}"
+      },
+      {
+        "line": 563,
+        "text": "\t}"
+      },
+      {
+        "line": 564,
+        "text": ""
+      },
+      {
+        "line": 565,
+        "text": "\tif (whole) {"
+      },
+      {
+        "line": 566,
+        "text": "\t\tthread_group_cputime_adjusted(task, &utime, &stime);"
+      },
+      {
+        "line": 567,
+        "text": "\t} else {"
+      },
+      {
+        "line": 568,
+        "text": "\t\ttask_cputime_adjusted(task, &utime, &stime);"
+      },
+      {
+        "line": 569,
+        "text": "\t\tmin_flt = task->min_flt;"
+      }
+    ]
+  },
+  "semantics": "CPU in /proc/PID/stat is threadgroup when whole=1; schedstat/wchan remain selectedtask. PerQEMUthread /proc/PID/task/TID/stat is thread-only. Do not sum wholeprocess and constituentthreads.",
+  "reason": "Join observed host realtime with guest date/uptime and actual shim CLOCKMONOTONIC windows; explicitown ancestryQEMUpid/threadidentity, endpoints and clockdrift/observer/namespace gaps. No new guest."
+}
