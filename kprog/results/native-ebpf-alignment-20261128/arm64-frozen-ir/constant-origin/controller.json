@@ -1,8 +1,46 @@
 {
-  "pid": 1293153,
-  "started_utc": "2026-11-28T05:44:43Z",
-  "phase": "stopped-before-reproduction-new-resource-coordination",
-  "controller_status": 143,
+  "pid": 1296302,
+  "started_utc": "2026-11-28T05:48:02Z",
+  "phase": "finished-manual-source-chain-review-pending",
+  "controller_status": 0,
   "scope": "Actual embedded ARM/x86 BPF ELF and current recorded Go dependencies; VariableSpec.Set versus direct NewMap input serialization only. No BPF syscall, app rebuild, guest, image/kernel/source/settings mutation.",
-  "ended_utc": "2026-11-28T05:47:05Z"
+  "command": [
+    "prlimit",
+    "--as=51539607552",
+    "--",
+    "taskset",
+    "-c",
+    "16,18",
+    "bash",
+    "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/constant-origin/reproduce.sh"
+  ],
+  "returncode": 0,
+  "observations": [
+    {
+      "Variables_count": 8,
+      "input_elf": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.arm64",
+      "input_to_direct_NewMap_unchanged": true,
+      "map_contents_after_Set": "0000000000000000",
+      "map_contents_before_Set": "0000000000000000",
+      "offset": 24,
+      "scope": "Parser/API reproduction only; no map/program syscall, no runtime constant override. Sentinel models a legitimate nonzero app-written value.",
+      "section": ".rodata.var",
+      "size": 8,
+      "variable_after_Set": "ffffffffffffffff"
+    },
+    {
+      "Variables_count": 8,
+      "input_elf": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.amd64",
+      "input_to_direct_NewMap_unchanged": true,
+      "map_contents_after_Set": "0000000000000000",
+      "map_contents_before_Set": "0000000000000000",
+      "offset": 8,
+      "scope": "Parser/API reproduction only; no map/program syscall, no runtime constant override. Sentinel models a legitimate nonzero app-written value.",
+      "section": ".rodata.var",
+      "size": 8,
+      "variable_after_Set": "ffffffffffffffff"
+    }
+  ],
+  "set_value_lost_at_direct_newmap_input": true,
+  "ended_utc": "2026-11-28T05:48:16Z"
 }

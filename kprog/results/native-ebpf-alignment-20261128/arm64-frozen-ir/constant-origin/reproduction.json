@@ -1,0 +1,26 @@
+[
+  {
+    "Variables_count": 8,
+    "input_elf": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.arm64",
+    "input_to_direct_NewMap_unchanged": true,
+    "map_contents_after_Set": "0000000000000000",
+    "map_contents_before_Set": "0000000000000000",
+    "offset": 24,
+    "scope": "Parser/API reproduction only; no map/program syscall, no runtime constant override. Sentinel models a legitimate nonzero app-written value.",
+    "section": ".rodata.var",
+    "size": 8,
+    "variable_after_Set": "ffffffffffffffff"
+  },
+  {
+    "Variables_count": 8,
+    "input_elf": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.amd64",
+    "input_to_direct_NewMap_unchanged": true,
+    "map_contents_after_Set": "0000000000000000",
+    "map_contents_before_Set": "0000000000000000",
+    "offset": 8,
+    "scope": "Parser/API reproduction only; no map/program syscall, no runtime constant override. Sentinel models a legitimate nonzero app-written value.",
+    "section": ".rodata.var",
+    "size": 8,
+    "variable_after_Set": "ffffffffffffffff"
+  }
+]
