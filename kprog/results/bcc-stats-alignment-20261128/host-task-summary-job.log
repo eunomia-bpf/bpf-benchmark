@@ -1,0 +1,16 @@
+{
+  "own_qemu_pid": 1468482,
+  "host_kernel_release": "7.3.0-070300rc3-generic",
+  "review_sha256": "5677f9527d2355079e686fa3dbce3dceeb8a83cf60303ad05b782c23882f3ed5",
+  "total_ratio": 1.2173063274006475,
+  "sockfd_ratio": 1.5149586579614818,
+  "interpretation": [
+    "The scheduling direction reversed relative to1465233: current eBPF phase has much more gueststeal and actual own-QEMU hostthread runqueue wait. This rules out treating native-only gueststeal as an invariant of this code/image/stats0 protocol.",
+    "Eight own descendant-QEMU threads were each observed in kvm_vcpu_block, with affinity0-7 recorded. Their names do not encode vCPU numbers here; no exact CPU-index mapping is claimed. Endpoints/spans differ slightly between guest and host, so summed waits are not an exact identity.",
+    "Own hostthread runnable waiting is observed, but the responsible competitor is not established. Visible process CPU is not a complete host census: namespaces, short-lived processes and endpoint sampling gaps remain. Do not kill, repin or change benchmark/kernel settings based on this record.",
+    "Historical3x180s0.877x cause remains unresolved; no stats0-specific compiler/code/global mismatch was established by the inspected controls. Current short ratios are diagnostics under unequal scheduling, not speedup acceptance.",
+    "Proceed to the ordered current-image refresh and six-app10s alignment check; retain this scheduling limitation and frozen app2689a430."
+  ]
+}
+baseline {"total_frozen_metric": 544725.74, "sockfd_ops_s": 165126.11, "sockfd_reported_cpu_s": 8.23, "guest_steal_cpu_s": 22.91, "guest_sample_span_s": 9.67576478700002, "host_sample_span_s": 9.251883506774902, "host_snapshot_count": 19, "own_kvm_block_observed_thread_ids": [1468484, 1468485, 1468486, 1468487, 1468488, 1468489, 1468490, 1468491], "own_kvm_threads_cpu_s": 39.17, "own_kvm_threads_runqueue_wait_s": 21.725750319, "own_qemu_process_group_cpu_s": 39.84, "host_cpu0_7_busy_cpu_s": 71.36, "host_cpu0_7_steal_cpu_s": 0.0, "host_observer_cpu_s": 0.14}
+post_rejit {"total_frozen_metric": 663098.09, "sockfd_ops_s": 250159.23, "sockfd_reported_cpu_s": 15.24, "guest_steal_cpu_s": 0.63, "guest_sample_span_s": 10.264117465999988, "host_sample_span_s": 10.20441222190857, "host_snapshot_count": 21, "own_kvm_block_observed_thread_ids": [1468484, 1468485, 1468486, 1468487, 1468488, 1468489, 1468490, 1468491], "own_kvm_threads_cpu_s": 58.55, "own_kvm_threads_runqueue_wait_s": 0.627818654, "own_qemu_process_group_cpu_s": 59.26, "host_cpu0_7_busy_cpu_s": 63.17, "host_cpu0_7_steal_cpu_s": 0.0, "host_observer_cpu_s": 0.15}

@@ -1,0 +1,1101 @@
+{
+  "own_qemu_pid": 1468482,
+  "host_kernel_release": "7.3.0-070300rc3-generic",
+  "review_sha256": "5677f9527d2355079e686fa3dbce3dceeb8a83cf60303ad05b782c23882f3ed5",
+  "phases": {
+    "baseline": {
+      "total_frozen_metric": 544725.74,
+      "sockfd_ops_s": 165126.11,
+      "sockfd_reported_cpu_s": 8.23,
+      "guest_steal_cpu_s": 22.91,
+      "guest_sample_span_s": 9.67576478700002,
+      "host_sample_span_s": 9.251883506774902,
+      "host_snapshot_count": 19,
+      "own_kvm_block_observed_thread_ids": [
+        1468484,
+        1468485,
+        1468486,
+        1468487,
+        1468488,
+        1468489,
+        1468490,
+        1468491
+      ],
+      "own_kvm_threads_cpu_s": 39.17,
+      "own_kvm_threads_runqueue_wait_s": 21.725750319,
+      "own_qemu_process_group_cpu_s": 39.84,
+      "host_cpu0_7_busy_cpu_s": 71.36,
+      "host_cpu0_7_steal_cpu_s": 0.0,
+      "all_host_cpu_delta_ticks": {
+        "cpu": [
+          7498,
+          0,
+          1264,
+          13450,
+          37,
+          0,
+          4,
+          0,
+          6117,
+          0
+        ],
+        "cpu0": [
+          166,
+          0,
+          696,
+          64,
+          0,
+          0,
+          0,
+          0,
+          71,
+          0
+        ],
+        "cpu1": [
+          837,
+          0,
+          41,
+          47,
+          0,
+          0,
+          0,
+          0,
+          828,
+          0
+        ],
+        "cpu2": [
+          848,
+          0,
+          32,
+          46,
+          0,
+          0,
+          0,
+          0,
+          840,
+          0
+        ],
+        "cpu3": [
+          840,
+          0,
+          40,
+          45,
+          0,
+          0,
+          0,
+          0,
+          833,
+          0
+        ],
+        "cpu4": [
+          907,
+          0,
+          11,
+          8,
+          0,
+          0,
+          0,
+          0,
+          904,
+          0
+        ],
+        "cpu5": [
+          919,
+          0,
+          3,
+          3,
+          1,
+          0,
+          0,
+          0,
+          918,
+          0
+        ],
+        "cpu6": [
+          837,
+          0,
+          42,
+          45,
+          0,
+          0,
+          0,
+          0,
+          828,
+          0
+        ],
+        "cpu7": [
+          899,
+          0,
+          18,
+          9,
+          0,
+          0,
+          0,
+          0,
+          896,
+          0
+        ],
+        "cpu8": [
+          38,
+          0,
+          59,
+          811,
+          3,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "cpu9": [
+          26,
+          0,
+          27,
+          862,
+          11,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu10": [
+          36,
+          0,
+          35,
+          857,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu11": [
+          16,
+          0,
+          13,
+          900,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu12": [
+          21,
+          0,
+          12,
+          893,
+          5,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu13": [
+          20,
+          0,
+          18,
+          891,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu14": [
+          27,
+          0,
+          22,
+          875,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu15": [
+          15,
+          0,
+          13,
+          899,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu16": [
+          23,
+          0,
+          16,
+          887,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu17": [
+          16,
+          0,
+          11,
+          903,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "cpu18": [
+          28,
+          0,
+          38,
+          862,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu19": [
+          893,
+          0,
+          32,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu20": [
+          29,
+          0,
+          42,
+          856,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu21": [
+          21,
+          0,
+          23,
+          884,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "cpu22": [
+          17,
+          0,
+          10,
+          900,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu23": [
+          17,
+          0,
+          11,
+          902,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "top_visible_process_group_cpu": [
+        {
+          "pid": 1468482,
+          "comm": "qemu-system-x86",
+          "start_ticks": 26791285,
+          "ppid": 1468465,
+          "observations": 19,
+          "first": 1795871285.0202277,
+          "last": 1795871294.2721112,
+          "span_s": 9.251883506774902,
+          "cpu_s": 39.84,
+          "processors": {
+            "0": 2,
+            "1": 3,
+            "6": 1,
+            "7": 9,
+            "2": 2,
+            "3": 2
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 0.600342476,
+            "runqueue_wait_s": 1.399355705,
+            "timeslices": 9259
+          }
+        },
+        {
+          "pid": 1468967,
+          "comm": "git",
+          "start_ticks": 26802891,
+          "ppid": 1468794,
+          "observations": 19,
+          "first": 1795871285.0202277,
+          "last": 1795871294.2721112,
+          "span_s": 9.251883506774902,
+          "cpu_s": 9.11,
+          "processors": {
+            "19": 19
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 9.111545887,
+            "runqueue_wait_s": 0.140236277,
+            "timeslices": 92
+          }
+        },
+        {
+          "pid": 1467959,
+          "comm": "python3",
+          "start_ticks": 26778455,
+          "ppid": 1,
+          "observations": 19,
+          "first": 1795871285.0202277,
+          "last": 1795871294.2721112,
+          "span_s": 9.251883506774902,
+          "cpu_s": 0.14,
+          "processors": {
+            "19": 19
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 0.139774791,
+            "runqueue_wait_s": 0.111274598,
+            "timeslices": 54
+          }
+        },
+        {
+          "pid": 733965,
+          "comm": "omp",
+          "start_ticks": 12176357,
+          "ppid": 733960,
+          "observations": 19,
+          "first": 1795871285.0202277,
+          "last": 1795871294.2721112,
+          "span_s": 9.251883506774902,
+          "cpu_s": 0.1,
+          "processors": {
+            "10": 4,
+            "18": 1,
+            "23": 1,
+            "9": 1,
+            "8": 1,
+            "14": 6,
+            "12": 1,
+            "20": 1,
+            "11": 3
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 0.032588135,
+            "runqueue_wait_s": 2.6807e-05,
+            "timeslices": 162
+          }
+        },
+        {
+          "pid": 13385,
+          "comm": "coder",
+          "start_ticks": 1384852,
+          "ppid": 1,
+          "observations": 19,
+          "first": 1795871285.0202277,
+          "last": 1795871294.2721112,
+          "span_s": 9.251883506774902,
+          "cpu_s": 0.02,
+          "processors": {
+            "10": 19
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 0.0,
+            "runqueue_wait_s": 0.0,
+            "timeslices": 0
+          }
+        },
+        {
+          "pid": 1,
+          "comm": "coder",
+          "start_ticks": 1353033,
+          "ppid": 0,
+          "observations": 19,
+          "first": 1795871285.0202277,
+          "last": 1795871294.2721112,
+          "span_s": 9.251883506774902,
+          "cpu_s": 0.0,
+          "processors": {
+            "20": 19
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 0.0,
+            "runqueue_wait_s": 0.0,
+            "timeslices": 0
+          }
+        },
+        {
+          "pid": 8571,
+          "comm": "dockerd",
+          "start_ticks": 1373021,
+          "ppid": 1,
+          "observations": 19,
+          "first": 1795871285.0202277,
+          "last": 1795871294.2721112,
+          "span_s": 9.251883506774902,
+          "cpu_s": 0.0,
+          "processors": {
+            "14": 19
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 0.0,
+            "runqueue_wait_s": 0.0,
+            "timeslices": 0
+          }
+        },
+        {
+          "pid": 8626,
+          "comm": "containerd",
+          "start_ticks": 1373024,
+          "ppid": 8571,
+          "observations": 19,
+          "first": 1795871285.0202277,
+          "last": 1795871294.2721112,
+          "span_s": 9.251883506774902,
+          "cpu_s": 0.0,
+          "processors": {
+            "18": 19
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 0.0,
+            "runqueue_wait_s": 0.0,
+            "timeslices": 0
+          }
+        },
+        {
+          "pid": 733957,
+          "comm": "bash",
+          "start_ticks": 12176357,
+          "ppid": 13385,
+          "observations": 19,
+          "first": 1795871285.0202277,
+          "last": 1795871294.2721112,
+          "span_s": 9.251883506774902,
+          "cpu_s": 0.0,
+          "processors": {
+            "17": 19
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 0.0,
+            "runqueue_wait_s": 0.0,
+            "timeslices": 0
+          }
+        },
+        {
+          "pid": 733960,
+          "comm": "bash",
+          "start_ticks": 12176357,
+          "ppid": 733957,
+          "observations": 19,
+          "first": 1795871285.0202277,
+          "last": 1795871294.2721112,
+          "span_s": 9.251883506774902,
+          "cpu_s": 0.0,
+          "processors": {
+            "22": 19
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 0.0,
+            "runqueue_wait_s": 0.0,
+            "timeslices": 0
+          }
+        }
+      ],
+      "host_observer_cpu_s": 0.14
+    },
+    "post_rejit": {
+      "total_frozen_metric": 663098.09,
+      "sockfd_ops_s": 250159.23,
+      "sockfd_reported_cpu_s": 15.24,
+      "guest_steal_cpu_s": 0.63,
+      "guest_sample_span_s": 10.264117465999988,
+      "host_sample_span_s": 10.20441222190857,
+      "host_snapshot_count": 21,
+      "own_kvm_block_observed_thread_ids": [
+        1468484,
+        1468485,
+        1468486,
+        1468487,
+        1468488,
+        1468489,
+        1468490,
+        1468491
+      ],
+      "own_kvm_threads_cpu_s": 58.55,
+      "own_kvm_threads_runqueue_wait_s": 0.627818654,
+      "own_qemu_process_group_cpu_s": 59.26,
+      "host_cpu0_7_busy_cpu_s": 63.17,
+      "host_cpu0_7_steal_cpu_s": 0.0,
+      "all_host_cpu_delta_ticks": {
+        "cpu": [
+          6568,
+          0,
+          777,
+          17140,
+          64,
+          0,
+          59,
+          0,
+          5656,
+          0
+        ],
+        "cpu0": [
+          560,
+          0,
+          80,
+          379,
+          1,
+          0,
+          0,
+          0,
+          533,
+          0
+        ],
+        "cpu1": [
+          770,
+          0,
+          59,
+          187,
+          0,
+          0,
+          8,
+          0,
+          757,
+          0
+        ],
+        "cpu2": [
+          701,
+          0,
+          86,
+          234,
+          0,
+          0,
+          8,
+          0,
+          674,
+          0
+        ],
+        "cpu3": [
+          743,
+          0,
+          41,
+          233,
+          0,
+          0,
+          7,
+          0,
+          731,
+          0
+        ],
+        "cpu4": [
+          866,
+          0,
+          17,
+          137,
+          0,
+          0,
+          3,
+          0,
+          865,
+          0
+        ],
+        "cpu5": [
+          666,
+          0,
+          74,
+          272,
+          4,
+          0,
+          6,
+          0,
+          631,
+          0
+        ],
+        "cpu6": [
+          782,
+          0,
+          55,
+          186,
+          0,
+          0,
+          4,
+          0,
+          761,
+          0
+        ],
+        "cpu7": [
+          717,
+          0,
+          58,
+          252,
+          0,
+          0,
+          6,
+          0,
+          704,
+          0
+        ],
+        "cpu8": [
+          32,
+          0,
+          44,
+          942,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "cpu9": [
+          31,
+          0,
+          24,
+          958,
+          12,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu10": [
+          21,
+          0,
+          17,
+          977,
+          8,
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
+        "cpu11": [
+          20,
+          0,
+          22,
+          978,
+          3,
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
+        "cpu12": [
+          20,
+          0,
+          20,
+          984,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "cpu13": [
+          19,
+          0,
+          16,
+          988,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
+        "cpu14": [
+          21,
+          0,
+          19,
+          985,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "cpu15": [
+          19,
+          0,
+          16,
+          989,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu16": [
+          19,
+          0,
+          10,
+          997,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu17": [
+          19,
+          0,
+          15,
+          988,
+          1,
+          0,
+          4,
+          0,
+          0,
+          0
+        ],
+        "cpu18": [
+          17,
+          0,
+          7,
+          999,
+          3,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "cpu19": [
+          443,
+          0,
+          48,
+          514,
+          17,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu20": [
+          19,
+          0,
+          10,
+          994,
+          4,
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
+        "cpu21": [
+          18,
+          0,
+          6,
+          996,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu22": [
+          24,
+          0,
+          17,
+          984,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cpu23": [
+          19,
+          0,
+          17,
+          986,
+          0,
+          0,
+          3,
+          0,
+          0,
+          0
+        ]
+      },
+      "top_visible_process_group_cpu": [
+        {
+          "pid": 1468482,
+          "comm": "qemu-system-x86",
+          "start_ticks": 26791285,
+          "ppid": 1468465,
+          "observations": 21,
+          "first": 1795871328.7220604,
+          "last": 1795871338.9264727,
+          "span_s": 10.20441222190857,
+          "cpu_s": 59.26,
+          "processors": {
+            "1": 2,
+            "3": 3,
+            "6": 5,
+            "7": 3,
+            "2": 4,
+            "0": 1,
+            "5": 3
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 0.63915857,
+            "runqueue_wait_s": 0.073777443,
+            "timeslices": 8298
+          }
+        },
+        {
+          "pid": 1468967,
+          "comm": "git",
+          "start_ticks": 26802891,
+          "ppid": 1468794,
+          "observations": 8,
+          "first": 1795871328.7220604,
+          "last": 1795871332.320008,
+          "span_s": 3.597947597503662,
+          "cpu_s": 3.54,
+          "processors": {
+            "19": 8
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 3.543216423,
+            "runqueue_wait_s": 0.054897847,
+            "timeslices": 37
+          }
+        },
+        {
+          "pid": 1467959,
+          "comm": "python3",
+          "start_ticks": 26778455,
+          "ppid": 1,
+          "observations": 21,
+          "first": 1795871328.7220604,
+          "last": 1795871338.9264727,
+          "span_s": 10.20441222190857,
+          "cpu_s": 0.15,
+          "processors": {
+            "19": 21
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 0.154999207,
+            "runqueue_wait_s": 0.053572272,
+            "timeslices": 41
+          }
+        },
+        {
+          "pid": 733965,
+          "comm": "omp",
+          "start_ticks": 12176357,
+          "ppid": 733960,
+          "observations": 21,
+          "first": 1795871328.7220604,
+          "last": 1795871338.9264727,
+          "span_s": 10.20441222190857,
+          "cpu_s": 0.13,
+          "processors": {
+            "16": 6,
+            "10": 1,
+            "12": 3,
+            "13": 4,
+            "22": 1,
+            "1": 2,
+            "19": 1,
+            "15": 2,
+            "14": 1
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 0.032928085,
+            "runqueue_wait_s": 0.001094492,
+            "timeslices": 190
+          }
+        },
+        {
+          "pid": 1468794,
+          "comm": "python3",
+          "start_ticks": 26802525,
+          "ppid": 1468792,
+          "observations": 14,
+          "first": 1795871328.7220604,
+          "last": 1795871335.3730946,
+          "span_s": 6.651034116744995,
+          "cpu_s": 0.13,
+          "processors": {
+            "19": 14
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 0.136266796,
+            "runqueue_wait_s": 0.034329033,
+            "timeslices": 2790
+          }
+        },
+        {
+          "pid": 13385,
+          "comm": "coder",
+          "start_ticks": 1384852,
+          "ppid": 1,
+          "observations": 21,
+          "first": 1795871328.7220604,
+          "last": 1795871338.9264727,
+          "span_s": 10.20441222190857,
+          "cpu_s": 0.03,
+          "processors": {
+            "10": 21
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 0.0,
+            "runqueue_wait_s": 0.0,
+            "timeslices": 0
+          }
+        },
+        {
+          "pid": 1,
+          "comm": "coder",
+          "start_ticks": 1353033,
+          "ppid": 0,
+          "observations": 21,
+          "first": 1795871328.7220604,
+          "last": 1795871338.9264727,
+          "span_s": 10.20441222190857,
+          "cpu_s": 0.0,
+          "processors": {
+            "20": 21
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 4.0619e-05,
+            "runqueue_wait_s": 0.0,
+            "timeslices": 1
+          }
+        },
+        {
+          "pid": 8571,
+          "comm": "dockerd",
+          "start_ticks": 1373021,
+          "ppid": 1,
+          "observations": 21,
+          "first": 1795871328.7220604,
+          "last": 1795871338.9264727,
+          "span_s": 10.20441222190857,
+          "cpu_s": 0.0,
+          "processors": {
+            "14": 21
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 0.0,
+            "runqueue_wait_s": 0.0,
+            "timeslices": 0
+          }
+        },
+        {
+          "pid": 8626,
+          "comm": "containerd",
+          "start_ticks": 1373024,
+          "ppid": 8571,
+          "observations": 21,
+          "first": 1795871328.7220604,
+          "last": 1795871338.9264727,
+          "span_s": 10.20441222190857,
+          "cpu_s": 0.0,
+          "processors": {
+            "18": 21
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 0.0,
+            "runqueue_wait_s": 0.0,
+            "timeslices": 0
+          }
+        },
+        {
+          "pid": 733957,
+          "comm": "bash",
+          "start_ticks": 12176357,
+          "ppid": 13385,
+          "observations": 21,
+          "first": 1795871328.7220604,
+          "last": 1795871338.9264727,
+          "span_s": 10.20441222190857,
+          "cpu_s": 0.0,
+          "processors": {
+            "17": 21
+          },
+          "wchan": {},
+          "sched_delta": {
+            "run_s": 0.0,
+            "runqueue_wait_s": 0.0,
+            "timeslices": 0
+          }
+        }
+      ],
+      "host_observer_cpu_s": 0.15
+    }
+  },
+  "total_ratio": 1.2173063274006475,
+  "sockfd_ratio": 1.5149586579614818,
+  "interpretation": [
+    "The scheduling direction reversed relative to1465233: current eBPF phase has much more gueststeal and actual own-QEMU hostthread runqueue wait. This rules out treating native-only gueststeal as an invariant of this code/image/stats0 protocol.",
+    "Eight own descendant-QEMU threads were each observed in kvm_vcpu_block, with affinity0-7 recorded. Their names do not encode vCPU numbers here; no exact CPU-index mapping is claimed. Endpoints/spans differ slightly between guest and host, so summed waits are not an exact identity.",
+    "Own hostthread runnable waiting is observed, but the responsible competitor is not established. Visible process CPU is not a complete host census: namespaces, short-lived processes and endpoint sampling gaps remain. Do not kill, repin or change benchmark/kernel settings based on this record.",
+    "Historical3x180s0.877x cause remains unresolved; no stats0-specific compiler/code/global mismatch was established by the inspected controls. Current short ratios are diagnostics under unequal scheduling, not speedup acceptance.",
+    "Proceed to the ordered current-image refresh and six-app10s alignment check; retain this scheduling limitation and frozen app2689a430."
+  ]
+}
