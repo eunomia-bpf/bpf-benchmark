@@ -1,0 +1,97 @@
+{
+  "scope": "real per-field header pointer store and original three-step assignment visit",
+  "source_sha256": "1cc863c51d52378ab9b3d6f672276bae8d33ee7e19088a1df70691882d81e3cf",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-header-memory/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.8612654209136963,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderMemory"
+      ],
+      "exit": 0,
+      "seconds": 2.043691396713257,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.7472803592681885,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-header-memory/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.293652296066284,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 229,
+  "full_jobs": 1519,
+  "root_queries": [
+    "store",
+    "visit",
+    "named_frame"
+  ],
+  "actual_header_source_commit": "2d75282c7b0a9e68f85efa2f2e8497f39983cd40",
+  "actual_fields": 12,
+  "actual_store": "Mint64 Vptr(actual source block,0) at actual header block offset8*i",
+  "storage": "current actual allocation rights over first96bytes; finite bounds and8byte alignment derive each store",
+  "readback": "same real store; nonoverlap preserves other11 header pointers; actual distinct allocation names frame all other locals",
+  "execution": "original sequence/assign/skip three internal steps with SAME store, accepted original source and lvalue evaluations and casts",
+  "preserves": "all other blocks, caller frame, access and allocation frontier; exact same temporary environment",
+  "all_twelve_sequential_execution_proved_here": false,
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
