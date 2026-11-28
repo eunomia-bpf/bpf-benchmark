@@ -1,0 +1,76 @@
+550:     sym: SymInfo,
+551:     base_in_blob: usize,
+552:     /// Local-IP-space (i.e. byte offset within the symbol's source bytes)
+553:     /// of each decoded instruction that survived (alignment NOPs are
+554:     /// dropped, RETs are replaced -- but the placeholder JMP keeps the
+555:     /// original RET's local IP).
+556:     insn_local_ip: Vec<u64>,
+557:     /// Offset of each surviving instruction's first byte within this
+558:     /// symbol's encoded slice, as reported by iced after encoding.
+559:     new_offset_in_sym: Vec<u32>,
+560: }
+561: fn push_x86_synthetic(
+562:     local: &mut Vec<Instruction>,
+563:     kinds: &mut Vec<Option<PatchKind>>,
+564:     insn_local_ip: &mut Vec<u64>,
+565:     next_ip: &mut u64,
+566:     mut insn: Instruction,
+567: ) -> Result<()> {
+568:     let len = u64::try_from(insn.len()).map_err(|_| anyhow!("instruction length overflow"))?;
+569:     insn.set_ip(*next_ip);
+570:     *next_ip = next_ip
+571:         .checked_add(len.max(1))
+572:         .ok_or_else(|| anyhow!("synthetic x86 instruction IP overflow"))?;
+573:     local.push(insn);
+574:     kinds.push(None);
+575:     insn_local_ip.push(u64::MAX);
+576:     Ok(())
+577: }
+578: 
+579: fn push_x86_replacement(
+580:     local: &mut Vec<Instruction>,
+581:     kinds: &mut Vec<Option<PatchKind>>,
+582:     insn_local_ip: &mut Vec<u64>,
+583:     local_ip: u64,
+584:     mut insn: Instruction,
+585:     kind: Option<PatchKind>,
+586: ) {
+587:     insn.set_ip(local_ip);
+588:     local.push(insn);
+589:     kinds.push(kind);
+590:     insn_local_ip.push(local_ip);
+591: }
+592: 
+593: fn x86_new_offset_for_local_target(
+594:     sym_name: &str,
+595:     sym_size: u64,
+596:     insn_local_ip: &[u64],
+597:     new_offsets: &[u32],
+598:     encoded_len: usize,
+599:     target: u64,
+600: ) -> Result<usize> {
+601:     if target == sym_size {
+602:         return Ok(encoded_len);
+603:     }
+604:     if target > sym_size {
+605:         bail!("x86 branch target {target:#x} in {sym_name} exceeds symbol size {sym_size:#x}");
+606:     }
+607:     let Some((idx, _)) = insn_local_ip
+608:         .iter()
+609:         .enumerate()
+610:         .filter(|(_, &ip)| ip != u64::MAX && ip >= target)
+611:         .min_by_key(|(_, &ip)| ip)
+612:     else {
+613:         bail!("x86 branch target {target:#x} in {sym_name} has no surviving instruction");
+614:     };
+615:     let off = *new_offsets
+616:         .get(idx)
+617:         .ok_or_else(|| anyhow!("missing encoded offset for branch target in {sym_name}"))?;
+618:     if off == u32::MAX {
+619:         bail!("rewritten branch target instruction in {sym_name} has no stable offset");
+620:     }
+621:     Ok(off as usize)
+622: }
+623: 
+624: fn x86_local_branch_target_needs_remap(
+625:     sym_size: u64,

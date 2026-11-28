@@ -1,0 +1,1361 @@
+app	version	phase	id	truncated_name	type	calls	time_ns	ns_per_call	may29_parser_retained	jited_bytes	xlated_bytes
+cilium	may29	baseline	111	cil_xdp_entry	xdp	2	1651	825.5	0	509	880
+cilium	may29	baseline	113	tail_drop_notif	sched_cls	0	0		0	405	752
+cilium	may29	baseline	115	cil_to_host	sched_cls	2	2248	1124.0	0	859	1512
+cilium	may29	baseline	116	tail_handle_ipv	sched_cls	0	0		0	8254	14392
+cilium	may29	baseline	117	tail_handle_sna	sched_cls	0	0		0	12954	21584
+cilium	may29	baseline	118	cil_from_host	sched_cls	2	3193	1596.5	0	3945	7040
+cilium	may29	baseline	119	tail_nodeport_n	sched_cls	0	0		0	8881	15112
+cilium	may29	baseline	120	tail_nodeport_n	sched_cls	0	0		0	6566	11024
+cilium	may29	baseline	121	cil_host_policy	sched_cls	0	0		0	16	16
+cilium	may29	baseline	122	tail_handle_ipv	sched_cls	0	0		0	1262	2112
+cilium	may29	baseline	124	tail_drop_notif	sched_cls	0	0		0	405	752
+cilium	may29	baseline	125	tail_handle_ipv	sched_cls	0	0		0	1262	2112
+cilium	may29	baseline	126	tail_no_service	sched_cls	0	0		0	2792	4952
+cilium	may29	baseline	127	cil_to_host	sched_cls	2	1734	867.0	0	859	1512
+cilium	may29	baseline	129	tail_handle_sna	sched_cls	0	0		0	12981	21632
+cilium	may29	baseline	132	tail_nodeport_n	sched_cls	0	0		0	8881	15112
+cilium	may29	baseline	133	tail_nodeport_n	sched_cls	0	0		0	6566	11024
+cilium	may29	baseline	134	tail_handle_ipv	sched_cls	0	0		0	8242	14312
+cilium	may29	baseline	135	tail_handle_ipv	sched_cls	0	0		0	8242	14312
+cilium	may29	baseline	136	tail_handle_sna	sched_cls	0	0		0	12981	21632
+cilium	may29	baseline	137	tail_no_service	sched_cls	0	0		0	2792	4952
+cilium	may29	baseline	140	tail_handle_ipv	sched_cls	0	0		0	1262	2112
+cilium	may29	baseline	141	cil_to_netdev	sched_cls	2	2842	1421.0	0	5222	8912
+cilium	may29	baseline	143	cil_from_netdev	sched_cls	2	2908	1454.0	0	3386	5936
+cilium	may29	baseline	144	tail_drop_notif	sched_cls	0	0		0	405	752
+cilium	may29	baseline	145	tail_nodeport_n	sched_cls	0	0		0	8881	15112
+cilium	may29	baseline	146	tail_nodeport_n	sched_cls	0	0		0	6566	11024
+cilium	may29	baseline	147	tail_drop_notif	sched_cls	0	0		0	382	696
+cilium	may29	baseline	148	tail_ipv4_ct_in	sched_cls	0	0		0	5210	9224
+cilium	may29	baseline	150	tail_no_service	sched_cls	0	0		0	2774	4920
+cilium	may29	baseline	151	tail_ipv4_ct_eg	sched_cls	0	0		0	5375	9592
+cilium	may29	baseline	152	cil_from_contai	sched_cls	421029694	204595457442	485.94068389390134	1	1089	1720
+cilium	may29	baseline	153	cil_lxc_policy	sched_cls	0	0		0	5760	10104
+cilium	may29	baseline	154	tail_ipv4_polic	sched_cls	0	0		0	5580	9904
+cilium	may29	baseline	155	cil_lxc_policy_	sched_cls	0	0		0	16	16
+cilium	may29	baseline	156	tail_nodeport_r	sched_cls	0	0		0	3622	6368
+cilium	may29	baseline	157	tail_ipv4_to_en	sched_cls	0	0		0	5802	10368
+cilium	may29	baseline	158	tail_handle_ipv	sched_cls	0	0		0	6216	10984
+cilium	may29	baseline	159	tail_handle_ipv	sched_cls	0	0		0	6398	11104
+cilium	may29	baseline	160	tail_handle_arp	sched_cls	0	0		0	927	1616
+cilium	may29	baseline	161	tail_ipv4_to_en	sched_cls	0	0		0	5802	10368
+cilium	may29	baseline	162	tail_handle_ipv	sched_cls	0	0		0	6398	11104
+cilium	may29	baseline	163	tail_drop_notif	sched_cls	0	0		0	382	696
+cilium	may29	baseline	164	tail_ipv4_ct_in	sched_cls	0	0		0	5210	9224
+cilium	may29	baseline	165	tail_ipv4_ct_eg	sched_cls	0	0		0	5375	9592
+cilium	may29	baseline	166	cil_lxc_policy_	sched_cls	0	0		0	16	16
+cilium	may29	baseline	167	tail_ipv4_polic	sched_cls	0	0		0	5580	9904
+cilium	may29	baseline	168	cil_lxc_policy	sched_cls	0	0		0	5760	10104
+cilium	may29	baseline	169	tail_nodeport_r	sched_cls	0	0		0	3622	6368
+cilium	may29	baseline	170	tail_no_service	sched_cls	0	0		0	2774	4920
+cilium	may29	baseline	171	tail_handle_arp	sched_cls	0	0		0	927	1616
+cilium	may29	baseline	173	cil_from_contai	sched_cls	421037204	206902272460	491.41090263367795	1	1089	1720
+cilium	may29	baseline	174	tail_handle_ipv	sched_cls	0	0		0	6216	10984
+cilium	may29	post_rejit	353	cil_xdp_entry	xdp	2	2023	1011.5	0	1104	152
+cilium	may29	post_rejit	355	tail_handle_sna	sched_cls	0	0		0	13230	1680
+cilium	may29	post_rejit	357	tail_nodeport_n	sched_cls	0	0		0	5975	768
+cilium	may29	post_rejit	359	tail_nodeport_n	sched_cls	0	0		0	8321	1056
+cilium	may29	post_rejit	361	cil_from_host	sched_cls	1	1796	1796.0	0	3779	496
+cilium	may29	post_rejit	363	tail_handle_ipv	sched_cls	0	0		0	12271	1552
+cilium	may29	post_rejit	367	tail_handle_ipv	sched_cls	0	0		0	1250	176
+cilium	may29	post_rejit	369	cil_host_policy	sched_cls	0	0		0	16	24
+cilium	may29	post_rejit	371	tail_drop_notif	sched_cls	0	0		0	1121	152
+cilium	may29	post_rejit	375	cil_to_host	sched_cls	1	1091	1091.0	0	2914	384
+cilium	may29	post_rejit	377	tail_handle_ipv	sched_cls	0	0		0	1250	176
+cilium	may29	post_rejit	381	tail_nodeport_n	sched_cls	0	0		0	5975	768
+cilium	may29	post_rejit	383	tail_drop_notif	sched_cls	0	0		0	1121	152
+cilium	may29	post_rejit	385	tail_handle_sna	sched_cls	0	0		0	13230	1680
+cilium	may29	post_rejit	387	tail_no_service	sched_cls	0	0		0	2269	304
+cilium	may29	post_rejit	393	cil_to_host	sched_cls	1	2165	2165.0	0	2914	384
+cilium	may29	post_rejit	395	tail_nodeport_n	sched_cls	0	0		0	8321	1056
+cilium	may29	post_rejit	399	tail_handle_ipv	sched_cls	0	0		0	12271	1552
+cilium	may29	post_rejit	403	tail_no_service	sched_cls	0	0		0	2269	304
+cilium	may29	post_rejit	405	tail_handle_ipv	sched_cls	0	0		0	1250	176
+cilium	may29	post_rejit	407	tail_nodeport_n	sched_cls	0	0		0	8321	1056
+cilium	may29	post_rejit	409	tail_handle_sna	sched_cls	0	0		0	13230	1680
+cilium	may29	post_rejit	411	tail_handle_ipv	sched_cls	0	0		0	12271	1552
+cilium	may29	post_rejit	413	cil_to_netdev	sched_cls	2	2419	1209.5	0	6758	864
+cilium	may29	post_rejit	415	tail_nodeport_n	sched_cls	0	0		0	5975	768
+cilium	may29	post_rejit	417	tail_drop_notif	sched_cls	0	0		0	1121	152
+cilium	may29	post_rejit	419	cil_from_netdev	sched_cls	2	2274	1137.0	0	3619	464
+cilium	may29	post_rejit	425	cil_from_contai	sched_cls	944366682	248856443360	263.51675477682727	1	1709	240
+cilium	may29	post_rejit	427	tail_handle_ipv	sched_cls	0	0		0	6121	784
+cilium	may29	post_rejit	429	tail_nodeport_r	sched_cls	0	0		0	3433	448
+cilium	may29	post_rejit	433	tail_no_service	sched_cls	0	0		0	2241	304
+cilium	may29	post_rejit	435	tail_ipv4_ct_in	sched_cls	0	0		0	4986	640
+cilium	may29	post_rejit	437	cil_lxc_policy_	sched_cls	0	0		0	16	24
+cilium	may29	post_rejit	439	tail_ipv4_to_en	sched_cls	0	0		0	7773	992
+cilium	may29	post_rejit	441	tail_handle_ipv	sched_cls	0	0		0	13639	1728
+cilium	may29	post_rejit	443	tail_ipv4_polic	sched_cls	0	0		0	8233	1040
+cilium	may29	post_rejit	445	tail_handle_arp	sched_cls	0	0		0	770	112
+cilium	may29	post_rejit	447	cil_lxc_policy	sched_cls	0	0		0	5549	720
+cilium	may29	post_rejit	449	tail_drop_notif	sched_cls	0	0		0	819	120
+cilium	may29	post_rejit	451	tail_ipv4_ct_eg	sched_cls	0	0		0	6410	816
+cilium	may29	post_rejit	453	tail_ipv4_to_en	sched_cls	0	0		0	7773	992
+cilium	may29	post_rejit	455	tail_handle_arp	sched_cls	0	0		0	770	112
+cilium	may29	post_rejit	457	tail_drop_notif	sched_cls	0	0		0	819	120
+cilium	may29	post_rejit	459	tail_ipv4_polic	sched_cls	0	0		0	8233	1040
+cilium	may29	post_rejit	461	tail_ipv4_ct_in	sched_cls	0	0		0	4986	640
+cilium	may29	post_rejit	463	tail_handle_ipv	sched_cls	0	0		0	13639	1728
+cilium	may29	post_rejit	465	cil_from_contai	sched_cls	951601648	248452405736	261.08866694186304	1	1709	240
+cilium	may29	post_rejit	467	cil_lxc_policy_	sched_cls	0	0		0	16	24
+cilium	may29	post_rejit	469	cil_lxc_policy	sched_cls	0	0		0	5549	720
+cilium	may29	post_rejit	471	tail_ipv4_ct_eg	sched_cls	0	0		0	6410	816
+cilium	may29	post_rejit	473	tail_nodeport_r	sched_cls	0	0		0	3433	448
+cilium	may29	post_rejit	475	tail_no_service	sched_cls	0	0		0	2241	304
+cilium	may29	post_rejit	477	tail_handle_ipv	sched_cls	0	0		0	6121	784
+cilium	nov28	baseline	111	cil_xdp_entry	xdp	2	1775	887.5	0	513	880
+cilium	nov28	baseline	113	cil_to_host	sched_cls	2	1905	952.5	0	863	1512
+cilium	nov28	baseline	114	tail_handle_sna	sched_cls	0	0		0	12958	21584
+cilium	nov28	baseline	115	tail_nodeport_n	sched_cls	0	0		0	6570	11024
+cilium	nov28	baseline	116	tail_drop_notif	sched_cls	0	0		0	409	752
+cilium	nov28	baseline	117	cil_from_host	sched_cls	2	3147	1573.5	0	3949	7040
+cilium	nov28	baseline	118	tail_nodeport_n	sched_cls	0	0		0	8885	15112
+cilium	nov28	baseline	120	tail_handle_ipv	sched_cls	0	0		0	8258	14392
+cilium	nov28	baseline	121	cil_host_policy	sched_cls	0	0		0	20	16
+cilium	nov28	baseline	122	tail_handle_ipv	sched_cls	0	0		0	1268	2112
+cilium	nov28	baseline	123	tail_handle_ipv	sched_cls	0	0		0	8246	14312
+cilium	nov28	baseline	124	tail_drop_notif	sched_cls	0	0		0	409	752
+cilium	nov28	baseline	127	cil_to_host	sched_cls	2	1500	750.0	0	863	1512
+cilium	nov28	baseline	129	tail_handle_ipv	sched_cls	0	0		0	1268	2112
+cilium	nov28	baseline	130	tail_no_service	sched_cls	0	0		0	2796	4952
+cilium	nov28	baseline	131	tail_handle_sna	sched_cls	0	0		0	12985	21632
+cilium	nov28	baseline	132	tail_nodeport_n	sched_cls	0	0		0	6570	11024
+cilium	nov28	baseline	133	tail_nodeport_n	sched_cls	0	0		0	8885	15112
+cilium	nov28	baseline	135	tail_drop_notif	sched_cls	0	0		0	409	752
+cilium	nov28	baseline	136	cil_from_netdev	sched_cls	2	2979	1489.5	0	3390	5936
+cilium	nov28	baseline	137	tail_handle_ipv	sched_cls	0	0		0	1268	2112
+cilium	nov28	baseline	138	tail_nodeport_n	sched_cls	0	0		0	8885	15112
+cilium	nov28	baseline	139	tail_no_service	sched_cls	0	0		0	2796	4952
+cilium	nov28	baseline	140	tail_nodeport_n	sched_cls	0	0		0	6570	11024
+cilium	nov28	baseline	141	tail_handle_ipv	sched_cls	0	0		0	8246	14312
+cilium	nov28	baseline	144	cil_to_netdev	sched_cls	2	3085	1542.5	0	5226	8912
+cilium	nov28	baseline	145	tail_handle_sna	sched_cls	0	0		0	12985	21632
+cilium	nov28	baseline	147	tail_ipv4_ct_eg	sched_cls	0	0		0	5379	9592
+cilium	nov28	baseline	148	tail_handle_arp	sched_cls	0	0		0	931	1616
+cilium	nov28	baseline	149	cil_lxc_policy_	sched_cls	0	0		0	20	16
+cilium	nov28	baseline	150	tail_ipv4_polic	sched_cls	0	0		0	5584	9904
+cilium	nov28	baseline	151	cil_lxc_policy	sched_cls	0	0		0	5764	10104
+cilium	nov28	baseline	152	tail_ipv4_to_en	sched_cls	0	0		0	5806	10368
+cilium	nov28	baseline	153	tail_ipv4_ct_in	sched_cls	0	0		0	5214	9224
+cilium	nov28	baseline	154	tail_handle_ipv	sched_cls	0	0		0	6404	11104
+cilium	nov28	baseline	155	tail_handle_ipv	sched_cls	0	0		0	6220	10984
+cilium	nov28	baseline	156	tail_no_service	sched_cls	0	0		0	2778	4920
+cilium	nov28	baseline	158	tail_drop_notif	sched_cls	0	0		0	386	696
+cilium	nov28	baseline	159	cil_from_contai	sched_cls	342215925	243936275199	712.8139206233608	1	1093	1720
+cilium	nov28	baseline	160	tail_nodeport_r	sched_cls	0	0		0	3626	6368
+cilium	nov28	baseline	161	cil_lxc_policy	sched_cls	0	0		0	5764	10104
+cilium	nov28	baseline	162	tail_ipv4_ct_eg	sched_cls	0	0		0	5379	9592
+cilium	nov28	baseline	163	cil_from_contai	sched_cls	342211311	244637599604	714.8729213219957	1	1093	1720
+cilium	nov28	baseline	164	tail_handle_ipv	sched_cls	0	0		0	6404	11104
+cilium	nov28	baseline	165	tail_nodeport_r	sched_cls	0	0		0	3626	6368
+cilium	nov28	baseline	166	tail_no_service	sched_cls	0	0		0	2778	4920
+cilium	nov28	baseline	167	tail_ipv4_to_en	sched_cls	0	0		0	5806	10368
+cilium	nov28	baseline	168	tail_ipv4_ct_in	sched_cls	0	0		0	5214	9224
+cilium	nov28	baseline	169	tail_ipv4_polic	sched_cls	0	0		0	5584	9904
+cilium	nov28	baseline	170	tail_drop_notif	sched_cls	0	0		0	386	696
+cilium	nov28	baseline	171	tail_handle_ipv	sched_cls	0	0		0	6220	10984
+cilium	nov28	baseline	172	cil_lxc_policy_	sched_cls	0	0		0	20	16
+cilium	nov28	baseline	173	tail_handle_arp	sched_cls	0	0		0	931	1616
+cilium	nov28	post_rejit	353	cil_xdp_entry	xdp	2	1831	915.5	0	1174	16
+cilium	nov28	post_rejit	355	cil_host_policy	sched_cls	0	0		0	20	16
+cilium	nov28	post_rejit	357	cil_to_host	sched_cls	1	2813	2813.0	0	437	16
+cilium	nov28	post_rejit	359	tail_handle_sna	sched_cls	0	0		0	11240	16
+cilium	nov28	post_rejit	363	tail_drop_notif	sched_cls	0	0		0	253	16
+cilium	nov28	post_rejit	367	tail_handle_ipv	sched_cls	0	0		0	1926	16
+cilium	nov28	post_rejit	369	cil_from_host	sched_cls	1	1700	1700.0	0	3121	16
+cilium	nov28	post_rejit	371	tail_handle_ipv	sched_cls	0	0		0	6531	16
+cilium	nov28	post_rejit	373	tail_nodeport_n	sched_cls	0	0		0	6361	16
+cilium	nov28	post_rejit	375	tail_nodeport_n	sched_cls	0	0		0	5260	16
+cilium	nov28	post_rejit	377	cil_to_host	sched_cls	1	928	928.0	0	437	16
+cilium	nov28	post_rejit	379	tail_handle_ipv	sched_cls	0	0		0	1926	16
+cilium	nov28	post_rejit	381	tail_nodeport_n	sched_cls	0	0		0	5260	16
+cilium	nov28	post_rejit	383	tail_drop_notif	sched_cls	0	0		0	253	16
+cilium	nov28	post_rejit	385	tail_handle_sna	sched_cls	0	0		0	11251	16
+cilium	nov28	post_rejit	387	tail_no_service	sched_cls	0	0		0	2010	16
+cilium	nov28	post_rejit	391	tail_handle_ipv	sched_cls	0	0		0	6526	16
+cilium	nov28	post_rejit	395	tail_nodeport_n	sched_cls	0	0		0	6361	16
+cilium	nov28	post_rejit	401	tail_handle_sna	sched_cls	0	0		0	11171	16
+cilium	nov28	post_rejit	407	tail_nodeport_n	sched_cls	0	0		0	6361	16
+cilium	nov28	post_rejit	409	tail_handle_ipv	sched_cls	0	0		0	1926	16
+cilium	nov28	post_rejit	411	tail_nodeport_n	sched_cls	0	0		0	5260	16
+cilium	nov28	post_rejit	413	cil_from_netdev	sched_cls	2	2629	1314.5	0	2961	16
+cilium	nov28	post_rejit	415	tail_no_service	sched_cls	0	0		0	2010	16
+cilium	nov28	post_rejit	417	cil_to_netdev	sched_cls	2	2412	1206.0	0	3483	16
+cilium	nov28	post_rejit	419	tail_handle_ipv	sched_cls	0	0		0	6526	16
+cilium	nov28	post_rejit	423	tail_drop_notif	sched_cls	0	0		0	253	16
+cilium	nov28	post_rejit	425	tail_ipv4_ct_in	sched_cls	0	0		0	3155	16
+cilium	nov28	post_rejit	429	tail_ipv4_to_en	sched_cls	0	0		0	6012	16
+cilium	nov28	post_rejit	431	tail_nodeport_r	sched_cls	0	0		0	2619	16
+cilium	nov28	post_rejit	433	cil_lxc_policy_	sched_cls	0	0		0	20	16
+cilium	nov28	post_rejit	435	cil_lxc_policy	sched_cls	0	0		0	3616	16
+cilium	nov28	post_rejit	437	tail_handle_arp	sched_cls	0	0		0	773	16
+cilium	nov28	post_rejit	439	tail_handle_ipv	sched_cls	0	0		0	6499	16
+cilium	nov28	post_rejit	441	tail_drop_notif	sched_cls	0	0		0	253	16
+cilium	nov28	post_rejit	443	tail_handle_ipv	sched_cls	0	0		0	5068	16
+cilium	nov28	post_rejit	445	cil_from_contai	sched_cls	378782347	222829501883	588.2784761429233	1	842	16
+cilium	nov28	post_rejit	447	tail_ipv4_polic	sched_cls	0	0		0	5176	16
+cilium	nov28	post_rejit	449	tail_no_service	sched_cls	0	0		0	2010	16
+cilium	nov28	post_rejit	451	tail_ipv4_ct_eg	sched_cls	0	0		0	4053	16
+cilium	nov28	post_rejit	453	tail_ipv4_polic	sched_cls	0	0		0	5176	16
+cilium	nov28	post_rejit	455	tail_ipv4_to_en	sched_cls	0	0		0	6012	16
+cilium	nov28	post_rejit	457	tail_handle_arp	sched_cls	0	0		0	773	16
+cilium	nov28	post_rejit	459	tail_no_service	sched_cls	0	0		0	2010	16
+cilium	nov28	post_rejit	461	cil_lxc_policy	sched_cls	0	0		0	3616	16
+cilium	nov28	post_rejit	463	tail_ipv4_ct_eg	sched_cls	0	0		0	4053	16
+cilium	nov28	post_rejit	465	cil_from_contai	sched_cls	378711917	215522823785	569.0943804786581	1	842	16
+cilium	nov28	post_rejit	467	tail_drop_notif	sched_cls	0	0		0	253	16
+cilium	nov28	post_rejit	469	tail_nodeport_r	sched_cls	0	0		0	2619	16
+cilium	nov28	post_rejit	471	cil_lxc_policy_	sched_cls	0	0		0	20	16
+cilium	nov28	post_rejit	473	tail_ipv4_ct_in	sched_cls	0	0		0	3155	16
+cilium	nov28	post_rejit	475	tail_handle_ipv	sched_cls	0	0		0	6499	16
+cilium	nov28	post_rejit	479	tail_handle_ipv	sched_cls	0	0		0	5068	16
+tetragon	may29	baseline	100	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	101	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	102	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	103	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	104	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	105	generic_kprobe_	kprobe	172126404	142790985888	829.5704933683504	1	1875	3304
+tetragon	may29	baseline	106	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	107	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	108	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	109	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	110	generic_kprobe_	kprobe	171310255	143836233700	839.6241877055171	1	1875	3304
+tetragon	may29	baseline	111	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	112	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	113	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	114	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	115	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	116	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	117	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	118	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	119	generic_kprobe_	kprobe	0	0		0	1875	3304
+tetragon	may29	baseline	120	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	121	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	122	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	123	generic_kprobe_	kprobe	0	0		0	1875	3304
+tetragon	may29	baseline	124	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	125	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	126	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	127	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	128	generic_kprobe_	kprobe	204661603	43397281322	212.04408001240955	1	1875	3304
+tetragon	may29	baseline	129	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	130	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	131	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	132	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	133	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	134	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	135	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	136	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	137	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	138	generic_kprobe_	kprobe	252070594	135511905975	537.5950594816308	1	1875	3304
+tetragon	may29	baseline	139	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	140	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	141	generic_retkpro	kprobe	0	0		0	17466	28616
+tetragon	may29	baseline	142	generic_retkpro	kprobe	0	0		0	4391	7784
+tetragon	may29	baseline	143	generic_retkpro	kprobe	252070594	12646459299	50.170307842413386	1	15271	26384
+tetragon	may29	baseline	144	generic_retkpro	kprobe	0	0		0	799	1360
+tetragon	may29	baseline	145	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	146	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	147	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	148	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	149	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	150	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	151	generic_kprobe_	kprobe	58508681	356603165890	6094.876175554188	1	1875	3304
+tetragon	may29	baseline	152	generic_retkpro	kprobe	0	0		0	4391	7784
+tetragon	may29	baseline	153	generic_retkpro	kprobe	0	0		0	799	1360
+tetragon	may29	baseline	154	generic_retkpro	kprobe	58508681	3059685322	52.294553042479286	1	15271	26384
+tetragon	may29	baseline	155	generic_retkpro	kprobe	0	0		0	17466	28616
+tetragon	may29	baseline	156	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	157	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	158	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	159	generic_kprobe_	kprobe	0	0		0	1875	3304
+tetragon	may29	baseline	160	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	161	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	162	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	163	generic_retkpro	kprobe	0	0		0	799	1360
+tetragon	may29	baseline	164	generic_retkpro	kprobe	0	0		0	15271	26384
+tetragon	may29	baseline	165	generic_retkpro	kprobe	0	0		0	17466	28616
+tetragon	may29	baseline	166	generic_retkpro	kprobe	0	0		0	4391	7784
+tetragon	may29	baseline	167	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	168	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	169	generic_kprobe_	kprobe	0	0		0	1875	3304
+tetragon	may29	baseline	170	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	171	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	172	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	173	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	174	generic_retkpro	kprobe	0	0		0	4391	7784
+tetragon	may29	baseline	175	generic_retkpro	kprobe	0	0		0	17466	28616
+tetragon	may29	baseline	176	generic_retkpro	kprobe	0	0		0	15271	26384
+tetragon	may29	baseline	177	generic_retkpro	kprobe	0	0		0	799	1360
+tetragon	may29	baseline	178	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	179	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	180	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	181	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	182	generic_kprobe_	kprobe	0	0		0	1875	3304
+tetragon	may29	baseline	183	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	184	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	185	generic_retkpro	kprobe	0	0		0	17466	28616
+tetragon	may29	baseline	186	generic_retkpro	kprobe	0	0		0	799	1360
+tetragon	may29	baseline	187	generic_retkpro	kprobe	0	0		0	15271	26384
+tetragon	may29	baseline	188	generic_retkpro	kprobe	0	0		0	4391	7784
+tetragon	may29	baseline	189	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	190	generic_kprobe_	kprobe	0	0		0	1875	3304
+tetragon	may29	baseline	191	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	192	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	193	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	194	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	195	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	196	generic_kprobe_	kprobe	0	0		0	1875	3304
+tetragon	may29	baseline	197	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	198	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	199	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	200	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	201	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	202	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	203	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	204	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	205	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	206	generic_kprobe_	kprobe	3	15334	5111.333333333333	0	1875	3304
+tetragon	may29	baseline	207	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	208	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	209	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	210	generic_tracepo	tracepoint	0	0		0	12210	19944
+tetragon	may29	baseline	211	generic_tracepo	tracepoint	0	0		0	5419	9656
+tetragon	may29	baseline	212	generic_tracepo	tracepoint	0	0		0	15680	26888
+tetragon	may29	baseline	213	generic_tracepo	tracepoint	1408592744	1018044368141	722.7386144628614	1	14938	26568
+tetragon	may29	baseline	214	generic_tracepo	tracepoint	0	0		0	17561	28816
+tetragon	may29	baseline	215	generic_tracepo	tracepoint	0	0		0	1877	3160
+tetragon	may29	baseline	216	generic_rawtp_o	raw_tracepoint	0	0		0	1877	3160
+tetragon	may29	baseline	217	generic_rawtp_p	raw_tracepoint	0	0		0	12207	19944
+tetragon	may29	baseline	218	generic_rawtp_f	raw_tracepoint	0	0		0	17561	28816
+tetragon	may29	baseline	219	generic_rawtp_e	raw_tracepoint	3	13152	4384.0	0	1875	3304
+tetragon	may29	baseline	220	generic_rawtp_s	raw_tracepoint	0	0		0	741	1176
+tetragon	may29	baseline	221	generic_rawtp_p	raw_tracepoint	0	0		0	17834	30448
+tetragon	may29	baseline	222	generic_rawtp_a	raw_tracepoint	0	0		0	4391	7784
+tetragon	may29	baseline	223	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	224	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	225	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	226	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	227	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	228	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	229	generic_kprobe_	kprobe	15875	42966991	2706.5821102362206	1	1875	3304
+tetragon	may29	baseline	230	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	231	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	232	generic_kprobe_	kprobe	229	1065029	4650.781659388646	1	1875	3304
+tetragon	may29	baseline	233	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	234	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	235	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	236	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	237	generic_kprobe_	kprobe	0	0		0	1875	3304
+tetragon	may29	baseline	238	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	239	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	240	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	241	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	242	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	243	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	244	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	245	generic_kprobe_	kprobe	42498015	17903872328	421.2872607814742	1	1875	3304
+tetragon	may29	baseline	246	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	247	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	248	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	249	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	250	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	251	generic_retkpro	kprobe	0	0		0	17466	28616
+tetragon	may29	baseline	252	generic_retkpro	kprobe	0	0		0	799	1360
+tetragon	may29	baseline	253	generic_retkpro	kprobe	42498015	2304916940	54.23587289900481	1	15271	26384
+tetragon	may29	baseline	254	generic_retkpro	kprobe	0	0		0	4391	7784
+tetragon	may29	baseline	255	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	256	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	257	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	258	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	259	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	26	event_exit_acct	kprobe	58	81014	1396.7931034482758	0	1038	1840
+tetragon	may29	baseline	260	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	261	generic_kprobe_	kprobe	42498058	42768330745	1006.3596493044458	1	1875	3304
+tetragon	may29	baseline	262	generic_kprobe_	kprobe	384	496471	1292.8932291666667	1	1875	3304
+tetragon	may29	baseline	263	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	264	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	265	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	266	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	267	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	268	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	269	generic_kprobe_	kprobe	89	353369	3970.438202247191	0	1875	3304
+tetragon	may29	baseline	27	event_wake_up_n	kprobe	45	99328	2207.288888888889	0	7335	11312
+tetragon	may29	baseline	270	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	271	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	272	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	273	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	274	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	275	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	276	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	277	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	278	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	279	generic_kprobe_	kprobe	43	187185	4353.139534883721	0	1875	3304
+tetragon	may29	baseline	28	execve_rate	tracepoint	0	0		0	1381	2352
+tetragon	may29	baseline	280	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	281	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	282	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	283	generic_retkpro	kprobe	43	105648	2456.9302325581393	0	15271	26384
+tetragon	may29	baseline	284	generic_retkpro	kprobe	0	0		0	17466	28616
+tetragon	may29	baseline	285	generic_retkpro	kprobe	0	0		0	799	1360
+tetragon	may29	baseline	286	generic_retkpro	kprobe	0	0		0	4391	7784
+tetragon	may29	baseline	287	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	288	generic_kprobe_	kprobe	44	288476	6556.272727272727	0	1875	3304
+tetragon	may29	baseline	289	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	29	execve_send	tracepoint	0	0		0	5127	8136
+tetragon	may29	baseline	290	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	291	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	292	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	293	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	294	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	295	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	296	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	297	generic_kprobe_	kprobe	89	345591	3883.044943820225	0	1875	3304
+tetragon	may29	baseline	298	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	299	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	30	event_execve	tracepoint	3	17764	5921.333333333333	0	11790	20472
+tetragon	may29	baseline	300	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	301	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	302	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	303	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	304	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	305	generic_kprobe_	kprobe	103723802	89921110374	866.9284064037683	1	1875	3304
+tetragon	may29	baseline	306	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	307	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	308	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	309	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	31	tg_kp_bprm_comm	kprobe	3	2635	878.3333333333334	0	1533	2560
+tetragon	may29	baseline	310	generic_kprobe_	kprobe	0	0		0	1875	3304
+tetragon	may29	baseline	311	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	312	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	313	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	314	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	32	execve_map_upda	socket_filter	0	0		0	325	544
+tetragon	may29	baseline	35	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	36	generic_kprobe_	kprobe	0	0		0	1875	3304
+tetragon	may29	baseline	37	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	38	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	39	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	40	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	41	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	42	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	43	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	44	generic_kprobe_	kprobe	0	0		0	1875	3304
+tetragon	may29	baseline	45	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	46	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	47	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	48	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	49	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	50	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	51	generic_kprobe_	kprobe	0	0		0	1875	3304
+tetragon	may29	baseline	52	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	53	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	54	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	55	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	56	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	57	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	58	generic_kprobe_	kprobe	42498015	17667402101	415.7229955563807	1	1875	3304
+tetragon	may29	baseline	59	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	60	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	61	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	62	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	63	generic_retkpro	kprobe	0	0		0	17466	28616
+tetragon	may29	baseline	64	generic_retkpro	kprobe	0	0		0	4391	7784
+tetragon	may29	baseline	65	generic_retkpro	kprobe	0	0		0	799	1360
+tetragon	may29	baseline	66	generic_retkpro	kprobe	42498015	2081286553	48.97373566741882	1	15271	26384
+tetragon	may29	baseline	67	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	68	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	69	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	70	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	71	generic_kprobe_	kprobe	42498058	39531217789	930.18880507434	1	1875	3304
+tetragon	may29	baseline	72	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	73	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	74	generic_kprobe_	kprobe	0	0		0	1875	3304
+tetragon	may29	baseline	75	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	76	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	77	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	78	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	79	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	80	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	81	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	82	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	83	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	84	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	85	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	86	generic_kprobe_	kprobe	42498015	17926944471	421.8301600910066	1	1875	3304
+tetragon	may29	baseline	87	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	88	generic_retkpro	kprobe	42498015	2178088892	51.251544148591414	1	15271	26384
+tetragon	may29	baseline	89	generic_retkpro	kprobe	0	0		0	17466	28616
+tetragon	may29	baseline	90	generic_retkpro	kprobe	0	0		0	4391	7784
+tetragon	may29	baseline	91	generic_retkpro	kprobe	0	0		0	799	1360
+tetragon	may29	baseline	92	generic_kprobe_	kprobe	0	0		0	18573	31440
+tetragon	may29	baseline	93	generic_kprobe_	kprobe	0	0		0	1313	2240
+tetragon	may29	baseline	94	generic_kprobe_	kprobe	0	0		0	12207	19944
+tetragon	may29	baseline	95	generic_kprobe_	kprobe	42498058	41899441129	985.9142535171842	1	1875	3304
+tetragon	may29	baseline	96	generic_kprobe_	kprobe	0	0		0	5664	10136
+tetragon	may29	baseline	97	generic_kprobe_	kprobe	0	0		0	18195	29864
+tetragon	may29	baseline	98	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	baseline	99	generic_kprobe_	kprobe	0	0		0	1877	3160
+tetragon	may29	post_rejit	336	event_exit_acct	kprobe	122	152736	1251.9344262295083	1	889	120
+tetragon	may29	post_rejit	338	event_wake_up_n	kprobe	44	18685	424.65909090909093	0	3794	488
+tetragon	may29	post_rejit	342	execve_rate	tracepoint	0	0		0	1242	176
+tetragon	may29	post_rejit	344	event_execve	tracepoint	3	29314	9771.333333333334	0	10665	1360
+tetragon	may29	post_rejit	346	execve_send	tracepoint	0	0		0	4943	632
+tetragon	may29	post_rejit	348	tg_kp_bprm_comm	kprobe	3	2342	780.6666666666666	0	1347	184
+tetragon	may29	post_rejit	350	execve_map_upda	socket_filter	0	0		0	327	56
+tetragon	may29	post_rejit	354	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	356	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	358	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	360	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	362	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	364	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	366	generic_kprobe_	kprobe	0	0		0	1560	208
+tetragon	may29	post_rejit	368	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	370	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	372	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	374	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	376	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	378	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	380	generic_kprobe_	kprobe	0	0		0	1560	208
+tetragon	may29	post_rejit	382	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	384	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	386	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	388	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	390	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	392	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	394	generic_kprobe_	kprobe	0	0		0	1560	208
+tetragon	may29	post_rejit	396	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	398	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	400	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	402	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	404	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	406	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	408	generic_kprobe_	kprobe	70403438	4110697496	58.38773805336041	1	1560	208
+tetragon	may29	post_rejit	410	generic_retkpro	kprobe	70403438	3575721008	50.789011297999394	1	13417	1696
+tetragon	may29	post_rejit	412	generic_retkpro	kprobe	0	0		0	3104	400
+tetragon	may29	post_rejit	414	generic_retkpro	kprobe	0	0		0	707	104
+tetragon	may29	post_rejit	416	generic_retkpro	kprobe	0	0		0	9916	1264
+tetragon	may29	post_rejit	418	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	420	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	422	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	424	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	426	generic_kprobe_	kprobe	70403522	4000279453	56.81930874140075	1	1560	208
+tetragon	may29	post_rejit	428	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	430	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	432	generic_kprobe_	kprobe	0	0		0	1560	208
+tetragon	may29	post_rejit	434	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	436	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	438	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	440	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	442	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	444	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	446	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	448	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	450	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	452	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	454	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	456	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	458	generic_kprobe_	kprobe	70403438	4025396523	57.17613567394251	1	1560	208
+tetragon	may29	post_rejit	460	generic_retkpro	kprobe	0	0		0	707	104
+tetragon	may29	post_rejit	462	generic_retkpro	kprobe	0	0		0	9916	1264
+tetragon	may29	post_rejit	464	generic_retkpro	kprobe	70403438	3578048377	50.82206890237377	1	13417	1696
+tetragon	may29	post_rejit	466	generic_retkpro	kprobe	0	0		0	3104	400
+tetragon	may29	post_rejit	468	generic_kprobe_	kprobe	70403522	3881693874	55.13493876059212	1	1560	208
+tetragon	may29	post_rejit	470	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	472	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	474	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	476	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	478	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	480	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	482	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	484	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	486	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	488	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	490	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	492	generic_kprobe_	kprobe	287963656	16063161627	55.78190612707042	1	1560	208
+tetragon	may29	post_rejit	494	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	496	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	498	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	500	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	502	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	504	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	506	generic_kprobe_	kprobe	285581763	16563350357	57.998627723997906	1	1560	208
+tetragon	may29	post_rejit	508	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	510	generic_kprobe_	kprobe	0	0		0	1560	208
+tetragon	may29	post_rejit	512	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	514	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	516	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	518	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	520	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	522	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	524	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	526	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	528	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	530	generic_kprobe_	kprobe	0	0		0	1560	208
+tetragon	may29	post_rejit	532	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	534	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	536	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	538	generic_kprobe_	kprobe	258176725	16596468862	64.2833658301305	1	1560	208
+tetragon	may29	post_rejit	540	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	542	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	544	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	546	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	548	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	550	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	552	generic_kprobe_	kprobe	355063929	19036763640	53.615031224419305	1	1560	208
+tetragon	may29	post_rejit	554	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	556	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	558	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	560	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	562	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	564	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	566	generic_retkpro	kprobe	0	0		0	3104	400
+tetragon	may29	post_rejit	568	generic_retkpro	kprobe	0	0		0	707	104
+tetragon	may29	post_rejit	570	generic_retkpro	kprobe	0	0		0	9916	1264
+tetragon	may29	post_rejit	572	generic_retkpro	kprobe	355063929	16680098209	46.97773230859505	1	13417	1696
+tetragon	may29	post_rejit	574	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	576	generic_kprobe_	kprobe	264286078	13774961115	52.1214027588695	1	1560	208
+tetragon	may29	post_rejit	578	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	580	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	582	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	584	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	586	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	588	generic_retkpro	kprobe	0	0		0	3104	400
+tetragon	may29	post_rejit	590	generic_retkpro	kprobe	0	0		0	707	104
+tetragon	may29	post_rejit	592	generic_retkpro	kprobe	264286078	12435195922	47.052027924074004	1	13417	1696
+tetragon	may29	post_rejit	594	generic_retkpro	kprobe	0	0		0	9916	1264
+tetragon	may29	post_rejit	596	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	598	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	600	generic_kprobe_	kprobe	0	0		0	1560	208
+tetragon	may29	post_rejit	602	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	604	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	606	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	608	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	610	generic_retkpro	kprobe	0	0		0	707	104
+tetragon	may29	post_rejit	612	generic_retkpro	kprobe	0	0		0	3104	400
+tetragon	may29	post_rejit	614	generic_retkpro	kprobe	0	0		0	13417	1696
+tetragon	may29	post_rejit	616	generic_retkpro	kprobe	0	0		0	9916	1264
+tetragon	may29	post_rejit	618	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	620	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	622	generic_kprobe_	kprobe	0	0		0	1560	208
+tetragon	may29	post_rejit	624	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	626	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	628	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	630	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	632	generic_retkpro	kprobe	0	0		0	9916	1264
+tetragon	may29	post_rejit	634	generic_retkpro	kprobe	0	0		0	707	104
+tetragon	may29	post_rejit	636	generic_retkpro	kprobe	0	0		0	13417	1696
+tetragon	may29	post_rejit	638	generic_retkpro	kprobe	0	0		0	3104	400
+tetragon	may29	post_rejit	640	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	642	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	644	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	646	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	648	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	650	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	652	generic_kprobe_	kprobe	0	0		0	1560	208
+tetragon	may29	post_rejit	654	generic_retkpro	kprobe	0	0		0	3104	400
+tetragon	may29	post_rejit	656	generic_retkpro	kprobe	0	0		0	13417	1696
+tetragon	may29	post_rejit	658	generic_retkpro	kprobe	0	0		0	707	104
+tetragon	may29	post_rejit	660	generic_retkpro	kprobe	0	0		0	9916	1264
+tetragon	may29	post_rejit	662	generic_kprobe_	kprobe	0	0		0	1560	208
+tetragon	may29	post_rejit	664	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	666	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	668	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	670	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	672	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	674	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	676	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	678	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	680	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	682	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	684	generic_kprobe_	kprobe	0	0		0	1560	208
+tetragon	may29	post_rejit	686	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	688	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	690	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	692	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	694	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	696	generic_kprobe_	kprobe	3	18577	6192.333333333333	0	1560	208
+tetragon	may29	post_rejit	698	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	700	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	702	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	704	generic_tracepo	tracepoint	0	0		0	10950	1392
+tetragon	may29	post_rejit	706	generic_tracepo	tracepoint	0	0		0	10008	1264
+tetragon	may29	post_rejit	708	generic_tracepo	tracepoint	0	0		0	3763	496
+tetragon	may29	post_rejit	710	generic_tracepo	tracepoint	2139996036	1417535433725	662.4009623749602	1	12989	1648
+tetragon	may29	post_rejit	712	generic_tracepo	tracepoint	0	0		0	13982	1760
+tetragon	may29	post_rejit	714	generic_tracepo	tracepoint	0	0		0	1201	168
+tetragon	may29	post_rejit	716	generic_rawtp_a	raw_tracepoint	0	0		0	3104	400
+tetragon	may29	post_rejit	718	generic_rawtp_p	raw_tracepoint	0	0		0	15606	1968
+tetragon	may29	post_rejit	720	generic_rawtp_p	raw_tracepoint	0	0		0	10944	1392
+tetragon	may29	post_rejit	722	generic_rawtp_o	raw_tracepoint	0	0		0	1201	168
+tetragon	may29	post_rejit	724	generic_rawtp_e	raw_tracepoint	3	16405	5468.333333333333	0	1560	208
+tetragon	may29	post_rejit	726	generic_rawtp_f	raw_tracepoint	0	0		0	10008	1264
+tetragon	may29	post_rejit	728	generic_rawtp_s	raw_tracepoint	0	0		0	710	112
+tetragon	may29	post_rejit	730	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	732	generic_kprobe_	kprobe	17547	10213258	582.0515187781388	1	1560	208
+tetragon	may29	post_rejit	734	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	736	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	738	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	740	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	742	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	744	generic_kprobe_	kprobe	229	1004763	4387.611353711791	1	1560	208
+tetragon	may29	post_rejit	746	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	748	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	750	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	752	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	754	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	756	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	758	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	760	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	762	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	764	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	766	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	768	generic_kprobe_	kprobe	0	0		0	1560	208
+tetragon	may29	post_rejit	770	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	772	generic_kprobe_	kprobe	70403438	3969087852	56.376335655653634	1	1560	208
+tetragon	may29	post_rejit	774	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	776	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	778	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	780	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	782	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	784	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	786	generic_retkpro	kprobe	70403438	3540287689	50.285721685921075	1	13417	1696
+tetragon	may29	post_rejit	788	generic_retkpro	kprobe	0	0		0	9916	1264
+tetragon	may29	post_rejit	790	generic_retkpro	kprobe	0	0		0	3104	400
+tetragon	may29	post_rejit	792	generic_retkpro	kprobe	0	0		0	707	104
+tetragon	may29	post_rejit	794	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	796	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	798	generic_kprobe_	kprobe	70403522	4026943906	57.1980462284259	1	1560	208
+tetragon	may29	post_rejit	800	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	802	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	804	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	806	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	808	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	810	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	812	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	814	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	816	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	818	generic_kprobe_	kprobe	752	287455	382.2539893617021	1	1560	208
+tetragon	may29	post_rejit	820	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	822	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	824	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	826	generic_kprobe_	kprobe	170	257458	1514.4588235294118	1	1560	208
+tetragon	may29	post_rejit	828	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	830	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	832	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	834	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	836	generic_kprobe_	kprobe	84	574448	6838.666666666667	0	1560	208
+tetragon	may29	post_rejit	838	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	840	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	842	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	844	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	846	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	848	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	850	generic_retkpro	kprobe	84	392106	4667.928571428572	0	13417	1696
+tetragon	may29	post_rejit	852	generic_retkpro	kprobe	0	0		0	3104	400
+tetragon	may29	post_rejit	854	generic_retkpro	kprobe	0	0		0	707	104
+tetragon	may29	post_rejit	856	generic_retkpro	kprobe	0	0		0	9916	1264
+tetragon	may29	post_rejit	858	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	860	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	862	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	864	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	866	generic_kprobe_	kprobe	85	198620	2336.705882352941	0	1560	208
+tetragon	may29	post_rejit	868	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	870	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	872	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	874	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	876	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	878	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	880	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	882	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	884	generic_kprobe_	kprobe	170	230052	1353.2470588235294	1	1560	208
+tetragon	may29	post_rejit	886	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	888	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	890	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	892	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	894	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	896	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	898	generic_kprobe_	kprobe	203975359	10542041856	51.682918503896346	1	1560	208
+tetragon	may29	post_rejit	900	generic_kprobe_	kprobe	0	0		0	4027	528
+tetragon	may29	post_rejit	902	generic_kprobe_	kprobe	0	0		0	16029	2032
+tetragon	may29	post_rejit	904	generic_kprobe_	kprobe	0	0		0	10944	1392
+tetragon	may29	post_rejit	906	generic_kprobe_	kprobe	0	0		0	1201	168
+tetragon	may29	post_rejit	908	generic_kprobe_	kprobe	0	0		0	812	128
+tetragon	may29	post_rejit	910	generic_kprobe_	kprobe	0	0		0	10008	1264
+tetragon	may29	post_rejit	912	generic_kprobe_	kprobe	0	0		0	1560	208
+tetragon	nov28	baseline	100	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	101	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	102	generic_kprobe_	kprobe	165921482	155871339753	939.4283240129207	1	1879	3304
+tetragon	nov28	baseline	103	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	104	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	105	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	106	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	107	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	108	generic_kprobe_	kprobe	165316081	157949917169	955.4419401522106	1	1879	3304
+tetragon	nov28	baseline	109	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	110	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	111	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	112	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	113	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	114	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	115	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	116	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	117	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	118	generic_kprobe_	kprobe	0	0		0	1879	3304
+tetragon	nov28	baseline	119	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	120	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	121	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	122	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	123	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	124	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	125	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	126	generic_kprobe_	kprobe	0	0		0	1879	3304
+tetragon	nov28	baseline	127	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	128	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	129	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	130	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	131	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	132	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	133	generic_kprobe_	kprobe	195930995	44553572768	227.39420461780435	1	1879	3304
+tetragon	nov28	baseline	134	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	135	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	136	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	137	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	138	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	139	generic_kprobe_	kprobe	241600888	139521350887	577.4869125770763	1	1879	3304
+tetragon	nov28	baseline	140	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	141	generic_retkpro	kprobe	0	0		0	803	1360
+tetragon	nov28	baseline	142	generic_retkpro	kprobe	0	0		0	17570	28616
+tetragon	nov28	baseline	143	generic_retkpro	kprobe	241600888	12049333568	49.8728860963458	1	15275	26384
+tetragon	nov28	baseline	144	generic_retkpro	kprobe	0	0		0	4399	7784
+tetragon	nov28	baseline	145	generic_kprobe_	kprobe	57257423	355167231463	6202.990160122994	1	1879	3304
+tetragon	nov28	baseline	146	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	147	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	148	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	149	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	150	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	151	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	152	generic_retkpro	kprobe	0	0		0	4399	7784
+tetragon	nov28	baseline	153	generic_retkpro	kprobe	0	0		0	803	1360
+tetragon	nov28	baseline	154	generic_retkpro	kprobe	57257423	2691640417	47.009457917796965	1	15275	26384
+tetragon	nov28	baseline	155	generic_retkpro	kprobe	0	0		0	17570	28616
+tetragon	nov28	baseline	156	generic_kprobe_	kprobe	0	0		0	1879	3304
+tetragon	nov28	baseline	157	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	158	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	159	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	160	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	161	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	162	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	163	generic_retkpro	kprobe	0	0		0	15275	26384
+tetragon	nov28	baseline	164	generic_retkpro	kprobe	0	0		0	4399	7784
+tetragon	nov28	baseline	165	generic_retkpro	kprobe	0	0		0	17570	28616
+tetragon	nov28	baseline	166	generic_retkpro	kprobe	0	0		0	803	1360
+tetragon	nov28	baseline	167	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	168	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	169	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	170	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	171	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	172	generic_kprobe_	kprobe	0	0		0	1879	3304
+tetragon	nov28	baseline	173	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	174	generic_retkpro	kprobe	0	0		0	803	1360
+tetragon	nov28	baseline	175	generic_retkpro	kprobe	0	0		0	4399	7784
+tetragon	nov28	baseline	176	generic_retkpro	kprobe	0	0		0	17570	28616
+tetragon	nov28	baseline	177	generic_retkpro	kprobe	0	0		0	15275	26384
+tetragon	nov28	baseline	178	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	179	generic_kprobe_	kprobe	0	0		0	1879	3304
+tetragon	nov28	baseline	180	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	181	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	182	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	183	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	184	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	185	generic_retkpro	kprobe	0	0		0	4399	7784
+tetragon	nov28	baseline	186	generic_retkpro	kprobe	0	0		0	15275	26384
+tetragon	nov28	baseline	187	generic_retkpro	kprobe	0	0		0	17570	28616
+tetragon	nov28	baseline	188	generic_retkpro	kprobe	0	0		0	803	1360
+tetragon	nov28	baseline	189	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	190	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	191	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	192	generic_kprobe_	kprobe	0	0		0	1879	3304
+tetragon	nov28	baseline	193	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	194	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	195	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	196	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	197	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	198	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	199	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	200	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	201	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	202	generic_kprobe_	kprobe	0	0		0	1879	3304
+tetragon	nov28	baseline	203	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	204	generic_kprobe_	kprobe	3	16747	5582.333333333333	0	1879	3304
+tetragon	nov28	baseline	205	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	206	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	207	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	208	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	209	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	210	generic_tracepo	tracepoint	0	0		0	5427	9656
+tetragon	nov28	baseline	211	generic_tracepo	tracepoint	0	0		0	1881	3160
+tetragon	nov28	baseline	212	generic_tracepo	tracepoint	0	0		0	12216	19944
+tetragon	nov28	baseline	213	generic_tracepo	tracepoint	0	0		0	17665	28816
+tetragon	nov28	baseline	214	generic_tracepo	tracepoint	0	0		0	15684	26888
+tetragon	nov28	baseline	215	generic_tracepo	tracepoint	1341988171	1008162780993	751.2456538583007	1	14942	26568
+tetragon	nov28	baseline	216	generic_rawtp_o	raw_tracepoint	0	0		0	1881	3160
+tetragon	nov28	baseline	217	generic_rawtp_s	raw_tracepoint	0	0		0	745	1176
+tetragon	nov28	baseline	218	generic_rawtp_p	raw_tracepoint	0	0		0	17850	30448
+tetragon	nov28	baseline	219	generic_rawtp_a	raw_tracepoint	0	0		0	4399	7784
+tetragon	nov28	baseline	220	generic_rawtp_e	raw_tracepoint	3	12153	4051.0	0	1879	3304
+tetragon	nov28	baseline	221	generic_rawtp_p	raw_tracepoint	0	0		0	12213	19944
+tetragon	nov28	baseline	222	generic_rawtp_f	raw_tracepoint	0	0		0	17665	28816
+tetragon	nov28	baseline	223	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	224	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	225	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	226	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	227	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	228	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	229	generic_kprobe_	kprobe	15101	38720085	2564.0742334944707	1	1879	3304
+tetragon	nov28	baseline	230	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	231	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	232	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	233	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	234	generic_kprobe_	kprobe	229	1058827	4623.698689956332	1	1879	3304
+tetragon	nov28	baseline	235	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	236	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	237	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	238	generic_kprobe_	kprobe	0	0		0	1879	3304
+tetragon	nov28	baseline	239	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	240	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	241	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	242	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	243	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	244	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	245	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	246	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	247	generic_kprobe_	kprobe	41529481	18600623081	447.88961078035146	1	1879	3304
+tetragon	nov28	baseline	248	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	249	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	25	event_exit_acct	kprobe	59	82052	1390.7118644067796	0	1042	1840
+tetragon	nov28	baseline	250	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	251	generic_retkpro	kprobe	41529481	2135078682	51.41115734145582	1	15275	26384
+tetragon	nov28	baseline	252	generic_retkpro	kprobe	0	0		0	803	1360
+tetragon	nov28	baseline	253	generic_retkpro	kprobe	0	0		0	4399	7784
+tetragon	nov28	baseline	254	generic_retkpro	kprobe	0	0		0	17570	28616
+tetragon	nov28	baseline	255	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	256	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	257	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	258	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	259	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	260	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	261	generic_kprobe_	kprobe	41529517	43284489112	1042.25842819217	1	1879	3304
+tetragon	nov28	baseline	262	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	263	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	264	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	265	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	266	generic_kprobe_	kprobe	317	439749	1387.2208201892745	1	1879	3304
+tetragon	nov28	baseline	267	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	268	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	269	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	27	event_wake_up_n	kprobe	46	102524	2228.782608695652	0	7339	11312
+tetragon	nov28	baseline	270	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	271	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	272	generic_kprobe_	kprobe	74	290808	3929.837837837838	0	1879	3304
+tetragon	nov28	baseline	273	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	274	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	275	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	276	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	277	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	278	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	279	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	28	event_execve	tracepoint	3	15952	5317.333333333333	0	11821	20472
+tetragon	nov28	baseline	280	generic_kprobe_	kprobe	36	158997	4416.583333333333	0	1879	3304
+tetragon	nov28	baseline	281	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	282	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	283	generic_retkpro	kprobe	0	0		0	803	1360
+tetragon	nov28	baseline	284	generic_retkpro	kprobe	36	100599	2794.4166666666665	0	15275	26384
+tetragon	nov28	baseline	285	generic_retkpro	kprobe	0	0		0	17570	28616
+tetragon	nov28	baseline	286	generic_retkpro	kprobe	0	0		0	4399	7784
+tetragon	nov28	baseline	287	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	288	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	289	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	29	execve_rate	tracepoint	0	0		0	1385	2352
+tetragon	nov28	baseline	290	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	291	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	292	generic_kprobe_	kprobe	36	220894	6135.944444444444	0	1879	3304
+tetragon	nov28	baseline	293	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	294	generic_kprobe_	kprobe	74	292679	3955.1216216216217	0	1879	3304
+tetragon	nov28	baseline	295	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	296	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	297	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	298	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	299	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	30	execve_send	tracepoint	0	0		0	5131	8136
+tetragon	nov28	baseline	300	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	301	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	302	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	303	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	304	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	305	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	306	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	307	generic_kprobe_	kprobe	85252174	78896478873	925.4482926499916	1	1879	3304
+tetragon	nov28	baseline	308	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	309	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	31	tg_kp_bprm_comm	kprobe	3	2502	834.0	0	1537	2560
+tetragon	nov28	baseline	310	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	311	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	312	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	313	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	314	generic_kprobe_	kprobe	0	0		0	1879	3304
+tetragon	nov28	baseline	32	execve_map_upda	socket_filter	0	0		0	329	544
+tetragon	nov28	baseline	35	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	36	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	37	generic_kprobe_	kprobe	0	0		0	1879	3304
+tetragon	nov28	baseline	38	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	39	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	40	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	41	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	42	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	43	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	44	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	45	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	46	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	47	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	48	generic_kprobe_	kprobe	0	0		0	1879	3304
+tetragon	nov28	baseline	49	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	50	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	51	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	52	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	53	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	54	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	55	generic_kprobe_	kprobe	0	0		0	1879	3304
+tetragon	nov28	baseline	56	generic_kprobe_	kprobe	41529481	17985148359	433.06942263497103	1	1879	3304
+tetragon	nov28	baseline	57	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	58	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	59	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	60	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	61	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	62	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	63	generic_retkpro	kprobe	0	0		0	17570	28616
+tetragon	nov28	baseline	64	generic_retkpro	kprobe	41529481	2051573753	49.40041877720552	1	15275	26384
+tetragon	nov28	baseline	65	generic_retkpro	kprobe	0	0		0	4399	7784
+tetragon	nov28	baseline	66	generic_retkpro	kprobe	0	0		0	803	1360
+tetragon	nov28	baseline	67	generic_kprobe_	kprobe	41529517	39685003439	955.5854800574733	1	1879	3304
+tetragon	nov28	baseline	68	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	69	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	70	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	71	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	72	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	73	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	74	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	75	generic_kprobe_	kprobe	0	0		0	1879	3304
+tetragon	nov28	baseline	76	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	77	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	78	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	79	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	80	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	81	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	82	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	83	generic_kprobe_	kprobe	41529481	18131633297	436.59667446843366	1	1879	3304
+tetragon	nov28	baseline	84	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	85	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	86	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	87	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	88	generic_retkpro	kprobe	41529481	2167175784	52.18403244673344	1	15275	26384
+tetragon	nov28	baseline	89	generic_retkpro	kprobe	0	0		0	803	1360
+tetragon	nov28	baseline	90	generic_retkpro	kprobe	0	0		0	17570	28616
+tetragon	nov28	baseline	91	generic_retkpro	kprobe	0	0		0	4399	7784
+tetragon	nov28	baseline	92	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	baseline	93	generic_kprobe_	kprobe	41529517	43334279383	1043.4573410280693	1	1879	3304
+tetragon	nov28	baseline	94	generic_kprobe_	kprobe	0	0		0	5672	10136
+tetragon	nov28	baseline	95	generic_kprobe_	kprobe	0	0		0	18335	29864
+tetragon	nov28	baseline	96	generic_kprobe_	kprobe	0	0		0	1317	2240
+tetragon	nov28	baseline	97	generic_kprobe_	kprobe	0	0		0	1881	3160
+tetragon	nov28	baseline	98	generic_kprobe_	kprobe	0	0		0	18593	31440
+tetragon	nov28	baseline	99	generic_kprobe_	kprobe	0	0		0	12213	19944
+tetragon	nov28	post_rejit	334	event_exit_acct	kprobe	118	161510	1368.7288135593221	1	904	16
+tetragon	nov28	post_rejit	338	event_wake_up_n	kprobe	45	75851	1685.5777777777778	0	3330	16
+tetragon	nov28	post_rejit	340	execve_send	tracepoint	0	0		0	4860	16
+tetragon	nov28	post_rejit	344	event_execve	tracepoint	3	13921	4640.333333333333	0	10444	16
+tetragon	nov28	post_rejit	346	execve_rate	tracepoint	0	0		0	1203	16
+tetragon	nov28	post_rejit	348	tg_kp_bprm_comm	kprobe	3	2179	726.3333333333334	0	844	16
+tetragon	nov28	post_rejit	350	execve_map_upda	socket_filter	0	0		0	201	16
+tetragon	nov28	post_rejit	354	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	356	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	358	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	360	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	362	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	364	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	366	generic_kprobe_	kprobe	0	0		0	1401	16
+tetragon	nov28	post_rejit	368	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	370	generic_kprobe_	kprobe	0	0		0	1401	16
+tetragon	nov28	post_rejit	372	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	374	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	376	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	378	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	380	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	382	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	384	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	386	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	388	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	390	generic_kprobe_	kprobe	0	0		0	1401	16
+tetragon	nov28	post_rejit	392	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	394	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	396	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	398	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	400	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	402	generic_kprobe_	kprobe	48769309	10829302304	222.051583794226	1	1401	16
+tetragon	nov28	post_rejit	404	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	406	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	408	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	410	generic_retkpro	kprobe	0	0		0	3536	16
+tetragon	nov28	post_rejit	412	generic_retkpro	kprobe	0	0		0	657	16
+tetragon	nov28	post_rejit	414	generic_retkpro	kprobe	48769309	2450271294	50.24207527730196	1	19253	16
+tetragon	nov28	post_rejit	416	generic_retkpro	kprobe	0	0		0	10402	16
+tetragon	nov28	post_rejit	418	generic_kprobe_	kprobe	48769362	39852486789	817.1623567476646	1	1401	16
+tetragon	nov28	post_rejit	420	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	422	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	424	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	426	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	428	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	430	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	432	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	434	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	436	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	438	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	440	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	442	generic_kprobe_	kprobe	0	0		0	1401	16
+tetragon	nov28	post_rejit	444	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	446	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	448	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	450	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	452	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	454	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	456	generic_kprobe_	kprobe	48769309	10737087595	220.16074894561248	1	1401	16
+tetragon	nov28	post_rejit	458	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	460	generic_retkpro	kprobe	0	0		0	10402	16
+tetragon	nov28	post_rejit	462	generic_retkpro	kprobe	0	0		0	3536	16
+tetragon	nov28	post_rejit	464	generic_retkpro	kprobe	48769309	2490798974	51.0730831556379	1	19253	16
+tetragon	nov28	post_rejit	466	generic_retkpro	kprobe	0	0		0	657	16
+tetragon	nov28	post_rejit	468	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	470	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	472	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	474	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	476	generic_kprobe_	kprobe	48769362	41915861643	859.4711910112746	1	1401	16
+tetragon	nov28	post_rejit	478	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	480	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	482	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	484	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	486	generic_kprobe_	kprobe	176479065	122736802462	695.4751401363102	1	1401	16
+tetragon	nov28	post_rejit	488	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	490	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	492	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	494	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	496	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	498	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	500	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	502	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	504	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	506	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	508	generic_kprobe_	kprobe	175287309	123696470369	705.6784149102317	1	1401	16
+tetragon	nov28	post_rejit	510	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	512	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	514	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	516	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	518	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	520	generic_kprobe_	kprobe	0	0		0	1401	16
+tetragon	nov28	post_rejit	522	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	524	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	526	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	528	generic_kprobe_	kprobe	0	0		0	1401	16
+tetragon	nov28	post_rejit	530	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	532	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	534	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	536	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	538	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	540	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	542	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	544	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	546	generic_kprobe_	kprobe	225030650	14576196294	64.77427094486906	1	1401	16
+tetragon	nov28	post_rejit	548	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	550	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	552	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	554	generic_kprobe_	kprobe	291479201	75190713367	257.9625342358476	1	1401	16
+tetragon	nov28	post_rejit	556	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	558	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	560	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	562	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	564	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	566	generic_retkpro	kprobe	291479201	13894783068	47.66989555457166	1	19253	16
+tetragon	nov28	post_rejit	568	generic_retkpro	kprobe	0	0		0	3536	16
+tetragon	nov28	post_rejit	570	generic_retkpro	kprobe	0	0		0	10402	16
+tetragon	nov28	post_rejit	572	generic_retkpro	kprobe	0	0		0	657	16
+tetragon	nov28	post_rejit	574	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	576	generic_kprobe_	kprobe	71250231	337471852511	4736.431696775832	1	1401	16
+tetragon	nov28	post_rejit	578	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	580	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	582	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	584	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	586	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	588	generic_retkpro	kprobe	71250231	3660132796	51.37011830880941	1	19253	16
+tetragon	nov28	post_rejit	590	generic_retkpro	kprobe	0	0		0	10402	16
+tetragon	nov28	post_rejit	592	generic_retkpro	kprobe	0	0		0	3536	16
+tetragon	nov28	post_rejit	594	generic_retkpro	kprobe	0	0		0	657	16
+tetragon	nov28	post_rejit	596	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	598	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	600	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	602	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	604	generic_kprobe_	kprobe	0	0		0	1401	16
+tetragon	nov28	post_rejit	606	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	608	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	610	generic_retkpro	kprobe	0	0		0	19253	16
+tetragon	nov28	post_rejit	612	generic_retkpro	kprobe	0	0		0	10402	16
+tetragon	nov28	post_rejit	614	generic_retkpro	kprobe	0	0		0	3536	16
+tetragon	nov28	post_rejit	616	generic_retkpro	kprobe	0	0		0	657	16
+tetragon	nov28	post_rejit	618	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	620	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	622	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	624	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	626	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	628	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	630	generic_kprobe_	kprobe	0	0		0	1401	16
+tetragon	nov28	post_rejit	632	generic_retkpro	kprobe	0	0		0	19253	16
+tetragon	nov28	post_rejit	634	generic_retkpro	kprobe	0	0		0	10402	16
+tetragon	nov28	post_rejit	636	generic_retkpro	kprobe	0	0		0	3536	16
+tetragon	nov28	post_rejit	638	generic_retkpro	kprobe	0	0		0	657	16
+tetragon	nov28	post_rejit	640	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	642	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	644	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	646	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	648	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	650	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	652	generic_kprobe_	kprobe	0	0		0	1401	16
+tetragon	nov28	post_rejit	654	generic_retkpro	kprobe	0	0		0	3536	16
+tetragon	nov28	post_rejit	656	generic_retkpro	kprobe	0	0		0	19253	16
+tetragon	nov28	post_rejit	658	generic_retkpro	kprobe	0	0		0	657	16
+tetragon	nov28	post_rejit	660	generic_retkpro	kprobe	0	0		0	10402	16
+tetragon	nov28	post_rejit	662	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	664	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	666	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	668	generic_kprobe_	kprobe	0	0		0	1401	16
+tetragon	nov28	post_rejit	670	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	672	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	674	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	676	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	678	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	680	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	682	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	684	generic_kprobe_	kprobe	0	0		0	1401	16
+tetragon	nov28	post_rejit	686	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	688	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	690	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	692	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	694	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	696	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	698	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	700	generic_kprobe_	kprobe	3	14951	4983.666666666667	0	1401	16
+tetragon	nov28	post_rejit	702	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	704	generic_tracepo	tracepoint	1529038958	1022663879798	668.8278767832415	1	13625	16
+tetragon	nov28	post_rejit	706	generic_tracepo	tracepoint	0	0		0	1229	16
+tetragon	nov28	post_rejit	708	generic_tracepo	tracepoint	0	0		0	20130	16
+tetragon	nov28	post_rejit	710	generic_tracepo	tracepoint	0	0		0	9620	16
+tetragon	nov28	post_rejit	712	generic_tracepo	tracepoint	0	0		0	10494	16
+tetragon	nov28	post_rejit	714	generic_tracepo	tracepoint	0	0		0	4126	16
+tetragon	nov28	post_rejit	716	generic_rawtp_p	raw_tracepoint	0	0		0	21820	16
+tetragon	nov28	post_rejit	718	generic_rawtp_f	raw_tracepoint	0	0		0	10494	16
+tetragon	nov28	post_rejit	720	generic_rawtp_p	raw_tracepoint	0	0		0	9617	16
+tetragon	nov28	post_rejit	722	generic_rawtp_o	raw_tracepoint	0	0		0	1229	16
+tetragon	nov28	post_rejit	724	generic_rawtp_a	raw_tracepoint	0	0		0	3536	16
+tetragon	nov28	post_rejit	726	generic_rawtp_s	raw_tracepoint	0	0		0	631	16
+tetragon	nov28	post_rejit	728	generic_rawtp_e	raw_tracepoint	3	14433	4811.0	0	1401	16
+tetragon	nov28	post_rejit	730	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	732	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	734	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	736	generic_kprobe_	kprobe	16952	26425816	1558.8612553091082	1	1401	16
+tetragon	nov28	post_rejit	738	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	740	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	742	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	744	generic_kprobe_	kprobe	229	1117290	4878.995633187773	1	1401	16
+tetragon	nov28	post_rejit	746	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	748	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	750	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	752	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	754	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	756	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	758	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	760	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	762	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	764	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	766	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	768	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	770	generic_kprobe_	kprobe	0	0		0	1401	16
+tetragon	nov28	post_rejit	772	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	774	generic_kprobe_	kprobe	48769309	10890254911	223.30139865217282	1	1401	16
+tetragon	nov28	post_rejit	776	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	778	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	780	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	782	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	784	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	786	generic_retkpro	kprobe	48769309	2620003931	53.722391904301944	1	19253	16
+tetragon	nov28	post_rejit	788	generic_retkpro	kprobe	0	0		0	10402	16
+tetragon	nov28	post_rejit	790	generic_retkpro	kprobe	0	0		0	657	16
+tetragon	nov28	post_rejit	792	generic_retkpro	kprobe	0	0		0	3536	16
+tetragon	nov28	post_rejit	794	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	796	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	798	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	800	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	802	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	804	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	806	generic_kprobe_	kprobe	48769362	40675178303	834.0313802546771	1	1401	16
+tetragon	nov28	post_rejit	808	generic_kprobe_	kprobe	477	574549	1204.5052410901467	1	1401	16
+tetragon	nov28	post_rejit	810	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	812	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	814	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	816	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	818	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	820	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	822	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	824	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	826	generic_kprobe_	kprobe	109	446955	4100.504587155963	1	1401	16
+tetragon	nov28	post_rejit	828	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	830	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	832	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	834	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	836	generic_kprobe_	kprobe	53	315854	5959.509433962264	0	1401	16
+tetragon	nov28	post_rejit	838	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	840	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	842	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	844	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	846	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	848	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	850	generic_retkpro	kprobe	0	0		0	657	16
+tetragon	nov28	post_rejit	852	generic_retkpro	kprobe	0	0		0	10402	16
+tetragon	nov28	post_rejit	854	generic_retkpro	kprobe	53	184403	3479.301886792453	0	19253	16
+tetragon	nov28	post_rejit	856	generic_retkpro	kprobe	0	0		0	3536	16
+tetragon	nov28	post_rejit	858	generic_kprobe_	kprobe	54	371264	6875.259259259259	0	1401	16
+tetragon	nov28	post_rejit	860	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	862	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	864	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	866	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	868	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	870	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	872	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	874	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	876	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	878	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	880	generic_kprobe_	kprobe	109	484948	4449.064220183486	1	1401	16
+tetragon	nov28	post_rejit	882	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	884	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	886	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	888	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	890	generic_kprobe_	kprobe	130630507	96101924979	735.6775012669897	1	1401	16
+tetragon	nov28	post_rejit	892	generic_kprobe_	kprobe	0	0		0	800	16
+tetragon	nov28	post_rejit	894	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	896	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	898	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	900	generic_kprobe_	kprobe	0	0		0	4330	16
+tetragon	nov28	post_rejit	902	generic_kprobe_	kprobe	0	0		0	1229	16
+tetragon	nov28	post_rejit	904	generic_kprobe_	kprobe	0	0		0	1401	16
+tetragon	nov28	post_rejit	906	generic_kprobe_	kprobe	0	0		0	22409	16
+tetragon	nov28	post_rejit	908	generic_kprobe_	kprobe	0	0		0	10494	16
+tetragon	nov28	post_rejit	910	generic_kprobe_	kprobe	0	0		0	9617	16
+tetragon	nov28	post_rejit	912	generic_kprobe_	kprobe	0	0		0	800	16

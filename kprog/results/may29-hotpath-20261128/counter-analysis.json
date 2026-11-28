@@ -1,0 +1,330 @@
+{
+  "scope": "Raw actual-run counters, all records preserved; >=100 is the original May29 parser aggregate, not a new filter. Cross-run IDs/truncated names do not pair attachments. Object comparison is static, relocations unapplied, not May29 installed bytes.",
+  "runs": {
+    "cilium": {
+      "may29": {
+        "input": {
+          "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260529_033517_489159/details/apps/cilium__agent.json",
+          "bytes": 47153,
+          "sha256": "60b64ca5905f5492eb64f505bafc87fac1c8d812e7f6950d6724664bb6e0482d"
+        },
+        "metadata": {
+          "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260529_033517_489159/metadata.json",
+          "bytes": 1002,
+          "sha256": "8473f3d69ce96c55226d4345d43f44965b4fc6cfe6bcb7647942803f35a62cf5"
+        },
+        "status": "ok",
+        "phases": {
+          "baseline": {
+            "total_programs": 53,
+            "retained_programs": 2,
+            "positive_programs": 8,
+            "calls": 842066898,
+            "time_ns": 411497729902,
+            "ns_per_call": 488.6758176569482,
+            "groups": {
+              "cil_from_contai": {
+                "calls": 842066898,
+                "time_ns": 411497729902,
+                "instances": 2,
+                "ns_per_call": 488.6758176569482,
+                "call_fraction": 1.0,
+                "aggregate_contribution_ns": 488.6758176569482
+              }
+            }
+          },
+          "post_rejit": {
+            "total_programs": 53,
+            "retained_programs": 2,
+            "positive_programs": 8,
+            "calls": 1895968330,
+            "time_ns": 497308849096,
+            "ns_per_call": 262.2980780992265,
+            "groups": {
+              "cil_from_contai": {
+                "calls": 1895968330,
+                "time_ns": 497308849096,
+                "instances": 2,
+                "ns_per_call": 262.2980780992265,
+                "call_fraction": 1.0,
+                "aggregate_contribution_ns": 262.2980780992265
+              }
+            }
+          }
+        },
+        "per_call_speedup": 1.8630552735963388
+      },
+      "nov28": {
+        "input": {
+          "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_091645_012670/details/apps/cilium__agent.json",
+          "bytes": 47088,
+          "sha256": "dcea5b27802c5e480b71e3ed31037a81a75808d8967f073309872dc38219c983"
+        },
+        "metadata": {
+          "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_091645_012670/metadata.json",
+          "bytes": 987,
+          "sha256": "e577e7c1211c779fad8dcd508a060549c36ae28f363d682a27442b209e82327d"
+        },
+        "status": "ok",
+        "phases": {
+          "baseline": {
+            "total_programs": 53,
+            "retained_programs": 2,
+            "positive_programs": 8,
+            "calls": 684427236,
+            "time_ns": 488573874803,
+            "ns_per_call": 713.8434140324013,
+            "groups": {
+              "cil_from_contai": {
+                "calls": 684427236,
+                "time_ns": 488573874803,
+                "instances": 2,
+                "ns_per_call": 713.8434140324013,
+                "call_fraction": 1.0,
+                "aggregate_contribution_ns": 713.8434140324013
+              }
+            }
+          },
+          "post_rejit": {
+            "total_programs": 53,
+            "retained_programs": 2,
+            "positive_programs": 8,
+            "calls": 757494264,
+            "time_ns": 438352325668,
+            "ns_per_call": 578.687320156394,
+            "groups": {
+              "cil_from_contai": {
+                "calls": 757494264,
+                "time_ns": 438352325668,
+                "instances": 2,
+                "ns_per_call": 578.687320156394,
+                "call_fraction": 1.0,
+                "aggregate_contribution_ns": 578.687320156394
+              }
+            }
+          }
+        },
+        "per_call_speedup": 1.2335563423775735
+      }
+    },
+    "tetragon": {
+      "may29": {
+        "input": {
+          "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260529_045551_393389/details/apps/tetragon__observer.json",
+          "bytes": 143781,
+          "sha256": "31e7024c572a94a0b98878c5ed018312cb9fc01da30a761ca0694f2b0b6cb55d"
+        },
+        "metadata": {
+          "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20260529_045551_393389/metadata.json",
+          "bytes": 1002,
+          "sha256": "f872bbd8a2e7c8fcf5f8b2e239ee1ee647c3ed5a37805abf0a98c9216881bb5f"
+        },
+        "status": "ok",
+        "phases": {
+          "baseline": {
+            "total_programs": 287,
+            "retained_programs": 21,
+            "positive_programs": 32,
+            "calls": 3064072110,
+            "time_ns": 2130117225350,
+            "ns_per_call": 695.1916106667608,
+            "groups": {
+              "generic_kprobe_": {
+                "calls": 1217406046,
+                "time_ns": 1089802420203,
+                "instances": 15,
+                "ns_per_call": 895.184005191806,
+                "call_fraction": 0.3973163823484559,
+                "aggregate_contribution_ns": 355.6712704790097
+              },
+              "generic_retkpro": {
+                "calls": 438073320,
+                "time_ns": 22270437006,
+                "instances": 5,
+                "ns_per_call": 50.837236574918556,
+                "call_fraction": 0.14297095638522686,
+                "aggregate_contribution_ns": 7.26824833309814
+              },
+              "generic_tracepo": {
+                "calls": 1408592744,
+                "time_ns": 1018044368141,
+                "instances": 1,
+                "ns_per_call": 722.7386144628614,
+                "call_fraction": 0.45971266126631727,
+                "aggregate_contribution_ns": 332.25209185465286
+              }
+            }
+          },
+          "post_rejit": {
+            "total_programs": 287,
+            "retained_programs": 24,
+            "positive_programs": 32,
+            "calls": 5048043737,
+            "time_ns": 1573947777213,
+            "ns_per_call": 311.793609408856,
+            "groups": {
+              "event_exit_acct": {
+                "calls": 122,
+                "time_ns": 152736,
+                "instances": 1,
+                "ns_per_call": 1251.9344262295083,
+                "call_fraction": 2.4167777926683204e-08,
+                "aggregate_contribution_ns": 3.0256473191884313e-05
+              },
+              "generic_kprobe_": {
+                "calls": 2077487258,
+                "time_ns": 116602839547,
+                "instances": 17,
+                "ns_per_call": 56.12686147555664,
+                "call_fraction": 0.4115430384988362,
+                "aggregate_contribution_ns": 23.098619113053854
+              },
+              "generic_retkpro": {
+                "calls": 830560321,
+                "time_ns": 39809351205,
+                "instances": 5,
+                "ns_per_call": 47.930716407291506,
+                "call_fraction": 0.1645311261692026,
+                "aggregate_contribution_ns": 7.886094748588348
+              },
+              "generic_tracepo": {
+                "calls": 2139996036,
+                "time_ns": 1417535433725,
+                "instances": 1,
+                "ns_per_call": 662.4009623749602,
+                "call_fraction": 0.42392581116418326,
+                "aggregate_contribution_ns": 280.80886529074064
+              }
+            }
+          }
+        },
+        "per_call_speedup": 2.2296531734079053
+      },
+      "nov28": {
+        "input": {
+          "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_094333_560478/details/apps/tetragon__observer.json",
+          "bytes": 143360,
+          "sha256": "b7f89705afe6623a04cc8f8fa86ae7682496d86c7adf307f3e4aee83633e552b"
+        },
+        "metadata": {
+          "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_094333_560478/metadata.json",
+          "bytes": 987,
+          "sha256": "ef47ac46b49a5950b233b10bcef22d1567141bfa58ed18dfe0b354930de0e550"
+        },
+        "status": "ok",
+        "phases": {
+          "baseline": {
+            "total_programs": 287,
+            "retained_programs": 21,
+            "positive_programs": 32,
+            "calls": 2925906609,
+            "time_ns": 2142278869442,
+            "ns_per_call": 732.1760929936777,
+            "groups": {
+              "generic_kprobe_": {
+                "calls": 1160471684,
+                "time_ns": 1113021286245,
+                "instances": 15,
+                "ns_per_call": 959.1111111031641,
+                "call_fraction": 0.3966195231352991,
+                "aggregate_contribution_ns": 380.40219151950384
+              },
+              "generic_retkpro": {
+                "calls": 423446754,
+                "time_ns": 21094802204,
+                "instances": 5,
+                "ns_per_call": 49.816894343225975,
+                "call_fraction": 0.14472326379026954,
+                "aggregate_contribution_ns": 7.2096635412466785
+              },
+              "generic_tracepo": {
+                "calls": 1341988171,
+                "time_ns": 1008162780993,
+                "instances": 1,
+                "ns_per_call": 751.2456538583007,
+                "call_fraction": 0.45865721307443136,
+                "aggregate_contribution_ns": 344.56423793292714
+              }
+            }
+          },
+          "post_rejit": {
+            "total_programs": 287,
+            "retained_programs": 24,
+            "positive_programs": 32,
+            "calls": 3400867287,
+            "time_ns": 1972483212456,
+            "ns_per_call": 579.9941738379279,
+            "groups": {
+              "event_exit_acct": {
+                "calls": 118,
+                "time_ns": 161510,
+                "instances": 1,
+                "ns_per_call": 1368.7288135593221,
+                "call_fraction": 3.469703168102484e-08,
+                "aggregate_contribution_ns": 4.749082700679934e-05
+              },
+              "generic_kprobe_": {
+                "calls": 1362790852,
+                "time_ns": 924703181085,
+                "instances": 17,
+                "ns_per_call": 678.536387097057,
+                "call_fraction": 0.40071862174961725,
+                "aggregate_contribution_ns": 271.9021658444974
+              },
+              "generic_retkpro": {
+                "calls": 509037359,
+                "time_ns": 25115990063,
+                "instances": 5,
+                "ns_per_call": 49.34017045888375,
+                "call_fraction": 0.14967868959362896,
+                "aggregate_contribution_ns": 7.385172058612
+              },
+              "generic_tracepo": {
+                "calls": 1529038958,
+                "time_ns": 1022663879798,
+                "instances": 1,
+                "ns_per_call": 668.8278767832415,
+                "call_fraction": 0.44960265395972215,
+                "aggregate_contribution_ns": 300.7067884439914
+              }
+            }
+          }
+        },
+        "per_call_speedup": 1.2623852549220178
+      }
+    }
+  },
+  "cilium_objects": {
+    "retained-reference": {
+      "input": {
+        "path": "/workspaces/kprog-raw/paper-tree-untracked/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+        "bytes": 721728,
+        "sha256": "6cf578f21604862ffdd7e90ea97fe6071acbb62266d891ba53db710a0c049856"
+      },
+      "symbol": "cil_from_container",
+      "symbol_bytes": 1268,
+      "symbol_sha256": "e7acb947b622c57cd48f93c071ab2c2fee5d8999a4d6f9225262ef1e85cd2c48",
+      "dwarf_provenance": [
+        "DW_AT_producer\t(\"Ubuntu clang version 18.1.3 (1ubuntu1)\")",
+        "DW_AT_comp_dir\t(\"/workspaces/.agent-state/bpf-benchmark-supervisor/cilium-lab-20261009/paper-tree/vendor/bpf\")"
+      ],
+      "perf_event_output_relocation_count": 0
+    },
+    "current-stage": {
+      "input": {
+        "path": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+        "bytes": 1302872,
+        "sha256": "1373794b9611d99815dd255edd47fd54707b404ae3256097fe6e360f0804d263"
+      },
+      "symbol": "cil_from_container",
+      "symbol_bytes": 1843,
+      "symbol_sha256": "8607c2ca6561f76c57905398a4c1afaaaf8a30cab6d2080f290422ecfaf2e82f",
+      "dwarf_provenance": [
+        "DW_AT_producer\t(\"Ubuntu clang version 18.1.3 (1ubuntu1)\")",
+        "DW_AT_comp_dir\t(\"/workspaces/repository/vendor/bpf\")"
+      ],
+      "perf_event_output_relocation_count": 1
+    }
+  },
+  "tetragon_evidence_gap": "No Tetragon object is present anywhere in the specified retained paper-tree-untracked root. May29 corpus has counters/metadata but no tracked shim logs or code captures. The retained-reference Cilium DWARF comp_dir is October09 reproduction; exact May29 installed-byte identity is not established."
+}

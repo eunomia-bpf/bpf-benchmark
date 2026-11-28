@@ -1,0 +1,322 @@
+
+/workspaces/kprog-raw/paper-tree-untracked/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o:	file format elf64-x86-64
+
+Disassembly of section tc/entry:
+
+0000000000000000 <cil_from_container>:
+       0:      	pushq	%rbp
+       1:      	pushq	%r15
+       3:      	pushq	%r14
+       5:      	pushq	%r13
+       7:      	pushq	%r12
+       9:      	pushq	%rbx
+       a:      	subq	$0x28, %rsp
+       e:      	movq	%rdi, %rbx
+      11:      	movq	(%rip), %rax            # 0x18 <cil_from_container+0x18>
+		0000000000000014:  R_X86_64_REX_GOTPCRELX	__config_security_label-0x4
+      18:      	movl	(%rax), %ebp
+      1a:      	movl	0x70(%rdi), %eax
+      1d:      	subl	0x74(%rdi), %eax
+      20:      	cmpl	$0xe, %eax
+      23:      	jae	0x2d <cil_from_container+0x2d>
+      25:      	xorl	%r12d, %r12d
+      28:      	xorl	%r13d, %r13d
+      2b:      	jmp	0x42 <cil_from_container+0x42>
+      2d:      	movq	0xd0(%rbx), %rax
+      34:      	movzwl	0xc(%rax), %r12d
+      39:      	cmpw	$0x6, %r12w
+      3e:      	setae	%r13b
+      42:      	movl	$0x0, 0x28(%rbx)
+      49:      	movl	$0x0, 0x2c(%rbx)
+      50:      	movl	$0x0, 0x30(%rbx)
+      57:      	movl	$0x0, 0x34(%rbx)
+      5e:      	movl	$0x0, 0x38(%rbx)
+      65:      	movq	(%rip), %r14            # 0x6c <cil_from_container+0x6c>
+		0000000000000068:  R_X86_64_REX_GOTPCRELX	__config_tracing_ip_option_type-0x4
+      6c:      	cmpb	$0x0, (%r14)
+      70:      	je	0xac <cil_from_container+0xac>
+      72:      	movzbl	(%r14), %ecx
+      76:      	movl	0x70(%rbx), %eax
+      79:      	subl	0x74(%rbx), %eax
+      7c:      	cmpl	$0xe, %eax
+      7f:      	jae	0x13f <cil_from_container+0x13f>
+      85:      	movl	$0x0, 0x10(%rsp)
+      8d:      	movl	$0x1, %eax
+      92:      	movq	(%rip), %rdi            # 0x99 <cil_from_container+0x99>
+		0000000000000095:  R_X86_64_REX_GOTPCRELX	cilium_percpu_trace_id-0x4
+      99:      	leaq	0x10(%rsp), %rsi
+      9e:      	callq	*%rax
+      a0:      	testq	%rax, %rax
+      a3:      	je	0xac <cil_from_container+0xac>
+      a5:      	movq	$0x0, (%rax)
+      ac:      	movw	$0x0, 0x7c(%rbx)
+      b2:      	movq	(%rip), %rax            # 0xb9 <cil_from_container+0xb9>
+		00000000000000b5:  R_X86_64_REX_GOTPCRELX	__config_endpoint_id-0x4
+      b9:      	movzwl	(%rax), %eax
+      bc:      	movq	(%rip), %rax            # 0xc3 <cil_from_container+0xc3>
+		00000000000000bf:  R_X86_64_REX_GOTPCRELX	__config_trace_payload_len-0x4
+      c3:      	movl	(%rax), %eax
+      c5:      	cmpb	$0x0, (%r14)
+      c9:      	je	0xe6 <cil_from_container+0xe6>
+      cb:      	movl	$0x0, 0x10(%rsp)
+      d3:      	movl	$0x1, %eax
+      d8:      	movq	(%rip), %rdi            # 0xdf <cil_from_container+0xdf>
+		00000000000000db:  R_X86_64_REX_GOTPCRELX	cilium_percpu_trace_id-0x4
+      df:      	leaq	0x10(%rsp), %rsi
+      e4:      	callq	*%rax
+      e6:      	movl	$0xa6, %eax
+      eb:      	xorl	%r14d, %r14d
+      ee:      	testb	%r13b, %r13b
+      f1:      	je	0x22e <cil_from_container+0x22e>
+      f7:      	movl	%r12d, %eax
+      fa:      	rolw	$0x8, %ax
+      fe:      	movzwl	%ax, %eax
+     101:      	cmpl	$0x806, %eax            # imm = 0x806
+     106:      	je	0x19c <cil_from_container+0x19c>
+     10c:      	cmpl	$0x800, %eax            # imm = 0x800
+     111:      	jne	0x1bb <cil_from_container+0x1bb>
+     117:      	movl	$0x27, %eax
+     11c:      	movq	%rbx, %rdi
+     11f:      	movl	$0x22, %esi
+     124:      	callq	*%rax
+     126:      	movl	0x70(%rbx), %ecx
+     129:      	subl	0x74(%rbx), %ecx
+     12c:      	movl	$0x86, %eax
+     131:      	cmpl	$0x22, %ecx
+     134:      	jae	0x1bb <cil_from_container+0x1bb>
+     13a:      	jmp	0x22e <cil_from_container+0x22e>
+     13f:      	cmpl	$0x22, %eax
+     142:      	jb	0x85 <cil_from_container+0x85>
+     148:      	movq	0xd0(%rbx), %rax
+     14f:      	cmpw	$0x8, 0xc(%rax)
+     154:      	jne	0x85 <cil_from_container+0x85>
+     15a:      	movzbl	0xe(%rax), %r15d
+     15f:      	andl	$0xf, %r15d
+     163:      	cmpb	$0x6, %r15b
+     167:      	jae	0x2d7 <cil_from_container+0x2d7>
+     16d:      	xorl	%r15d, %r15d
+     170:      	movl	$0x0, 0x10(%rsp)
+     178:      	movl	$0x1, %eax
+     17d:      	movq	(%rip), %rdi            # 0x184 <cil_from_container+0x184>
+		0000000000000180:  R_X86_64_REX_GOTPCRELX	cilium_percpu_trace_id-0x4
+     184:      	leaq	0x10(%rsp), %rsi
+     189:      	callq	*%rax
+     18b:      	testq	%rax, %rax
+     18e:      	je	0xac <cil_from_container+0xac>
+     194:      	movq	%r15, (%rax)
+     197:      	jmp	0xac <cil_from_container+0xac>
+     19c:      	movl	$0x27, %eax
+     1a1:      	movq	%rbx, %rdi
+     1a4:      	movl	$0x2a, %esi
+     1a9:      	callq	*%rax
+     1ab:      	movl	0x70(%rbx), %ecx
+     1ae:      	subl	0x74(%rbx), %ecx
+     1b1:      	movl	$0x86, %eax
+     1b6:      	cmpl	$0x2a, %ecx
+     1b9:      	jb	0x22e <cil_from_container+0x22e>
+     1bb:      	movzwl	%r12w, %ecx
+     1bf:      	cmpl	$0x608, %ecx            # imm = 0x608
+     1c5:      	je	0x1fd <cil_from_container+0x1fd>
+     1c7:      	movl	$0x8b, %eax
+     1cc:      	cmpl	$0x8, %ecx
+     1cf:      	jne	0x22e <cil_from_container+0x22e>
+     1d1:      	movl	$0xc, %eax
+     1d6:      	movq	(%rip), %rsi            # 0x1dd <cil_from_container+0x1dd>
+		00000000000001d9:  R_X86_64_REX_GOTPCRELX	cilium_calls-0x4
+     1dd:      	movq	%rbx, %rdi
+     1e0:      	movl	$0x7, %edx
+     1e5:      	callq	*%rax
+     1e7:      	movq	(%rip), %rax            # 0x1ee <cil_from_container+0x1ee>
+		00000000000001ea:  R_X86_64_REX_GOTPCRELX	__config_security_label-0x4
+     1ee:      	movl	(%rax), %ebp
+     1f0:      	movl	$0x8c, %eax
+     1f5:      	movl	$0x700, %r14d           # imm = 0x700
+     1fb:      	jmp	0x22e <cil_from_container+0x22e>
+     1fd:      	movq	(%rip), %rax            # 0x204 <cil_from_container+0x204>
+		0000000000000200:  R_X86_64_REX_GOTPCRELX	__config_enable_arp_responder-0x4
+     204:      	cmpb	$0x0, (%rax)
+     207:      	je	0x393 <cil_from_container+0x393>
+     20d:      	movl	$0xc, %eax
+     212:      	movq	(%rip), %rsi            # 0x219 <cil_from_container+0x219>
+		0000000000000215:  R_X86_64_REX_GOTPCRELX	cilium_calls-0x4
+     219:      	movq	%rbx, %rdi
+     21c:      	movl	$0x6, %edx
+     221:      	callq	*%rax
+     223:      	movl	$0x8c, %eax
+     228:      	movl	$0x600, %r14d           # imm = 0x600
+     22e:      	orl	%eax, %r14d
+     231:      	movl	%ebp, 0x28(%rbx)
+     234:      	movl	$0x0, 0x2c(%rbx)
+     23b:      	movl	%r14d, 0x30(%rbx)
+     23f:      	movabsq	$0x740020200000000, %rcx # imm = 0x740020200000000
+     249:      	movq	%rcx, 0x34(%rbx)
+     24d:      	movl	0x70(%rbx), %r14d
+     251:      	movabsq	$0x207400200, %rcx      # imm = 0x207400200
+     25b:      	movq	%rcx, 0x8(%rsp)
+     260:      	movb	%al, 0x8(%rsp)
+     264:      	movl	$0x1, %eax
+     269:      	movq	(%rip), %rdi            # 0x270 <cil_from_container+0x270>
+		000000000000026c:  R_X86_64_REX_GOTPCRELX	cilium_metrics-0x4
+     270:      	leaq	0x8(%rsp), %rsi
+     275:      	callq	*%rax
+     277:      	testq	%rax, %rax
+     27a:      	je	0x285 <cil_from_container+0x285>
+     27c:      	incq	(%rax)
+     27f:      	addq	%r14, 0x8(%rax)
+     283:      	jmp	0x2ad <cil_from_container+0x2ad>
+     285:      	movq	$0x1, 0x10(%rsp)
+     28e:      	movq	%r14, 0x18(%rsp)
+     293:      	movl	$0x2, %eax
+     298:      	movq	(%rip), %rdi            # 0x29f <cil_from_container+0x29f>
+		000000000000029b:  R_X86_64_REX_GOTPCRELX	cilium_metrics-0x4
+     29f:      	leaq	0x8(%rsp), %rsi
+     2a4:      	leaq	0x10(%rsp), %rdx
+     2a9:      	xorl	%ecx, %ecx
+     2ab:      	callq	*%rax
+     2ad:      	movl	$0xc, %eax
+     2b2:      	movq	(%rip), %rsi            # 0x2b9 <cil_from_container+0x2b9>
+		00000000000002b5:  R_X86_64_REX_GOTPCRELX	cilium_calls-0x4
+     2b9:      	movq	%rbx, %rdi
+     2bc:      	movl	$0x1, %edx
+     2c1:      	callq	*%rax
+     2c3:      	movl	$0x2, %eax
+     2c8:      	addq	$0x28, %rsp
+     2cc:      	popq	%rbx
+     2cd:      	popq	%r12
+     2cf:      	popq	%r13
+     2d1:      	popq	%r14
+     2d3:      	popq	%r15
+     2d5:      	popq	%rbp
+     2d6:      	retq
+     2d7:      	movb	%cl, 0x7(%rsp)
+     2db:      	movl	$0x1a, %eax
+     2e0:      	leaq	0x8(%rsp), %rdx
+     2e5:      	movq	%rbx, %rdi
+     2e8:      	movl	$0x22, %esi
+     2ed:      	movl	$0x1, %ecx
+     2f2:      	callq	*%rax
+     2f4:      	testl	%eax, %eax
+     2f6:      	js	0x85 <cil_from_container+0x85>
+     2fc:      	movzbl	0x8(%rsp), %eax
+     301:      	testl	%eax, %eax
+     303:      	je	0x16d <cil_from_container+0x16d>
+     309:      	movl	$0x23, %esi
+     30e:      	cmpl	$0x1, %eax
+     311:      	je	0x3a2 <cil_from_container+0x3a2>
+     317:      	movl	$0x1a, %eax
+     31c:      	leaq	0x6(%rsp), %rdx
+     321:      	movq	%rbx, %rdi
+     324:      	movl	$0x23, %esi
+     329:      	movl	$0x1, %ecx
+     32e:      	callq	*%rax
+     330:      	testl	%eax, %eax
+     332:      	js	0x85 <cil_from_container+0x85>
+     338:      	movl	$0x22, %esi
+     33d:      	movzbl	0x7(%rsp), %eax
+     342:      	cmpb	%al, 0x8(%rsp)
+     346:      	jne	0x39a <cil_from_container+0x39a>
+     348:      	movzbl	0x6(%rsp), %eax
+     34d:      	cmpl	$0xa, %eax
+     350:      	je	0x44a <cil_from_container+0x44a>
+     356:      	cmpl	$0x6, %eax
+     359:      	je	0x422 <cil_from_container+0x422>
+     35f:      	cmpl	$0x4, %eax
+     362:      	jne	0x85 <cil_from_container+0x85>
+     368:      	movl	$0x1a, %eax
+     36d:      	addl	$0x2, %esi
+     370:      	leaq	0x10(%rsp), %rdx
+     375:      	movq	%rbx, %rdi
+     378:      	movl	$0x2, %ecx
+     37d:      	callq	*%rax
+     37f:      	xorl	%r15d, %r15d
+     382:      	testl	%eax, %eax
+     384:      	movbew	0x10(%rsp), %cx
+     38b:      	movzwl	%cx, %ecx
+     38e:      	jmp	0x46d <cil_from_container+0x46d>
+     393:      	xorl	%eax, %eax
+     395:      	jmp	0x2c8 <cil_from_container+0x2c8>
+     39a:      	movzbl	0x6(%rsp), %esi
+     39f:      	addl	$0x22, %esi
+     3a2:      	leal	0x22(,%r15,4), %r15d
+     3aa:      	cmpl	%r15d, %esi
+     3ad:      	jae	0x16d <cil_from_container+0x16d>
+     3b3:      	movl	$0x1a, %eax
+     3b8:      	leaq	0x8(%rsp), %rdx
+     3bd:      	movq	%rbx, %rdi
+     3c0:      	movq	%rsi, 0x20(%rsp)
+     3c5:      	movl	$0x1, %ecx
+     3ca:      	callq	*%rax
+     3cc:      	testl	%eax, %eax
+     3ce:      	js	0x85 <cil_from_container+0x85>
+     3d4:      	movzbl	0x8(%rsp), %eax
+     3d9:      	testl	%eax, %eax
+     3db:      	movq	0x20(%rsp), %rsi
+     3e0:      	je	0x16d <cil_from_container+0x16d>
+     3e6:      	cmpl	$0x1, %eax
+     3e9:      	je	0x488 <cil_from_container+0x488>
+     3ef:      	movl	$0x1a, %eax
+     3f4:      	incl	%esi
+     3f6:      	leaq	0x6(%rsp), %rdx
+     3fb:      	movq	%rbx, %rdi
+     3fe:      	movl	$0x1, %ecx
+     403:      	callq	*%rax
+     405:      	testl	%eax, %eax
+     407:      	js	0x85 <cil_from_container+0x85>
+     40d:      	movzbl	0x7(%rsp), %eax
+     412:      	cmpb	%al, 0x8(%rsp)
+     416:      	jne	0x47e <cil_from_container+0x47e>
+     418:      	movq	0x20(%rsp), %rsi
+     41d:      	jmp	0x348 <cil_from_container+0x348>
+     422:      	movl	$0x1a, %eax
+     427:      	addl	$0x2, %esi
+     42a:      	leaq	0x10(%rsp), %rdx
+     42f:      	movq	%rbx, %rdi
+     432:      	movl	$0x4, %ecx
+     437:      	callq	*%rax
+     439:      	xorl	%ecx, %ecx
+     43b:      	testl	%eax, %eax
+     43d:      	movbel	0x10(%rsp), %r15d
+     444:      	cmovsl	%ecx, %r15d
+     448:      	jmp	0x471 <cil_from_container+0x471>
+     44a:      	movl	$0x1a, %eax
+     44f:      	addl	$0x2, %esi
+     452:      	leaq	0x10(%rsp), %rdx
+     457:      	movq	%rbx, %rdi
+     45a:      	movl	$0x8, %ecx
+     45f:      	callq	*%rax
+     461:      	xorl	%r15d, %r15d
+     464:      	testl	%eax, %eax
+     466:      	movbeq	0x10(%rsp), %rcx
+     46d:      	cmovnsq	%rcx, %r15
+     471:      	testl	%eax, %eax
+     473:      	jns	0x170 <cil_from_container+0x170>
+     479:      	jmp	0x85 <cil_from_container+0x85>
+     47e:      	movzbl	0x6(%rsp), %eax
+     483:      	movq	0x20(%rsp), %rsi
+     488:      	addl	%eax, %esi
+     48a:      	cmpl	%r15d, %esi
+     48d:      	jae	0x16d <cil_from_container+0x16d>
+     493:      	movl	$0x1a, %eax
+     498:      	leaq	0x8(%rsp), %rdx
+     49d:      	movq	%rbx, %rdi
+     4a0:      	movq	%rsi, %r15
+     4a3:      	movl	$0x1, %ecx
+     4a8:      	callq	*%rax
+     4aa:      	testl	%eax, %eax
+     4ac:      	js	0x85 <cil_from_container+0x85>
+     4b2:      	cmpb	$0x2, 0x8(%rsp)
+     4b7:      	jb	0x16d <cil_from_container+0x16d>
+     4bd:      	movl	$0x1a, %eax
+     4c2:      	leal	0x1(%r15), %esi
+     4c6:      	leaq	0x6(%rsp), %rdx
+     4cb:      	movq	%rbx, %rdi
+     4ce:      	movl	$0x1, %ecx
+     4d3:      	callq	*%rax
+     4d5:      	testl	%eax, %eax
+     4d7:      	js	0x85 <cil_from_container+0x85>
+     4dd:      	movzbl	0x7(%rsp), %eax
+     4e2:      	cmpb	%al, 0x8(%rsp)
+     4e6:      	movq	%r15, %rsi
+     4e9:      	jne	0x16d <cil_from_container+0x16d>
+     4ef:      	jmp	0x348 <cil_from_container+0x348>
+     4f4:      	nopw	%cs:(%rax,%rax)

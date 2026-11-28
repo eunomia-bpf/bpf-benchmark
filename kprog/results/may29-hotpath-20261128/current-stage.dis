@@ -1,0 +1,481 @@
+
+/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o:	file format elf64-x86-64
+
+Disassembly of section tc/entry:
+
+0000000000000000 <cil_from_container>:
+       0:      	pushq	%rbp
+       1:      	pushq	%r15
+       3:      	pushq	%r14
+       5:      	pushq	%r13
+       7:      	pushq	%r12
+       9:      	pushq	%rbx
+       a:      	subq	$0x68, %rsp
+       e:      	movq	%rdi, %rbx
+      11:      	movq	(%rip), %rax            # 0x18 <cil_from_container+0x18>
+		0000000000000014:  R_X86_64_REX_GOTPCRELX	__config_security_label-0x4
+      18:      	movl	(%rax), %ecx
+      1a:      	movl	0x70(%rdi), %eax
+      1d:      	subl	0x74(%rdi), %eax
+      20:      	cmpl	$0xe, %eax
+      23:      	movl	%ecx, 0x20(%rsp)
+      27:      	jae	0x36 <cil_from_container+0x36>
+      29:      	xorl	%r13d, %r13d
+      2c:      	movl	$0x0, 0x1c(%rsp)
+      34:      	jmp	0x4e <cil_from_container+0x4e>
+      36:      	movq	0xd0(%rbx), %rax
+      3d:      	movzwl	0xc(%rax), %r13d
+      42:      	cmpw	$0x6, %r13w
+      47:      	setae	%al
+      4a:      	movl	%eax, 0x1c(%rsp)
+      4e:      	movl	$0x0, 0x30(%rbx)
+      55:      	movl	$0x0, 0x34(%rbx)
+      5c:      	movl	$0x0, 0x38(%rbx)
+      63:      	movl	$0x0, 0x3c(%rbx)
+      6a:      	movl	$0x0, 0x40(%rbx)
+      71:      	movq	(%rip), %r15            # 0x78 <cil_from_container+0x78>
+		0000000000000074:  R_X86_64_REX_GOTPCRELX	__config_tracing_ip_option_type-0x4
+      78:      	cmpb	$0x0, (%r15)
+      7c:      	je	0xb6 <cil_from_container+0xb6>
+      7e:      	movzbl	(%r15), %ebp
+      82:      	movl	0x70(%rbx), %eax
+      85:      	subl	0x74(%rbx), %eax
+      88:      	cmpl	$0xe, %eax
+      8b:      	jae	0x218 <cil_from_container+0x218>
+      91:      	movl	$0x0, 0x28(%rsp)
+      99:      	movq	(%rip), %rdi            # 0xa0 <cil_from_container+0xa0>
+		000000000000009c:  R_X86_64_REX_GOTPCRELX	cilium_percpu_trace_id-0x4
+      a0:      	leaq	0x28(%rsp), %rsi
+      a5:      	callq	0xaa <cil_from_container+0xaa>
+		00000000000000a6:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+      aa:      	testq	%rax, %rax
+      ad:      	je	0xb6 <cil_from_container+0xb6>
+      af:      	movq	$0x0, (%rax)
+      b6:      	movw	$0x0, 0x7c(%rbx)
+      bc:      	movq	(%rip), %rbp            # 0xc3 <cil_from_container+0xc3>
+		00000000000000bf:  R_X86_64_REX_GOTPCRELX	__config_endpoint_id-0x4
+      c3:      	movzwl	(%rbp), %eax
+      c7:      	movq	(%rip), %r14            # 0xce <cil_from_container+0xce>
+		00000000000000ca:  R_X86_64_REX_GOTPCRELX	__config_trace_payload_len-0x4
+      ce:      	movl	(%r14), %r12d
+      d1:      	cmpb	$0x0, (%r15)
+      d5:      	je	0xfa <cil_from_container+0xfa>
+      d7:      	movl	$0x0, 0x28(%rsp)
+      df:      	movq	(%rip), %rdi            # 0xe6 <cil_from_container+0xe6>
+		00000000000000e2:  R_X86_64_REX_GOTPCRELX	cilium_percpu_trace_id-0x4
+      e6:      	leaq	0x28(%rsp), %rsi
+      eb:      	callq	0xf0 <cil_from_container+0xf0>
+		00000000000000ec:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+      f0:      	testq	%rax, %rax
+      f3:      	je	0xfa <cil_from_container+0xfa>
+      f5:      	movq	(%rax), %rsi
+      f8:      	jmp	0xfc <cil_from_container+0xfc>
+      fa:      	xorl	%esi, %esi
+      fc:      	movl	0x70(%rbx), %edi
+      ff:      	movq	$0x2, 0x10(%rsp)
+     108:      	movq	(%rip), %rax            # 0x10f <cil_from_container+0x10f>
+		000000000000010b:  R_X86_64_REX_GOTPCRELX	__config_events_map_rate_limit-0x4
+     10f:      	cmpl	$0x0, (%rax)
+     112:      	je	0x2db <cil_from_container+0x2db>
+     118:      	movl	%edi, 0x18(%rsp)
+     11c:      	movq	%rsi, %rbp
+     11f:      	movl	%r13d, 0xc(%rsp)
+     124:      	movq	(%rip), %rcx            # 0x12b <cil_from_container+0x12b>
+		0000000000000127:  R_X86_64_REX_GOTPCRELX	__config_events_map_burst_limit-0x4
+     12b:      	movl	(%rcx), %ecx
+     12d:      	movq	%rcx, 0x60(%rsp)
+     132:      	movl	(%rax), %r13d
+     135:      	callq	0x13a <cil_from_container+0x13a>
+		0000000000000136:  R_X86_64_PLT32	ktime_get_mono_fast_ns-0x4
+     13a:      	movq	%rax, %r15
+     13d:      	movl	$0x2, 0x24(%rsp)
+     145:      	movq	(%rip), %rdi            # 0x14c <cil_from_container+0x14c>
+		0000000000000148:  R_X86_64_REX_GOTPCRELX	cilium_ratelimit_metrics-0x4
+     14c:      	leaq	0x24(%rsp), %rsi
+     151:      	callq	0x156 <cil_from_container+0x156>
+		0000000000000152:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     156:      	movq	%rax, %r14
+     159:      	testq	%rax, %rax
+     15c:      	jne	0x187 <cil_from_container+0x187>
+     15e:      	movq	$0x0, (%rsp)
+     166:      	movq	(%rip), %rdi            # 0x16d <cil_from_container+0x16d>
+		0000000000000169:  R_X86_64_REX_GOTPCRELX	cilium_ratelimit_metrics-0x4
+     16d:      	leaq	0x24(%rsp), %rsi
+     172:      	movq	%rsp, %r14
+     175:      	movq	%r14, %rdx
+     178:      	xorl	%ecx, %ecx
+     17a:      	callq	0x17f <cil_from_container+0x17f>
+		000000000000017b:  R_X86_64_PLT32	bpf_map_update_elem-0x4
+     17f:      	testl	%eax, %eax
+     181:      	js	0x45b <cil_from_container+0x45b>
+     187:      	movq	(%rip), %rdi            # 0x18e <cil_from_container+0x18e>
+		000000000000018a:  R_X86_64_REX_GOTPCRELX	cilium_ratelimit-0x4
+     18e:      	leaq	0x10(%rsp), %rsi
+     193:      	callq	0x198 <cil_from_container+0x198>
+		0000000000000194:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     198:      	testq	%rax, %rax
+     19b:      	je	0x273 <cil_from_container+0x273>
+     1a1:      	movq	(%rax), %rcx
+     1a4:      	movq	%r15, %rsi
+     1a7:      	subq	%rcx, %rsi
+     1aa:      	cmpq	$0x3b9aca00, %rsi       # imm = 0x3B9ACA00
+     1b1:      	jbe	0x2ad <cil_from_container+0x2ad>
+     1b7:      	movq	%rsi, %rdx
+     1ba:      	shrq	$0x9, %rdx
+     1be:      	movabsq	$0x44b82fa09b5a53, %rcx # imm = 0x44B82FA09B5A53
+     1c8:      	mulxq	%rcx, %rcx, %rcx
+     1cd:      	shrq	$0xb, %rcx
+     1d1:      	imulq	$0x3b9aca00, %rcx, %rdx # imm = 0x3B9ACA00
+     1d8:      	imulq	%r13, %rcx
+     1dc:      	addq	0x8(%rax), %rcx
+     1e0:      	movq	%rcx, 0x8(%rax)
+     1e4:      	subq	%rsi, %rdx
+     1e7:      	addq	%rdx, %r15
+     1ea:      	movq	%r15, (%rax)
+     1ed:      	movq	0x60(%rsp), %rdx
+     1f2:      	cmpq	%rdx, %rcx
+     1f5:      	movl	0xc(%rsp), %r13d
+     1fa:      	movq	%rbp, %rsi
+     1fd:      	movl	0x18(%rsp), %edi
+     201:      	jbe	0x20a <cil_from_container+0x20a>
+     203:      	movq	%rdx, 0x8(%rax)
+     207:      	movq	%rdx, %rcx
+     20a:      	testq	%rcx, %rcx
+     20d:      	jne	0x2c6 <cil_from_container+0x2c6>
+     213:      	jmp	0x458 <cil_from_container+0x458>
+     218:      	cmpl	$0x22, %eax
+     21b:      	jb	0x91 <cil_from_container+0x91>
+     221:      	movq	0xd0(%rbx), %rax
+     228:      	cmpw	$0x8, 0xc(%rax)
+     22d:      	jne	0x91 <cil_from_container+0x91>
+     233:      	movzbl	0xe(%rax), %r12d
+     238:      	andl	$0xf, %r12d
+     23c:      	cmpb	$0x6, %r12b
+     240:      	jae	0x546 <cil_from_container+0x546>
+     246:      	xorl	%r14d, %r14d
+     249:      	movl	$0x0, 0x28(%rsp)
+     251:      	movq	(%rip), %rdi            # 0x258 <cil_from_container+0x258>
+		0000000000000254:  R_X86_64_REX_GOTPCRELX	cilium_percpu_trace_id-0x4
+     258:      	leaq	0x28(%rsp), %rsi
+     25d:      	callq	0x262 <cil_from_container+0x262>
+		000000000000025e:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     262:      	testq	%rax, %rax
+     265:      	je	0xb6 <cil_from_container+0xb6>
+     26b:      	movq	%r14, (%rax)
+     26e:      	jmp	0xb6 <cil_from_container+0xb6>
+     273:      	movq	%r15, 0x28(%rsp)
+     278:      	decq	%r13
+     27b:      	movq	%r13, 0x30(%rsp)
+     280:      	movq	(%rip), %rdi            # 0x287 <cil_from_container+0x287>
+		0000000000000283:  R_X86_64_REX_GOTPCRELX	cilium_ratelimit-0x4
+     287:      	leaq	0x10(%rsp), %rsi
+     28c:      	leaq	0x28(%rsp), %rdx
+     291:      	xorl	%ecx, %ecx
+     293:      	callq	0x298 <cil_from_container+0x298>
+		0000000000000294:  R_X86_64_PLT32	bpf_map_update_elem-0x4
+     298:      	testl	%eax, %eax
+     29a:      	movl	0xc(%rsp), %r13d
+     29f:      	movq	%rbp, %rsi
+     2a2:      	movl	0x18(%rsp), %edi
+     2a6:      	jns	0x2cd <cil_from_container+0x2cd>
+     2a8:      	jmp	0x458 <cil_from_container+0x458>
+     2ad:      	movq	0x8(%rax), %rcx
+     2b1:      	movl	0xc(%rsp), %r13d
+     2b6:      	movq	%rbp, %rsi
+     2b9:      	movl	0x18(%rsp), %edi
+     2bd:      	testq	%rcx, %rcx
+     2c0:      	je	0x458 <cil_from_container+0x458>
+     2c6:      	decq	%rcx
+     2c9:      	movq	%rcx, 0x8(%rax)
+     2cd:      	movq	(%rip), %rbp            # 0x2d4 <cil_from_container+0x2d4>
+		00000000000002d0:  R_X86_64_REX_GOTPCRELX	__config_endpoint_id-0x4
+     2d4:      	movq	(%rip), %r14            # 0x2db <cil_from_container+0x2db>
+		00000000000002d7:  R_X86_64_REX_GOTPCRELX	__config_trace_payload_len-0x4
+     2db:      	movl	%r13d, %eax
+     2de:      	testw	%r13w, %r13w
+     2e2:      	jne	0x2eb <cil_from_container+0x2eb>
+     2e4:      	movzwl	0xb4(%rbx), %eax
+     2eb:      	movzwl	%ax, %eax
+     2ee:      	cmpl	$0xdd86, %eax           # imm = 0xDD86
+     2f3:      	sete	%al
+     2f6:      	movl	(%r14), %ecx
+     2f9:      	testl	%r12d, %r12d
+     2fc:      	movq	%r14, %rdx
+     2ff:      	movl	0x20(%rsp), %r14d
+     304:      	movl	0x1c(%rsp), %r15d
+     309:      	je	0x312 <cil_from_container+0x312>
+     30b:      	movl	(%rdx), %edx
+     30d:      	cmpl	%r12d, %edx
+     310:      	jne	0x315 <cil_from_container+0x315>
+     312:      	movl	%ecx, %r12d
+     315:      	movl	0x70(%rbx), %ecx
+     318:      	cmpl	%ecx, %r12d
+     31b:      	jb	0x320 <cil_from_container+0x320>
+     31d:      	movl	%ecx, %r12d
+     320:      	movzwl	(%rbp), %ecx
+     324:      	movl	0x98(%rbx), %edx
+     32a:      	movw	$0x504, 0x28(%rsp)      # imm = 0x504
+     331:      	movw	%cx, 0x2a(%rsp)
+     336:      	movl	%edx, 0x2c(%rsp)
+     33a:      	movl	%edi, 0x30(%rsp)
+     33e:      	movw	%r12w, 0x34(%rsp)
+     344:      	movw	$0x2, 0x36(%rsp)
+     34b:      	movl	%r14d, 0x38(%rsp)
+     350:      	movl	$0x0, 0x3c(%rsp)
+     358:      	movw	$0x0, 0x40(%rsp)
+     35f:      	movb	$0x5, 0x42(%rsp)
+     364:      	movb	%al, 0x43(%rsp)
+     368:      	movl	$0x0, 0x44(%rsp)
+     370:      	movq	%rsi, 0x58(%rsp)
+     375:      	shlq	$0x20, %r12
+     379:      	movl	$0xffffffff, %edx       # imm = 0xFFFFFFFF
+     37e:      	orq	%r12, %rdx
+     381:      	movq	$0x0, 0x48(%rsp)
+     38a:      	movq	$0x0, 0x50(%rsp)
+     393:      	movq	(%rip), %rsi            # 0x39a <cil_from_container+0x39a>
+		0000000000000396:  R_X86_64_REX_GOTPCRELX	cilium_events-0x4
+     39a:      	leaq	0x28(%rsp), %rcx
+     39f:      	movl	$0x38, %r8d
+     3a5:      	movq	%rbx, %rdi
+     3a8:      	callq	0x3ad <cil_from_container+0x3ad>
+		00000000000003a9:  R_X86_64_PLT32	bpf_perf_event_output-0x4
+     3ad:      	movl	$0xa6, %eax
+     3b2:      	xorl	%ebp, %ebp
+     3b4:      	testb	%r15b, %r15b
+     3b7:      	je	0x4aa <cil_from_container+0x4aa>
+     3bd:      	movl	%r13d, %eax
+     3c0:      	rolw	$0x8, %ax
+     3c4:      	movzwl	%ax, %eax
+     3c7:      	cmpl	$0x806, %eax            # imm = 0x806
+     3cc:      	je	0x3f7 <cil_from_container+0x3f7>
+     3ce:      	cmpl	$0x800, %eax            # imm = 0x800
+     3d3:      	jne	0x418 <cil_from_container+0x418>
+     3d5:      	movq	%rbx, %rdi
+     3d8:      	movl	$0x22, %esi
+     3dd:      	callq	0x3e2 <cil_from_container+0x3e2>
+		00000000000003de:  R_X86_64_PLT32	bpf_skb_pull_data-0x4
+     3e2:      	movl	0x70(%rbx), %ecx
+     3e5:      	subl	0x74(%rbx), %ecx
+     3e8:      	movl	$0x86, %eax
+     3ed:      	cmpl	$0x22, %ecx
+     3f0:      	jae	0x418 <cil_from_container+0x418>
+     3f2:      	jmp	0x4aa <cil_from_container+0x4aa>
+     3f7:      	movq	%rbx, %rdi
+     3fa:      	movl	$0x2a, %esi
+     3ff:      	callq	0x404 <cil_from_container+0x404>
+		0000000000000400:  R_X86_64_PLT32	bpf_skb_pull_data-0x4
+     404:      	movl	0x70(%rbx), %ecx
+     407:      	subl	0x74(%rbx), %ecx
+     40a:      	movl	$0x86, %eax
+     40f:      	cmpl	$0x2a, %ecx
+     412:      	jb	0x4aa <cil_from_container+0x4aa>
+     418:      	movzwl	%r13w, %ecx
+     41c:      	cmpl	$0x608, %ecx            # imm = 0x608
+     422:      	je	0x47c <cil_from_container+0x47c>
+     424:      	movl	$0x8b, %eax
+     429:      	cmpl	$0x8, %ecx
+     42c:      	jne	0x4aa <cil_from_container+0x4aa>
+     42e:      	movq	(%rip), %rsi            # 0x435 <cil_from_container+0x435>
+		0000000000000431:  R_X86_64_REX_GOTPCRELX	cilium_calls-0x4
+     435:      	movq	%rbx, %rdi
+     438:      	movl	$0x7, %edx
+     43d:      	callq	0x442 <cil_from_container+0x442>
+		000000000000043e:  R_X86_64_PLT32	bpf_tail_call-0x4
+     442:      	movq	(%rip), %rax            # 0x449 <cil_from_container+0x449>
+		0000000000000445:  R_X86_64_REX_GOTPCRELX	__config_security_label-0x4
+     449:      	movl	(%rax), %r14d
+     44c:      	movl	$0x8c, %eax
+     451:      	movl	$0x700, %ebp            # imm = 0x700
+     456:      	jmp	0x4aa <cil_from_container+0x4aa>
+     458:      	incq	(%r14)
+     45b:      	movl	0x20(%rsp), %r14d
+     460:      	movl	0xc(%rsp), %r13d
+     465:      	movl	0x1c(%rsp), %r15d
+     46a:      	movl	$0xa6, %eax
+     46f:      	xorl	%ebp, %ebp
+     471:      	testb	%r15b, %r15b
+     474:      	jne	0x3bd <cil_from_container+0x3bd>
+     47a:      	jmp	0x4aa <cil_from_container+0x4aa>
+     47c:      	movq	(%rip), %rax            # 0x483 <cil_from_container+0x483>
+		000000000000047f:  R_X86_64_REX_GOTPCRELX	__config_enable_arp_responder-0x4
+     483:      	cmpb	$0x0, (%rax)
+     486:      	je	0x5fa <cil_from_container+0x5fa>
+     48c:      	movq	(%rip), %rsi            # 0x493 <cil_from_container+0x493>
+		000000000000048f:  R_X86_64_REX_GOTPCRELX	cilium_calls-0x4
+     493:      	movq	%rbx, %rdi
+     496:      	movl	$0x6, %edx
+     49b:      	callq	0x4a0 <cil_from_container+0x4a0>
+		000000000000049c:  R_X86_64_PLT32	bpf_tail_call-0x4
+     4a0:      	movl	$0x8c, %eax
+     4a5:      	movl	$0x600, %ebp            # imm = 0x600
+     4aa:      	movl	%r14d, 0x30(%rbx)
+     4ae:      	movl	$0x0, 0x34(%rbx)
+     4b5:      	orl	%eax, %ebp
+     4b7:      	movl	%ebp, 0x38(%rbx)
+     4ba:      	movabsq	$0x740020200000000, %rcx # imm = 0x740020200000000
+     4c4:      	movq	%rcx, 0x3c(%rbx)
+     4c8:      	movl	0x70(%rbx), %r14d
+     4cc:      	movabsq	$0x207400200, %rcx      # imm = 0x207400200
+     4d6:      	movq	%rcx, (%rsp)
+     4da:      	movb	%al, (%rsp)
+     4dd:      	movq	(%rip), %rdi            # 0x4e4 <cil_from_container+0x4e4>
+		00000000000004e0:  R_X86_64_REX_GOTPCRELX	cilium_metrics-0x4
+     4e4:      	movq	%rsp, %rsi
+     4e7:      	callq	0x4ec <cil_from_container+0x4ec>
+		00000000000004e8:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     4ec:      	testq	%rax, %rax
+     4ef:      	je	0x4fa <cil_from_container+0x4fa>
+     4f1:      	incq	(%rax)
+     4f4:      	addq	%r14, 0x8(%rax)
+     4f8:      	jmp	0x51e <cil_from_container+0x51e>
+     4fa:      	movq	$0x1, 0x28(%rsp)
+     503:      	movq	%r14, 0x30(%rsp)
+     508:      	movq	(%rip), %rdi            # 0x50f <cil_from_container+0x50f>
+		000000000000050b:  R_X86_64_REX_GOTPCRELX	cilium_metrics-0x4
+     50f:      	movq	%rsp, %rsi
+     512:      	leaq	0x28(%rsp), %rdx
+     517:      	xorl	%ecx, %ecx
+     519:      	callq	0x51e <cil_from_container+0x51e>
+		000000000000051a:  R_X86_64_PLT32	bpf_map_update_elem-0x4
+     51e:      	movq	(%rip), %rsi            # 0x525 <cil_from_container+0x525>
+		0000000000000521:  R_X86_64_REX_GOTPCRELX	cilium_calls-0x4
+     525:      	movq	%rbx, %rdi
+     528:      	movl	$0x1, %edx
+     52d:      	callq	0x532 <cil_from_container+0x532>
+		000000000000052e:  R_X86_64_PLT32	bpf_tail_call-0x4
+     532:      	movl	$0x2, %eax
+     537:      	addq	$0x68, %rsp
+     53b:      	popq	%rbx
+     53c:      	popq	%r12
+     53e:      	popq	%r13
+     540:      	popq	%r14
+     542:      	popq	%r15
+     544:      	popq	%rbp
+     545:      	retq
+     546:      	movq	%rsp, %rdx
+     549:      	movq	%rbx, %rdi
+     54c:      	movl	$0x22, %esi
+     551:      	movl	$0x1, %ecx
+     556:      	callq	0x55b <cil_from_container+0x55b>
+		0000000000000557:  R_X86_64_PLT32	bpf_skb_load_bytes-0x4
+     55b:      	testl	%eax, %eax
+     55d:      	js	0x91 <cil_from_container+0x91>
+     563:      	movzbl	(%rsp), %eax
+     567:      	testl	%eax, %eax
+     569:      	je	0x246 <cil_from_container+0x246>
+     56f:      	movl	$0x23, %r14d
+     575:      	cmpl	$0x1, %eax
+     578:      	je	0x60b <cil_from_container+0x60b>
+     57e:      	leaq	0x10(%rsp), %rdx
+     583:      	movq	%rbx, %rdi
+     586:      	movl	$0x23, %esi
+     58b:      	movl	$0x1, %ecx
+     590:      	callq	0x595 <cil_from_container+0x595>
+		0000000000000591:  R_X86_64_PLT32	bpf_skb_load_bytes-0x4
+     595:      	testl	%eax, %eax
+     597:      	js	0x91 <cil_from_container+0x91>
+     59d:      	movl	$0x22, %r14d
+     5a3:      	cmpb	%bpl, (%rsp)
+     5a7:      	jne	0x601 <cil_from_container+0x601>
+     5a9:      	movzbl	0x10(%rsp), %eax
+     5ae:      	cmpl	$0xa, %eax
+     5b1:      	je	0x6fd <cil_from_container+0x6fd>
+     5b7:      	cmpl	$0x6, %eax
+     5ba:      	je	0x6d3 <cil_from_container+0x6d3>
+     5c0:      	cmpl	$0x4, %eax
+     5c3:      	jne	0x91 <cil_from_container+0x91>
+     5c9:      	addl	$0x2, %r14d
+     5cd:      	leaq	0x28(%rsp), %rdx
+     5d2:      	movq	%rbx, %rdi
+     5d5:      	movl	%r14d, %esi
+     5d8:      	movl	$0x2, %ecx
+     5dd:      	callq	0x5e2 <cil_from_container+0x5e2>
+		00000000000005de:  R_X86_64_PLT32	bpf_skb_load_bytes-0x4
+     5e2:      	testl	%eax, %eax
+     5e4:      	js	0x723 <cil_from_container+0x723>
+     5ea:      	movbew	0x28(%rsp), %cx
+     5f1:      	movzwl	%cx, %r14d
+     5f5:      	jmp	0x726 <cil_from_container+0x726>
+     5fa:      	xorl	%eax, %eax
+     5fc:      	jmp	0x537 <cil_from_container+0x537>
+     601:      	movzbl	0x10(%rsp), %r14d
+     607:      	addl	$0x22, %r14d
+     60b:      	leal	0x22(,%r12,4), %r12d
+     613:      	cmpl	%r12d, %r14d
+     616:      	jae	0x246 <cil_from_container+0x246>
+     61c:      	movq	%rsp, %rdx
+     61f:      	movq	%rbx, %rdi
+     622:      	movl	%r14d, %esi
+     625:      	movl	$0x1, %ecx
+     62a:      	callq	0x62f <cil_from_container+0x62f>
+		000000000000062b:  R_X86_64_PLT32	bpf_skb_load_bytes-0x4
+     62f:      	testl	%eax, %eax
+     631:      	js	0x91 <cil_from_container+0x91>
+     637:      	movzbl	(%rsp), %eax
+     63b:      	testl	%eax, %eax
+     63d:      	je	0x246 <cil_from_container+0x246>
+     643:      	cmpl	$0x1, %eax
+     646:      	je	0x675 <cil_from_container+0x675>
+     648:      	leal	0x1(%r14), %esi
+     64c:      	leaq	0x10(%rsp), %rdx
+     651:      	movq	%rbx, %rdi
+     654:      	movl	$0x1, %ecx
+     659:      	callq	0x65e <cil_from_container+0x65e>
+		000000000000065a:  R_X86_64_PLT32	bpf_skb_load_bytes-0x4
+     65e:      	testl	%eax, %eax
+     660:      	js	0x91 <cil_from_container+0x91>
+     666:      	cmpb	%bpl, (%rsp)
+     66a:      	je	0x5a9 <cil_from_container+0x5a9>
+     670:      	movzbl	0x10(%rsp), %eax
+     675:      	addl	%eax, %r14d
+     678:      	cmpl	%r12d, %r14d
+     67b:      	jae	0x246 <cil_from_container+0x246>
+     681:      	movq	%rsp, %rdx
+     684:      	movq	%rbx, %rdi
+     687:      	movl	%r14d, %esi
+     68a:      	movl	$0x1, %ecx
+     68f:      	callq	0x694 <cil_from_container+0x694>
+		0000000000000690:  R_X86_64_PLT32	bpf_skb_load_bytes-0x4
+     694:      	testl	%eax, %eax
+     696:      	js	0x91 <cil_from_container+0x91>
+     69c:      	cmpb	$0x2, (%rsp)
+     6a0:      	jb	0x246 <cil_from_container+0x246>
+     6a6:      	leal	0x1(%r14), %esi
+     6aa:      	leaq	0x10(%rsp), %rdx
+     6af:      	movq	%rbx, %rdi
+     6b2:      	movl	$0x1, %ecx
+     6b7:      	callq	0x6bc <cil_from_container+0x6bc>
+		00000000000006b8:  R_X86_64_PLT32	bpf_skb_load_bytes-0x4
+     6bc:      	testl	%eax, %eax
+     6be:      	js	0x91 <cil_from_container+0x91>
+     6c4:      	cmpb	%bpl, (%rsp)
+     6c8:      	jne	0x246 <cil_from_container+0x246>
+     6ce:      	jmp	0x5a9 <cil_from_container+0x5a9>
+     6d3:      	addl	$0x2, %r14d
+     6d7:      	leaq	0x28(%rsp), %rdx
+     6dc:      	movq	%rbx, %rdi
+     6df:      	movl	%r14d, %esi
+     6e2:      	movl	$0x4, %ecx
+     6e7:      	callq	0x6ec <cil_from_container+0x6ec>
+		00000000000006e8:  R_X86_64_PLT32	bpf_skb_load_bytes-0x4
+     6ec:      	xorl	%ecx, %ecx
+     6ee:      	testl	%eax, %eax
+     6f0:      	movbel	0x28(%rsp), %r14d
+     6f7:      	cmovsl	%ecx, %r14d
+     6fb:      	jmp	0x726 <cil_from_container+0x726>
+     6fd:      	addl	$0x2, %r14d
+     701:      	leaq	0x28(%rsp), %rdx
+     706:      	movq	%rbx, %rdi
+     709:      	movl	%r14d, %esi
+     70c:      	movl	$0x8, %ecx
+     711:      	callq	0x716 <cil_from_container+0x716>
+		0000000000000712:  R_X86_64_PLT32	bpf_skb_load_bytes-0x4
+     716:      	testl	%eax, %eax
+     718:      	js	0x723 <cil_from_container+0x723>
+     71a:      	movbeq	0x28(%rsp), %r14
+     721:      	jmp	0x726 <cil_from_container+0x726>
+     723:      	xorl	%r14d, %r14d
+     726:      	testl	%eax, %eax
+     728:      	jns	0x249 <cil_from_container+0x249>
+     72e:      	jmp	0x91 <cil_from_container+0x91>
+     733:      	nopw	%cs:(%rax,%rax)

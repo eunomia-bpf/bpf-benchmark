@@ -1,0 +1,101 @@
+1330:                 // Else: keep verbatim. ELF reloc pass handles helpers; any
+1331:                 // other intra-symbol "call" with non-entry target would be
+1332:                 // a self-referential placeholder, which the assembler does
+1333:                 // not normally emit.
+1334:             }
+1335: 
+1336:             if matches!(
+1337:                 insn.flow_control(),
+1338:                 FlowControl::Call | FlowControl::IndirectCall
+1339:             ) {
+1340:                 let call_reg = x86_indirect_call_register(&insn);
+1341:                 let mut helper_call_name = helper_call_sites.get(&site_key).cloned();
+1342:                 if helper_call_name.is_none() {
+1343:                     if let Some(reg) = call_reg {
+1344:                         if let Some(helper_id) = helper_imm_registers.get(&reg).copied() {
+1345:                             let name = bpf_helper_name_from_id(helper_id).ok_or_else(|| {
+1346:                                 anyhow!(
+1347:                                     "x86 immediate BPF helper id {} in {} at local offset {:#x} is unsupported",
+1348:                                     helper_id,
+1349:                                     sym.name,
+1350:                                     local_ip
+1351:                                 )
+1352:                             })?;
+1353:                             helper_call_name = Some(name.to_string());
+1354:                         } else {
+1355:                             helper_call_name = helper_got_registers.get(&reg).cloned();
+1356:                         }
+1357:                     }
+1358:                 }
+1359:                 if let Some(name) = helper_call_name {
+1360:                     clear_x86_call_clobbered_registers(&mut helper_imm_registers);
+1361:                     clear_x86_call_clobbered_registers(&mut helper_got_registers);
+1362:                     if proof_mode {
+1363:                         local.push(insn);
+1364:                         kinds.push(None);
+1365:                         insn_local_ip.push(local_ip);
+1366:                         clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+1367:                         continue;
+1368:                     }
+1369:                     if name == "bpf_tail_call" {
+1370:                         if !is_entry {
+1371:                             bail!(
+1372:                                 "x86 bpf_tail_call in non-entry symbol {} at local offset {:#x} is unsupported",
+1373:                                 sym.name,
+1374:                                 local_ip
+1375:                             );
+1376:                         }
+1377:                         for ib in build_x86_tail_call_inline(
+1378:                             helper_addrs,
+1379:                             callee_saved_mask,
+1380:                             &entry_abi_strip.tail_call_cleanup_bytes,
+1381:                             entry_abi_strip.tail_call_bpf_rbp_rsp_offset,
+1382:                             entry_abi_strip.tail_call_bpf_rbp_is_live,
+1383:                         )? {
+1384:                             push_x86_synthetic(
+1385:                                 &mut local,
+1386:                                 &mut kinds,
+1387:                                 &mut insn_local_ip,
+1388:                                 &mut next_synthetic_ip,
+1389:                                 ib,
+1390:                             )?;
+1391:                         }
+1392:                         resolved_helper_call_sites.insert(site_key);
+1393:                         clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+1394:                         continue;
+1395:                     }
+1396:                     if name == "bpf_get_smp_processor_id" {
+1397:                         if let Some(inline) = build_x86_get_smp_processor_id_inline(helper_addrs)? {
+1398:                             for ib in inline {
+1399:                                 push_x86_synthetic(
+1400:                                     &mut local,
+1401:                                     &mut kinds,
+1402:                                     &mut insn_local_ip,
+1403:                                     &mut next_synthetic_ip,
+1404:                                     ib,
+1405:                                 )?;
+1406:                             }
+1407:                             resolved_helper_call_sites.insert(site_key);
+1408:                             clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+1409:                             continue;
+1410:                         }
+1411:                     }
+1412: 
+1413:                     if name == "bpf_map_lookup_elem" {
+1414:                         let native_call_index = lookup_call_counter;
+1415:                         lookup_call_counter += 1;
+1416:                         let native_map_name =
+1417:                             map_symbol_registers.get(&Register::RDI).map(String::as_str);
+1418:                         let (site_label, _site_index, spec) = select_lookup_site(
+1419:                             lookup_sites,
+1420:                             lookup_maps,
+1421:                             &mut lookup_site_used,
+1422:                             native_call_index,
+1423:                             native_map_name,
+1424:                             &sym.name,
+1425:                             map_lookup_helper_addr,
+1426:                         )?;
+1427:                         lookup_call_specs.insert(site_key, spec.clone());
+1428:                         match spec.kind {
+1429:                             LookupKind::Array | LookupKind::PerCpuArray => {
+1430:                                 for ib in build_x86_array_lookup(&spec)? {
