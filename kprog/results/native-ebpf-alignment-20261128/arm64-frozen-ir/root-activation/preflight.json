@@ -1,0 +1,225 @@
+{
+  "time_utc": "2026-11-28T05:01:52Z",
+  "canonical_root": "/workspaces/repository/.cache/qemu-arm64-root",
+  "temporary_root": "/workspaces/repository/.cache/qemu-arm64-root.tmp",
+  "root_is_symlink": false,
+  "checked_user_runtime_locations": [
+    {
+      "path": "root",
+      "regular_files": 6,
+      "bytes": 3283,
+      "host_matches": 0,
+      "previously_preserved": 0,
+      "newly_preserved": 6
+    },
+    {
+      "path": "home",
+      "regular_files": 3,
+      "bytes": 4798,
+      "host_matches": 0,
+      "previously_preserved": 0,
+      "newly_preserved": 3
+    },
+    {
+      "path": "tmp",
+      "regular_files": 0,
+      "bytes": 0,
+      "host_matches": 0,
+      "previously_preserved": 0,
+      "newly_preserved": 0
+    },
+    {
+      "path": "var/tmp",
+      "regular_files": 0,
+      "bytes": 0,
+      "host_matches": 0,
+      "previously_preserved": 0,
+      "newly_preserved": 0
+    },
+    {
+      "path": "run",
+      "regular_files": 2,
+      "bytes": 7,
+      "host_matches": 0,
+      "previously_preserved": 0,
+      "newly_preserved": 2
+    },
+    {
+      "path": "mnt",
+      "regular_files": 0,
+      "bytes": 0,
+      "host_matches": 0,
+      "previously_preserved": 0,
+      "newly_preserved": 0
+    },
+    {
+      "path": "media",
+      "regular_files": 0,
+      "bytes": 0,
+      "host_matches": 0,
+      "previously_preserved": 0,
+      "newly_preserved": 0
+    },
+    {
+      "path": "srv",
+      "regular_files": 0,
+      "bytes": 0,
+      "host_matches": 0,
+      "previously_preserved": 0,
+      "newly_preserved": 0
+    },
+    {
+      "path": "opt",
+      "regular_files": 0,
+      "bytes": 0,
+      "host_matches": 0,
+      "previously_preserved": 0,
+      "newly_preserved": 0
+    },
+    {
+      "path": "workspaces",
+      "regular_files": 168,
+      "bytes": 85190557,
+      "host_matches": 117,
+      "previously_preserved": 36,
+      "newly_preserved": 15
+    }
+  ],
+  "symlinks_not_followed": [
+    {
+      "path": "home/yunwei37/workspace/bpf-benchmark",
+      "target": "/workspaces/repository"
+    },
+    {
+      "path": "opt/bpf-benchmark",
+      "target": "/artifacts/user"
+    }
+  ],
+  "previous_preservation": "runtime-refresh/old-root-results-inventory.json",
+  "additional_files": {
+    "root/.profile": {
+      "bytes": 161,
+      "sha256": "bbee58b1e0787bb851e7f7a4d0c187a8122d68eb67e5fa464696310398ac005b"
+    },
+    "root/.bashrc": {
+      "bytes": 3106,
+      "sha256": "34fbc467b8c624d92abcdf3edcf35ee46032618a6f23b210efab0e6824978126"
+    },
+    "root/.config/gops/599": {
+      "bytes": 4,
+      "sha256": "21732143d7bcad4b49be2bf0fbf31eace1974b546416e85ed1a214e46d0432fd"
+    },
+    "root/.config/gops/1838": {
+      "bytes": 4,
+      "sha256": "21732143d7bcad4b49be2bf0fbf31eace1974b546416e85ed1a214e46d0432fd"
+    },
+    "root/.config/gops/1858": {
+      "bytes": 4,
+      "sha256": "21732143d7bcad4b49be2bf0fbf31eace1974b546416e85ed1a214e46d0432fd"
+    },
+    "root/.config/gops/1855": {
+      "bytes": 4,
+      "sha256": "21732143d7bcad4b49be2bf0fbf31eace1974b546416e85ed1a214e46d0432fd"
+    },
+    "home/ubuntu/.profile": {
+      "bytes": 807,
+      "sha256": "28b4a453b68dde64f814e94bab14ee651f4f162e15dd9920490aa1d49f05d2a4"
+    },
+    "home/ubuntu/.bashrc": {
+      "bytes": 3771,
+      "sha256": "342099da4dd28c394d3f8782d90d7465cb2eaa611193f8f378d6918261cb9bb8"
+    },
+    "home/ubuntu/.bash_logout": {
+      "bytes": 220,
+      "sha256": "26882b79471c25f945c970f8233d8ce29d54e9d5eedcd2884f88affa84a18f56"
+    },
+    "run/adduser": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "run/systemd/container": {
+      "bytes": 7,
+      "sha256": "00d151e7d392e68e2c756a6fc42640006ddc0a98d37dba3f90a7b73f63188bbd"
+    },
+    "workspaces/repository/runner/libs/__pycache__/workload.cpython-312.pyc": {
+      "bytes": 74345,
+      "sha256": "4e6b3d1ec3afcf98d6fe468d0ec5307f8535de9a1b53ce80ebe1ebcea3d9cd85"
+    },
+    "workspaces/repository/runner/libs/app_runners/__pycache__/__init__.cpython-312.pyc": {
+      "bytes": 4841,
+      "sha256": "9b336e2712deee521ccbde98a64757d43978352d91e054a7d3134357b7754fcd"
+    },
+    "workspaces/repository/runner/libs/app_runners/__pycache__/bcc_set.cpython-312.pyc": {
+      "bytes": 12996,
+      "sha256": "5c95d81b39986dd48f72330c9ee3f698b2f96f01743f5c59622ce56f4bdcc134"
+    },
+    "workspaces/repository/runner/libs/app_runners/__pycache__/process_support.cpython-312.pyc": {
+      "bytes": 17219,
+      "sha256": "7706f2f4b453ec8f0c6476112a7d74ee720fbf528c4debbffb1b9a31d1a4163f"
+    },
+    "workspaces/repository/runner/libs/app_runners/__pycache__/tracee.cpython-312.pyc": {
+      "bytes": 19189,
+      "sha256": "5596d39d00f44e9c5c185309c0a74b62017a1f228dfb56fb560347c0c8a26409"
+    },
+    "workspaces/repository/runner/libs/app_runners/__pycache__/bcc.cpython-312.pyc": {
+      "bytes": 8690,
+      "sha256": "2514611461683bcb1639e876a9842861f9819b01c197133a9a25b2b327226d48"
+    },
+    "workspaces/repository/runner/libs/app_runners/__pycache__/base.cpython-312.pyc": {
+      "bytes": 2924,
+      "sha256": "177e7478e60d1af858ac2b86d1442cf162795b71ab32bcaae6892c0eea984669"
+    },
+    "workspaces/repository/runner/libs/app_runners/__pycache__/tetragon.cpython-312.pyc": {
+      "bytes": 12985,
+      "sha256": "4522216ffe9dc3e433e191411a36052e9dfe3d28663f4e7744ae9d363081b3a9"
+    },
+    "workspaces/repository/runner/libs/app_runners/__pycache__/setup_support.cpython-312.pyc": {
+      "bytes": 3940,
+      "sha256": "ad9f2e3228e7ddf63c34bf189309a354f2ef0f3b8a2e352ac975b31e17b4c9b2"
+    },
+    "workspaces/repository/runner/libs/app_runners/__pycache__/cilium.cpython-312.pyc": {
+      "bytes": 34322,
+      "sha256": "cfeef1d4517926e566e496e7ceda45eca487f41cf98fadb31d4f0e43c23e5910"
+    },
+    "workspaces/repository/runner/libs/app_runners/__pycache__/native_loader_env.cpython-312.pyc": {
+      "bytes": 1651,
+      "sha256": "d05d7cf452f35482dcf2393a105613e575ff62b6662d58b38348957334d5d136"
+    },
+    "workspaces/repository/runner/libs/app_runners/__pycache__/katran.cpython-312.pyc": {
+      "bytes": 62021,
+      "sha256": "bf6531b7c8b421eb884173f8c06196ea68b04571174e56e9b4bdde52f70688f2"
+    },
+    "workspaces/repository/runner/libs/app_runners/__pycache__/otel_profiler.cpython-312.pyc": {
+      "bytes": 7604,
+      "sha256": "b98b036bf2e94c348666ac4475fde79556cfeb7933a8ac943bcd4d171aab22f2"
+    },
+    "workspaces/repository/runner/libs/app_runners/__pycache__/etcd_support.cpython-312.pyc": {
+      "bytes": 8475,
+      "sha256": "d658813e337f253206c1b3c09b4215028813fc19f521a8166133b961966564b2"
+    },
+    "workspaces/repository/corpus/__pycache__/driver.cpython-312.pyc": {
+      "bytes": 47038,
+      "sha256": "127d5230b4cd820ce071239d1c47d553c0f487a281390681fe13adb897b3b553"
+    },
+    "qemu-perf-scalar-init": {
+      "bytes": 1175,
+      "sha256": "9c5813372b9826f0e22bf952635116783dc2f48f99a2dcaee0ef9797727bb8f5"
+    },
+    "qemu-perf-checked-init": {
+      "bytes": 1721,
+      "sha256": "f2bc1179a6c81db824a8e762613f890676014e0b2c3d9c2f0a7892375ab550b0"
+    },
+    "qemu-perf-catalogue-init": {
+      "bytes": 882,
+      "sha256": "86437eefc90a7a2b3989d22c8de442865d39e3afa18a05b34178d99caac6d39e"
+    }
+  },
+  "additional_archive": {
+    "path": "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/root-activation/old-root-additional-data.tar.gz",
+    "bytes": 140894,
+    "sha256": "a91a6b247aed429a403b54c91c15aaf3a1d6bd49cd1dfffdb5e025f63ac60993"
+  },
+  "all_archive_members_sha_size_fileset_verified": true,
+  "active_arm_guests": [],
+  "scope": "Non-OS user/runtime/workspace locations and top-level diagnostics inspected; matching host framework files and previously verified result/control archive are preserved in place outside root; all other regular files archived. OS/tool/module rebuildable files replaced from existing canonical image. No guest or root replacement yet."
+}
