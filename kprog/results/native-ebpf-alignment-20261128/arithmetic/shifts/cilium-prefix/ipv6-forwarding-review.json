@@ -1,0 +1,67 @@
+{
+  "records": [
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+      "object_sha256": "f2299977fa0ffba5fab0075fb164701ba46fcbaa81c30dc5cd0bfc74a48b84fc",
+      "args": [
+        "opt-18",
+        "-passes=mem2reg",
+        "-S",
+        "-o",
+        "-",
+        "-"
+      ],
+      "exit": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "analysis_ir_sha256": "c08003f55c409d9ddc6106344a54e973764becb62174f685c92842fc2c19df66",
+      "function_ir": "define internal ptr @ipcache_lookup6(ptr noundef %0, ptr noundef %1, i32 noundef %2, i32 noundef %3) #3 !dbg !3261 {\n  %5 = alloca %struct.ipcache_key, align 1\n  tail call void @llvm.dbg.value(metadata ptr %0, metadata !3265, metadata !DIExpression()), !dbg !3270\n  tail call void @llvm.dbg.value(metadata ptr %1, metadata !3266, metadata !DIExpression()), !dbg !3270\n  tail call void @llvm.dbg.value(metadata i32 %2, metadata !3267, metadata !DIExpression()), !dbg !3270\n  tail call void @llvm.dbg.value(metadata i32 %3, metadata !3268, metadata !DIExpression()), !dbg !3270\n  call void @llvm.lifetime.start.p0(i64 24, ptr %5) #14, !dbg !3271\n  call void @llvm.dbg.declare(metadata ptr %5, metadata !3269, metadata !DIExpression()), !dbg !3272\n  call void @llvm.memset.p0.i64(ptr align 1 %5, i8 0, i64 24, i1 false), !dbg !3272\n  %6 = zext i32 %2 to i64, !dbg !3273\n  %7 = add i64 32, %6, !dbg !3273\n  %8 = trunc i64 %7 to i32, !dbg !3273\n  %9 = getelementptr inbounds %struct.ipcache_key, ptr %5, i32 0, i32 0, !dbg !3274\n  %10 = getelementptr inbounds %struct.bpf_lpm_trie_key, ptr %9, i32 0, i32 0, !dbg !3275\n  store i32 %8, ptr %10, align 1, !dbg !3276, !tbaa !3277\n  %11 = getelementptr inbounds %struct.ipcache_key, ptr %5, i32 0, i32 3, !dbg !3278\n  store i8 2, ptr %11, align 1, !dbg !3279, !tbaa !2350\n  %12 = getelementptr inbounds %struct.ipcache_key, ptr %5, i32 0, i32 4, !dbg !3280\n  call void @llvm.memcpy.p0.p0.i64(ptr align 1 %12, ptr align 1 %1, i64 16, i1 false), !dbg !3281, !tbaa.struct !3282\n  %13 = icmp ugt i32 %3, 65535, !dbg !3283\n  br i1 %13, label %14, label %15, !dbg !3285\n\n14:                                               ; preds = %4\n  br label %20, !dbg !3286\n\n15:                                               ; preds = %4\n  %16 = trunc i32 %3 to i16, !dbg !3287\n  %17 = getelementptr inbounds %struct.ipcache_key, ptr %5, i32 0, i32 1, !dbg !3288\n  store i16 %16, ptr %17, align 1, !dbg !3289, !tbaa !2363\n  %18 = getelementptr inbounds %struct.ipcache_key, ptr %5, i32 0, i32 4, !dbg !3290\n  call void @ipv6_addr_clear_suffix(ptr noundef %18, i32 noundef %2) #13, !dbg !3291\n  %19 = call ptr @bpf_map_lookup_elem(ptr noundef %0, ptr noundef %5) #13, !dbg !3292\n  br label %20, !dbg !3293\n\n20:                                               ; preds = %15, %14\n  %.0 = phi ptr [ null, %14 ], [ %19, %15 ], !dbg !3270\n  call void @llvm.lifetime.end.p0(i64 24, ptr %5) #14, !dbg !3294\n  ret ptr %.0, !dbg !3294\n}",
+      "direct_callers": [
+        {
+          "caller": "sock6_wildcard_lookup",
+          "line": 5139,
+          "ir": "  %45 = call ptr @ipcache_lookup6(ptr noundef @cilium_ipcache_v2, ptr noundef %44, i32 noundef 128, i32 noundef 0) #13, !dbg !3160"
+        }
+      ],
+      "prefix_integers": [
+        128
+      ],
+      "non_definition_non_direct_call_uses": [],
+      "scope": "Actual same-object helper/caller evidence, not a fresh workload or original plan binding.",
+      "stderr_capture": "Supplementary command stderr was not retained; exit, full-analysis SHA and exact function/call records are retained."
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_sock.native.o",
+      "object_sha256": "10e17ce4f1e731aad12d60445ff284b6a203f7f6a68494e3940ee63886ce6f76",
+      "args": [
+        "opt-18",
+        "-passes=mem2reg",
+        "-S",
+        "-o",
+        "-",
+        "-"
+      ],
+      "exit": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "analysis_ir_sha256": "29a1c4d9db2fb2bb14d534d7878599deb00f4285bd241ef238cf1a5864d25101",
+      "function_ir": "define internal ptr @ipcache_lookup6(ptr noundef %0, ptr noundef %1, i32 noundef %2, i32 noundef %3) #3 !dbg !3248 {\n  %5 = alloca %struct.ipcache_key, align 1\n  tail call void @llvm.dbg.value(metadata ptr %0, metadata !3252, metadata !DIExpression()), !dbg !3257\n  tail call void @llvm.dbg.value(metadata ptr %1, metadata !3253, metadata !DIExpression()), !dbg !3257\n  tail call void @llvm.dbg.value(metadata i32 %2, metadata !3254, metadata !DIExpression()), !dbg !3257\n  tail call void @llvm.dbg.value(metadata i32 %3, metadata !3255, metadata !DIExpression()), !dbg !3257\n  call void @llvm.lifetime.start.p0(i64 24, ptr %5) #13, !dbg !3258\n  call void @llvm.dbg.declare(metadata ptr %5, metadata !3256, metadata !DIExpression()), !dbg !3259\n  call void @llvm.memset.p0.i64(ptr align 1 %5, i8 0, i64 24, i1 false), !dbg !3259\n  %6 = zext i32 %2 to i64, !dbg !3260\n  %7 = add i64 32, %6, !dbg !3260\n  %8 = trunc i64 %7 to i32, !dbg !3260\n  %9 = getelementptr inbounds %struct.ipcache_key, ptr %5, i32 0, i32 0, !dbg !3261\n  %10 = getelementptr inbounds %struct.bpf_lpm_trie_key, ptr %9, i32 0, i32 0, !dbg !3262\n  store i32 %8, ptr %10, align 1, !dbg !3263, !tbaa !3264\n  %11 = getelementptr inbounds %struct.ipcache_key, ptr %5, i32 0, i32 3, !dbg !3265\n  store i8 2, ptr %11, align 1, !dbg !3266, !tbaa !2347\n  %12 = getelementptr inbounds %struct.ipcache_key, ptr %5, i32 0, i32 4, !dbg !3267\n  call void @llvm.memcpy.p0.p0.i64(ptr align 1 %12, ptr align 1 %1, i64 16, i1 false), !dbg !3268, !tbaa.struct !3269\n  %13 = icmp ugt i32 %3, 65535, !dbg !3270\n  br i1 %13, label %14, label %15, !dbg !3272\n\n14:                                               ; preds = %4\n  br label %20, !dbg !3273\n\n15:                                               ; preds = %4\n  %16 = trunc i32 %3 to i16, !dbg !3274\n  %17 = getelementptr inbounds %struct.ipcache_key, ptr %5, i32 0, i32 1, !dbg !3275\n  store i16 %16, ptr %17, align 1, !dbg !3276, !tbaa !2360\n  %18 = getelementptr inbounds %struct.ipcache_key, ptr %5, i32 0, i32 4, !dbg !3277\n  call void @ipv6_addr_clear_suffix(ptr noundef %18, i32 noundef %2), !dbg !3278\n  %19 = call ptr @bpf_map_lookup_elem(ptr noundef %0, ptr noundef %5), !dbg !3279\n  br label %20, !dbg !3280\n\n20:                                               ; preds = %15, %14\n  %.0 = phi ptr [ null, %14 ], [ %19, %15 ], !dbg !3257\n  call void @llvm.lifetime.end.p0(i64 24, ptr %5) #13, !dbg !3281\n  ret ptr %.0, !dbg !3281\n}",
+      "direct_callers": [
+        {
+          "caller": "sock6_wildcard_lookup",
+          "line": 5121,
+          "ir": "  %45 = call ptr @ipcache_lookup6(ptr noundef @cilium_ipcache_v2, ptr noundef %44, i32 noundef 128, i32 noundef 0), !dbg !3147"
+        }
+      ],
+      "prefix_integers": [
+        128
+      ],
+      "non_definition_non_direct_call_uses": [],
+      "scope": "Actual same-object helper/caller evidence, not a fresh workload or original plan binding.",
+      "stderr_capture": "Supplementary command stderr was not retained; exit, full-analysis SHA and exact function/call records are retained."
+    }
+  ],
+  "scope": "Both actual bpf_sock frontend modules: ipcache_lookup6 forwards its third parameter to ipv6_addr_clear_suffix; recorded calls all pass128. Guard/macro fields then see128/96/64/32, so dynamic GET_PREFIX shift branches are not selected for these invocations."
+}

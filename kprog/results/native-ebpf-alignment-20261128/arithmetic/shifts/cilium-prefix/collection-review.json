@@ -1,0 +1,846 @@
+{
+  "reviewed_utc": "2026-11-28T10:52:25Z",
+  "job": {
+    "launcher_pid": 1424689,
+    "controller_pid": 1424690,
+    "started_utc": "2026-11-28T10:44:35Z",
+    "ended_utc": "2026-11-28T10:44:37Z",
+    "controller_status": 0
+  },
+  "objects": 10,
+  "mem2reg_commands": 10,
+  "all_commands_exit_zero": true,
+  "manifest_rows": 156,
+  "missing_candidate_roots": 0,
+  "original_review_sites": 290,
+  "sites_by_function": {
+    "ipcache_lookup4": 120,
+    "__policy_account": 8,
+    "set_identity_mark": 18,
+    "format_cluster_id_mark": 6,
+    "get_identity": 18,
+    "get_cluster_id_upper_mask": 12,
+    "ipv4_is_in_subnet": 12,
+    "ipv6_addr_clear_suffix": 96
+  },
+  "prefix_call_records": [
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "caller": "handle_ipv4_from_lxc",
+      "callee": "ipcache_lookup4",
+      "line": 3724,
+      "ir": "  %38 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %36, i32 noundef 32, i32 noundef %37) #14, !dbg !4634",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %36",
+        "i32 noundef 32",
+        "i32 noundef %37"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "caller": "ipv4_policy",
+      "callee": "ipcache_lookup4",
+      "line": 5792,
+      "ir": "  %145 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %18, i32 noundef 32, i32 noundef 0) #14, !dbg !5682",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %18",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "caller": "tail_ipv4_to_endpoint",
+      "callee": "ipcache_lookup4",
+      "line": 6074,
+      "ir": "  %16 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %15, i32 noundef 32, i32 noundef 0) #14, !dbg !5833",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %15",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "caller": "lb4_lookup_wildcard_service",
+      "callee": "ipcache_lookup4",
+      "line": 28393,
+      "ir": "  %4 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %3, i32 noundef 32, i32 noundef 0) #14, !dbg !13767",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %3",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "caller": "snat_v4_needs_masquerade",
+      "callee": "ipv4_is_in_subnet",
+      "line": 25109,
+      "ir": "  %37 = call zeroext i1 @ipv4_is_in_subnet(i32 noundef %36, i32 noundef -65536, i32 noundef 16) #14, !dbg !12139",
+      "arguments": [
+        "i32 noundef %36",
+        "i32 noundef -65536",
+        "i32 noundef 16"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 16",
+        "integer": 16
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "caller": "snat_v4_needs_masquerade",
+      "callee": "ipcache_lookup4",
+      "line": 25132,
+      "ir": "  %50 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %49, i32 noundef 32, i32 noundef 0) #14, !dbg !12149",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %49",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "caller": "handle_ipv4_cont",
+      "callee": "ipcache_lookup4",
+      "line": 26501,
+      "ir": "  %54 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %53, i32 noundef 32, i32 noundef 0) #14, !dbg !12833",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %53",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "caller": "resolve_srcid_ipv4",
+      "callee": "ipcache_lookup4",
+      "line": 30581,
+      "ir": "  %9 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %8, i32 noundef 32, i32 noundef 0) #14, !dbg !14695",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %8",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "caller": "nodeport_rev_dnat_ipv4",
+      "callee": "ipcache_lookup4",
+      "line": 3077,
+      "ir": "  %73 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %72, i32 noundef 32, i32 noundef 0) #15, !dbg !3876",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %72",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "caller": "tail_nodeport_nat_egress_ipv4",
+      "callee": "ipcache_lookup4",
+      "line": 3819,
+      "ir": "  %39 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %37, i32 noundef 32, i32 noundef %38) #15, !dbg !4308",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %37",
+        "i32 noundef 32",
+        "i32 noundef %38"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "caller": "handle_ipv4",
+      "callee": "ipcache_lookup4",
+      "line": 5307,
+      "ir": "  %55 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %54, i32 noundef 32, i32 noundef 0) #15, !dbg !5034",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %54",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "caller": "nodeport_rev_dnat_ipv4",
+      "callee": "ipcache_lookup4",
+      "line": 3076,
+      "ir": "  %73 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %72, i32 noundef 32, i32 noundef 0) #15, !dbg !3824",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %72",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "caller": "tail_nodeport_nat_egress_ipv4",
+      "callee": "ipcache_lookup4",
+      "line": 3818,
+      "ir": "  %39 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %37, i32 noundef 32, i32 noundef %38) #15, !dbg !4256",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %37",
+        "i32 noundef 32",
+        "i32 noundef %38"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+      "caller": "sock4_wildcard_lookup_full",
+      "callee": "ipcache_lookup4",
+      "line": 1678,
+      "ir": "  %54 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %53, i32 noundef 32, i32 noundef 0) #13, !dbg !1991",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %53",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+      "caller": "sock4_skip_xlate",
+      "callee": "ipcache_lookup4",
+      "line": 1882,
+      "ir": "  %12 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %1, i32 noundef 32, i32 noundef 0) #13, !dbg !2108",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %1",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+      "caller": "sock4_wildcard_lookup",
+      "callee": "ipcache_lookup4",
+      "line": 4991,
+      "ir": "  %47 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %46, i32 noundef 32, i32 noundef 0) #13, !dbg !3066",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %46",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+      "caller": "ipcache_lookup6",
+      "callee": "ipv6_addr_clear_suffix",
+      "line": 5311,
+      "ir": "  call void @ipv6_addr_clear_suffix(ptr noundef %18, i32 noundef %2) #13, !dbg !3291",
+      "arguments": [
+        "ptr noundef %18",
+        "i32 noundef %2"
+      ],
+      "prefix_argument": {
+        "position": 1,
+        "ir": "i32 noundef %2",
+        "integer": null
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "caller": "handle_ipv4_from_lxc",
+      "callee": "ipcache_lookup4",
+      "line": 3720,
+      "ir": "  %38 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %36, i32 noundef 32, i32 noundef %37), !dbg !4631",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %36",
+        "i32 noundef 32",
+        "i32 noundef %37"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "caller": "ipv4_policy",
+      "callee": "ipcache_lookup4",
+      "line": 5787,
+      "ir": "  %145 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %18, i32 noundef 32, i32 noundef 0), !dbg !5679",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %18",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "caller": "tail_ipv4_to_endpoint",
+      "callee": "ipcache_lookup4",
+      "line": 6068,
+      "ir": "  %16 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %15, i32 noundef 32, i32 noundef 0), !dbg !5830",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %15",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "caller": "lb4_lookup_wildcard_service",
+      "callee": "ipcache_lookup4",
+      "line": 28369,
+      "ir": "  %4 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %3, i32 noundef 32, i32 noundef 0), !dbg !13755",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %3",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "caller": "snat_v4_needs_masquerade",
+      "callee": "ipv4_is_in_subnet",
+      "line": 25085,
+      "ir": "  %37 = call i1 @ipv4_is_in_subnet(i32 noundef %36, i32 noundef -65536, i32 noundef 16), !dbg !12127",
+      "arguments": [
+        "i32 noundef %36",
+        "i32 noundef -65536",
+        "i32 noundef 16"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 16",
+        "integer": 16
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "caller": "snat_v4_needs_masquerade",
+      "callee": "ipcache_lookup4",
+      "line": 25108,
+      "ir": "  %50 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %49, i32 noundef 32, i32 noundef 0), !dbg !12137",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %49",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "caller": "handle_ipv4_cont",
+      "callee": "ipcache_lookup4",
+      "line": 26477,
+      "ir": "  %54 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %53, i32 noundef 32, i32 noundef 0), !dbg !12821",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %53",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "caller": "resolve_srcid_ipv4",
+      "callee": "ipcache_lookup4",
+      "line": 30557,
+      "ir": "  %9 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %8, i32 noundef 32, i32 noundef 0), !dbg !14683",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %8",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o",
+      "caller": "nodeport_rev_dnat_ipv4",
+      "callee": "ipcache_lookup4",
+      "line": 3073,
+      "ir": "  %73 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %72, i32 noundef 32, i32 noundef 0), !dbg !3873",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %72",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o",
+      "caller": "tail_nodeport_nat_egress_ipv4",
+      "callee": "ipcache_lookup4",
+      "line": 3815,
+      "ir": "  %39 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %37, i32 noundef 32, i32 noundef %38), !dbg !4305",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %37",
+        "i32 noundef 32",
+        "i32 noundef %38"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o",
+      "caller": "handle_ipv4",
+      "callee": "ipcache_lookup4",
+      "line": 5303,
+      "ir": "  %55 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %54, i32 noundef 32, i32 noundef 0), !dbg !5031",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %54",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_wireguard.native.o",
+      "caller": "nodeport_rev_dnat_ipv4",
+      "callee": "ipcache_lookup4",
+      "line": 3072,
+      "ir": "  %73 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %72, i32 noundef 32, i32 noundef 0), !dbg !3821",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %72",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_wireguard.native.o",
+      "caller": "tail_nodeport_nat_egress_ipv4",
+      "callee": "ipcache_lookup4",
+      "line": 3814,
+      "ir": "  %39 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %37, i32 noundef 32, i32 noundef %38), !dbg !4253",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %37",
+        "i32 noundef 32",
+        "i32 noundef %38"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_sock.native.o",
+      "caller": "sock4_wildcard_lookup_full",
+      "callee": "ipcache_lookup4",
+      "line": 1677,
+      "ir": "  %54 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %53, i32 noundef 32, i32 noundef 0), !dbg !1988",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %53",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_sock.native.o",
+      "caller": "sock4_skip_xlate",
+      "callee": "ipcache_lookup4",
+      "line": 1881,
+      "ir": "  %12 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %1, i32 noundef 32, i32 noundef 0), !dbg !2105",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %1",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_sock.native.o",
+      "caller": "sock4_wildcard_lookup",
+      "callee": "ipcache_lookup4",
+      "line": 4973,
+      "ir": "  %47 = call ptr @ipcache_lookup4(ptr noundef @cilium_ipcache_v2, i32 noundef %46, i32 noundef 32, i32 noundef 0), !dbg !3053",
+      "arguments": [
+        "ptr noundef @cilium_ipcache_v2",
+        "i32 noundef %46",
+        "i32 noundef 32",
+        "i32 noundef 0"
+      ],
+      "prefix_argument": {
+        "position": 2,
+        "ir": "i32 noundef 32",
+        "integer": 32
+      },
+      "prefix_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_sock.native.o",
+      "caller": "ipcache_lookup6",
+      "callee": "ipv6_addr_clear_suffix",
+      "line": 5293,
+      "ir": "  call void @ipv6_addr_clear_suffix(ptr noundef %18, i32 noundef %2), !dbg !3278",
+      "arguments": [
+        "ptr noundef %18",
+        "i32 noundef %2"
+      ],
+      "prefix_argument": {
+        "position": 1,
+        "ir": "i32 noundef %2",
+        "integer": null
+      },
+      "prefix_definitions": {}
+    }
+  ],
+  "prefix_families": [
+    {
+      "sites": 120,
+      "function": "ipcache_lookup4",
+      "evidence": "30recorded calls across bothISAs pass32; GET_PREFIX selects all-ones branch, not dynamic shifts."
+    },
+    {
+      "sites": 12,
+      "function": "ipv4_is_in_subnet",
+      "evidence": "Two recorded calls pass16; 32-prefix=16, 1<<16 and minus1 are in-range."
+    },
+    {
+      "sites": 96,
+      "function": "ipv6_addr_clear_suffix",
+      "evidence": "Two supplemental same-object mem2reg commands: ipcache_lookup6 internal third argument is forwarded unchanged; recorded callers pass128. Successive macro fields see128/96/64/32, bypassing dynamic shift branches for this chain."
+    },
+    {
+      "sites": 8,
+      "function": "__policy_account",
+      "evidence": "Both retained bodies zeroextend uint8 prefix. The mask branch follows prefix>8 and prefix<24, so 24-prefix lies1..15; 65535<<amount stays representable as signed32. Exact branches/flags remain in archived IR."
+    },
+    {
+      "sites": 54,
+      "function": "cluster and identity helpers",
+      "evidence": "Standard source producer initializes ClusterIDMax255 and accepts255/511, producing bit counts8/9; NodeConfig writes the field. Derived shift amounts bits,24-bits,32-bits are8/9,16/15,24/23. Captured62x86plans show bits8; no ARM runtime or arbitrary map-update invariant inferred."
+    }
+  ],
+  "captured_plan_records": 62,
+  "captured_architectures": [
+    "x86"
+  ],
+  "captured_cluster_bits_hex": [
+    "08000000"
+  ],
+  "source_anchors": [
+    {
+      "path": "vendor/repos/cilium/pkg/datapath/config/node.go",
+      "sha256": "78c0127bfeec1389667d3b154130e819e394958acf844b3fccb922ce1adb2b48",
+      "first_line": 12,
+      "last_line": 15,
+      "excerpt": "12: func NodeConfig(lnc *Config) Node {\n13: \tnode := *NewNode()\n14: \tnode.ClusterIDBits = identity.GetClusterIDBits()\n15: "
+    },
+    {
+      "path": "vendor/repos/cilium/pkg/identity/numericidentity.go",
+      "sha256": "d4cc301aae9ed6b74c19c4a953d8eebb808db92e99a5c8626e270374445bac23",
+      "first_line": 331,
+      "last_line": 345,
+      "excerpt": "331: // GetClusterIDBits returns the number of bits that represent a cluster ID in a numeric identity\n332: // A sync.Once is used to ensure we only initialize clusterIDBits once.\n333: func GetClusterIDBits() uint32 {\n334: \tclusterIDInit.Do(initClusterIDShift)\n335: \treturn clusterIDBits\n336: }\n337: \n338: // initClusterIDShift sets variables that control the bit allocation of cluster\n339: // ID in a numeric identity.\n340: func initClusterIDShift() {\n341: \t// ClusterIDLen is the number of bits that represent a cluster ID in a numeric identity\n342: \tclusterIDBits = uint32(math.Log2(float64(cmtypes.ClusterIDMax + 1)))\n343: \t// ClusterIDShift is the number of bits to shift a cluster ID in a numeric identity\n344: \tclusterIDShift = NumericIdentityBitlength - clusterIDBits\n345: }"
+    },
+    {
+      "path": "vendor/repos/cilium/pkg/clustermesh/types/types.go",
+      "sha256": "ebd73b2de12939123315a5dcb33497bfd6bac9b52281ebc664b0be1203f18df4",
+      "first_line": 16,
+      "last_line": 25,
+      "excerpt": "16: const (\n17: \t// ClusterIDMin is the minimum value of the cluster ID\n18: \tClusterIDMin    = 0\n19: \tClusterIDExt511 = 511\n20: \n21: \tClusterIDUnset = ClusterIDMin\n22: )\n23: \n24: // ClusterIDMax is the maximum value of the cluster ID\n25: var ClusterIDMax uint32 = defaults.MaxConnectedClusters"
+    },
+    {
+      "path": "vendor/repos/cilium/pkg/clustermesh/types/types.go",
+      "sha256": "ebd73b2de12939123315a5dcb33497bfd6bac9b52281ebc664b0be1203f18df4",
+      "first_line": 40,
+      "last_line": 49,
+      "excerpt": "40: // InitClusterIDMax validates and sets the ClusterIDMax package level variable.\n41: func (c ClusterInfo) InitClusterIDMax() error {\n42: \tswitch c.MaxConnectedClusters {\n43: \tcase defaults.MaxConnectedClusters, ClusterIDExt511:\n44: \t\tClusterIDMax = c.MaxConnectedClusters\n45: \tdefault:\n46: \t\treturn fmt.Errorf(\"--%s=%d is invalid; supported values are [%d, %d]\", OptMaxConnectedClusters, c.MaxConnectedClusters, defaults.MaxConnectedClusters, ClusterIDExt511)\n47: \t}\n48: \treturn nil\n49: }"
+    },
+    {
+      "path": "vendor/repos/cilium/pkg/defaults/defaults.go",
+      "sha256": "f27eb4c6adf4914c63ed968996e3a61ba8b6fa5462f34a241e5c0e0fadf9609a",
+      "first_line": 498,
+      "last_line": 501,
+      "excerpt": "498: \t// identity in a numeric identity. Values > 255 will decrease the number of\n499: \t// allocatable identities.\n500: \tMaxConnectedClusters = 255\n501: "
+    },
+    {
+      "path": "vendor/bpf/cilium/bpf/include/bpf/config/node.h",
+      "sha256": "9b33db4fec804b06a929193dc1d0a3294e47ec15b2f55ed1815ab3b13875e724",
+      "first_line": 50,
+      "last_line": 57,
+      "excerpt": "50: NODE_CONFIG(__u32, cluster_id_bits, \"Number of bits of the identity reserved for the Cluster ID\")\n51: \n52: /* Allow to override the assigned value in tests */\n53: #ifndef DEFAULT_CLUSTER_ID_BITS\n54: #define DEFAULT_CLUSTER_ID_BITS 8\n55: #endif\n56: \n57: ASSIGN_CONFIG(__u32, cluster_id_bits, DEFAULT_CLUSTER_ID_BITS)"
+    },
+    {
+      "path": "vendor/bpf/cilium/bpf/lib/policy.h",
+      "sha256": "f822e1bd9b0d2b6ea42b05a44be9ad66035a76fb14068e79a37d2c9a54b84eec",
+      "first_line": 138,
+      "last_line": 146,
+      "excerpt": "138: \tif (lpm_prefix_length <= LPM_PROTO_PREFIX_BITS) {\n139: \t\tif (lpm_prefix_length < LPM_PROTO_PREFIX_BITS) {\n140: \t\t\t/* Protocol is not partially maskable */\n141: \t\t\tproto = 0;\n142: \t\t}\n143: \t\tdport = 0;\n144: \t} else if (lpm_prefix_length < LPM_FULL_PREFIX_BITS) {\n145: \t\tdport &= bpf_htons((__u16)(0xffff << (LPM_FULL_PREFIX_BITS - lpm_prefix_length)));\n146: \t}"
+    },
+    {
+      "path": "vendor/bpf/cilium/bpf/lib/ipv6.h",
+      "sha256": "8dbbd1ec7ded36becc212a1d2d2f5be7344083ae35abf4b9b3e6f8128b2a4fa2",
+      "first_line": 218,
+      "last_line": 231,
+      "excerpt": "218: #define GET_PREFIX(PREFIX)\t\t\t\t\t\t\\\n219: \tbpf_htonl(PREFIX <= 0 ? 0 : PREFIX < 32 ? ((1<<PREFIX) - 1) << (32-PREFIX)\t\\\n220: \t\t\t      : 0xFFFFFFFF)\n221: \n222: static __always_inline void ipv6_addr_clear_suffix(union v6addr *addr,\n223: \t\t\t\t\t\t   int prefix)\n224: {\n225: \taddr->p1 &= GET_PREFIX(prefix);\n226: \tprefix -= 32;\n227: \taddr->p2 &= GET_PREFIX(prefix);\n228: \tprefix -= 32;\n229: \taddr->p3 &= GET_PREFIX(prefix);\n230: \tprefix -= 32;\n231: \taddr->p4 &= GET_PREFIX(prefix);"
+    },
+    {
+      "path": "vendor/bpf/cilium/bpf/lib/ipv4.h",
+      "sha256": "7cc4d7f1420dcc3cd553da33f7605b9a1865f8e160dd4cb68affcd01737cc814",
+      "first_line": 84,
+      "last_line": 88,
+      "excerpt": "84: static __always_inline bool ipv4_is_in_subnet(__be32 addr,\n85: \t\t\t\t\t      __be32 subnet, int prefixlen)\n86: {\n87: \treturn (addr & bpf_htonl(~((1 << (32 - prefixlen)) - 1))) == subnet;\n88: }"
+    }
+  ],
+  "forwarding_review_sha256": "44905088ab097e3e36b162b90a4af5a4606eadeadbf4a286a1ef775f7086c8b4",
+  "input_source_sha256_reverified": {
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/programs.json": "6a23a92783d8195bc5f43cc9f9a845ebbc298ca1eeec9e72e7da0fe58995bdc7",
+    "kprog/results/native-ebpf-alignment-20261128/runtime-plan-audit/runtime-plans.json": "a2653369e9ce17c3c12bebc32ddd1f4e646a4de27080346a822e0892e97eb51b",
+    "kprog/results/native-ebpf-alignment-20261128/runtime-plan-audit/runtime-plans-archive.json": "10d0f98469f58c625348676a981f509f01de8163b2ffb7fd15c81c8bfae99286",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/controller.json": "550c30c22b7a55e2751b96a457e46c17f257f0e8927092ffe9ea504bbe8559e5",
+    "vendor/bpf/cilium/bpf/lib/eps.h": "cbae40763827434129816f9751012da1d8de30296c56b21dc8767a4582168b17",
+    "vendor/bpf/cilium/bpf/lib/ipv4.h": "7cc4d7f1420dcc3cd553da33f7605b9a1865f8e160dd4cb68affcd01737cc814",
+    "vendor/bpf/cilium/bpf/lib/ipv6.h": "8dbbd1ec7ded36becc212a1d2d2f5be7344083ae35abf4b9b3e6f8128b2a4fa2",
+    "vendor/bpf/cilium/bpf/lib/clustermesh.h": "44df3892c12c5dbb88b926eb0ac27246f34b091ea83f099a3a49146056e1a781",
+    "vendor/bpf/cilium/bpf/lib/identity.h": "07d5cd85bf6095493380f3c90a3eb0d34ca19dd7fcc59244e6447ed5582a6a1d",
+    "vendor/bpf/cilium/bpf/lib/policy.h": "f822e1bd9b0d2b6ea42b05a44be9ad66035a76fb14068e79a37d2c9a54b84eec",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/x86-cilium-bpf_lxc.native.json": "1ab2ef669c01af3b97d57b22c53981b7309ab622e3ecc11c7f6a7312ef38a26b",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/x86-cilium-bpf_host.native.json": "f8ade93fcbc46a2a940ac60621ac77f0ba922544e2ee2cdd9767f745a704711a",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/x86-cilium-bpf_overlay.native.json": "0b9092e61e6709beec2423b0af035794571002ed679719dca813fb5dbd2918d0",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/x86-cilium-bpf_wireguard.native.json": "f5c7510a60210f75b303b9ee3f9e99a290f20566f0cb1fa0d935fd3bc72858d6",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/x86-cilium-bpf_sock.native.json": "c01d6ed6b6bc352453ce4f05ac5c718b0965b722590f4c59cdce56e7eeeb1b71",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/arm64-cilium-bpf_lxc.native.json": "ec37e1541db88a524056a824448853ee17f2acb1bf79d8b2ad0199c8c682056c",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/arm64-cilium-bpf_host.native.json": "a9e5273ceef2ce788f1d344bbcffba7f54bc2752df6e8aefc55bd336682ea15e",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/arm64-cilium-bpf_overlay.native.json": "25d6c93159be0c9599bfe25a779c5a6b98c62e8e98363fc42e4642da3edb3019",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/arm64-cilium-bpf_wireguard.native.json": "db4ca6ba5c4200a2510b913a5c09cbb084f9c35ea9fd15d15e6fcba7b7d1c48f",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/arm64-cilium-bpf_sock.native.json": "f60a839cfdc9a93e5fa7590c034145732fa4634770ff9b392a3bde646ff5e14c"
+  },
+  "native_objects_sha256_reverified": {
+    "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o": "1373794b9611d99815dd255edd47fd54707b404ae3256097fe6e360f0804d263",
+    "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o": "79db42e767775c7343bffe55ac498f062946bf3af34da452441bef696be98dc4",
+    "vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o": "21e265e92c9b906094d22ac87da9c64af8bf1df8b7877734029c9f9ff8be4152",
+    "vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o": "a9abda8fb5d5c2e6f0c8edf1935af9c7b42a7364f03cb343e49391fe1d3a53ab",
+    "vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o": "f2299977fa0ffba5fab0075fb164701ba46fcbaa81c30dc5cd0bfc74a48b84fc",
+    "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o": "e5959faa80f1d85b3035f507fd9e8cb8c586b4a91a25d36574a0789819a08f80",
+    "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o": "2329ee0c89d3744e58a0cf65b1ba01d93e08f1b8e33483864bd023bd88e64d38",
+    "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o": "86578195b5d0075c8104dc176dd30a6fb72652dd1b29d2e26bef95de054005e8",
+    "vendor/build/native-bpf/arm64/stage/cilium/bpf_wireguard.native.o": "bb8442d848b9c12bc54ad4e13c34773d1dafef47c84fbfec4af5515064517f2a",
+    "vendor/build/native-bpf/arm64/stage/cilium/bpf_sock.native.o": "10e17ce4f1e731aad12d60445ff284b6a203f7f6a68494e3940ee63886ce6f76"
+  },
+  "archive": {
+    "path": "cilium-prefix-records.tar.zst",
+    "bytes": 52135,
+    "sha256": "897f69f083357a6f03155c5afd80318f45923968b2c9583034302ce86263dbe6",
+    "raw_bytes": 605487,
+    "verified_all_members": true,
+    "raw_copies_preserved": true
+  },
+  "conclusion": "All290 prior Cilium review sites are classified by recorded callers, local guards or standard configuration producer facts. No new confirmed shift defect or common repair. This is not a whole-kernel/source-C/native-eBPF equivalence proof, a positive executed-path witness, an actual ARM frozen-map value, or a guarantee under arbitrary user-space map updates.",
+  "next": "Reuse this10object collection and prior114object census; no repeat sweep. Proceed to actual OTel VM shift-field producer/caller evidence and Tracee index controls, then remaining probe/helper/attach/JIT alignment. Match any candidate to an admissible input and corresponding eBPF operation before a common fix."
+}
