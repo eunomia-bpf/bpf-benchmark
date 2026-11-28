@@ -1,0 +1,114 @@
+[
+  {
+    "path": "linkcache/native_kernel_link_cache/1956de42e4a23fc6.proof.o",
+    "bytes": 1162616,
+    "sha256": "31c4cc3abc227947324622db7c63be482aff413f17903e0bf717a403b83448ab",
+    "nm_returncode": 0,
+    "nm_diagnostic": "",
+    "selected_symbol_present": false
+  },
+  {
+    "path": "linkcache/native_kernel_link_cache/308206be5f2d7c70.proof.o",
+    "bytes": 783472,
+    "sha256": "e16c5a173f0756954511008721d4970735b8433f4411393cf3f9c6e241818ff0",
+    "nm_returncode": 0,
+    "nm_diagnostic": "",
+    "selected_symbol_present": false
+  },
+  {
+    "path": "linkcache/native_kernel_link_cache/3fdabd877365437a.proof.o",
+    "bytes": 375808,
+    "sha256": "3afb44264ae5d46661db41a345eac551a7f4c5ea25e764e743288e804fe2097a",
+    "nm_returncode": 1,
+    "nm_diagnostic": "llvm-nm-18: error: /workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261127T205918Z/linkcache/native_kernel_link_cache/3fdabd877365437a.proof.o: section header table goes past the end of the file: e_shoff = 0xc6f50\n\n",
+    "selected_symbol_present": false
+  },
+  {
+    "path": "linkcache/native_kernel_link_cache/483a4fcaf851c31d.proof.o",
+    "bytes": 806304,
+    "sha256": "8522163b3d553e414d669c8174bbb5558dd47efbdbe07ed11cb94b4cdec4149c",
+    "nm_returncode": 0,
+    "nm_diagnostic": "",
+    "selected_symbol_present": false
+  },
+  {
+    "path": "linkcache/native_kernel_link_cache/5c37e0f061d4e00a.proof.o",
+    "bytes": 654952,
+    "sha256": "4da93df838f614c8249e7c3566fe481ac19ff31e96d16b021941cdeaa4b34cf9",
+    "nm_returncode": 0,
+    "nm_diagnostic": "",
+    "selected_symbol_present": false
+  },
+  {
+    "path": "linkcache/native_kernel_link_cache/63b364938b43a4ff.proof.o",
+    "bytes": 714296,
+    "sha256": "8f34d489e75fcd78238586b488cfb238ca1873032a8f537d4fdd05703cde9f9c",
+    "nm_returncode": 0,
+    "nm_diagnostic": "",
+    "selected_symbol_present": false
+  },
+  {
+    "path": "linkcache/native_kernel_link_cache/7c58188b83cf1efd.proof.o",
+    "bytes": 1551944,
+    "sha256": "6d27887d05f4c48fc32a081358060aa703ca99736ce3745843a1446fc6478612",
+    "nm_returncode": 0,
+    "nm_diagnostic": "",
+    "selected_symbol_present": false
+  },
+  {
+    "path": "linkcache/native_kernel_link_cache/92f976f4e0570d1f.proof.o",
+    "bytes": 1560840,
+    "sha256": "b3d2ba36259e8b333155c47860b4845e486602bcfb8de810e70ebdf9904bc0e2",
+    "nm_returncode": 0,
+    "nm_diagnostic": "",
+    "selected_symbol_present": false
+  },
+  {
+    "path": "linkcache/native_kernel_link_cache/9bde55c7243631ea.proof.o",
+    "bytes": 671296,
+    "sha256": "5f41b17571a8e97b073070c788139772e93de691eee9614128fd7320f74ddb14",
+    "nm_returncode": 0,
+    "nm_diagnostic": "",
+    "selected_symbol_present": false
+  },
+  {
+    "path": "linkcache/native_kernel_link_cache/9e5f89e9c8df1177.proof.o",
+    "bytes": 1670392,
+    "sha256": "2964d514c0be077c1fd4a0d44a5ea63949d760aab6804928e2eba26b9bc30b89",
+    "nm_returncode": 0,
+    "nm_diagnostic": "",
+    "selected_symbol_present": false
+  },
+  {
+    "path": "linkcache/native_kernel_link_cache/cf3e5ff5852188ed.proof.o",
+    "bytes": 1465800,
+    "sha256": "ca55f57d0b494c625e45ff6afc33246e2f6badc55b1bc70b3848569c10c35402",
+    "nm_returncode": 0,
+    "nm_diagnostic": "",
+    "selected_symbol_present": false
+  },
+  {
+    "path": "linkcache/native_kernel_link_cache/d933e3c6378a052c.proof.o",
+    "bytes": 1435728,
+    "sha256": "30ab6c8365d3ba37dc6f03366902c11d38c4cf6647fd03277613be2cdfafbf0d",
+    "nm_returncode": 0,
+    "nm_diagnostic": "",
+    "selected_symbol_present": true
+  },
+  {
+    "path": "linkcache/native_kernel_link_cache/d9f05ae94f169f6a.proof.o",
+    "bytes": 1561200,
+    "sha256": "86a7c76df69798851a9c12571a5b8a929e8446e3515bc571d4501437f6904a01",
+    "nm_returncode": 0,
+    "nm_diagnostic": "",
+    "selected_symbol_present": false
+  },
+  {
+    "path": "linkcache/native_kernel_link_cache/dbf7913effb8a0c2.proof.o",
+    "bytes": 1337408,
+    "sha256": "712276e4a8e9863c85580437b6d606ef64c7a8632a2ee2e795c93d6f532038aa",
+    "nm_returncode": 0,
+    "nm_diagnostic": "",
+    "selected_symbol_present": false
+  }
+]

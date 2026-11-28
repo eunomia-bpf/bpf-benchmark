@@ -1,0 +1,1269 @@
+{
+  "utc": "2026-11-28T02:45:02Z",
+  "corpus_status": "ok",
+  "image": "sha256:c103a86a0636c7a07aee29dcd91a8f814291e62f38fb4b45a8df95bb745527f3",
+  "entry_counters": {
+    "baseline": {
+      "prog_id": "17",
+      "calls": 5971398,
+      "runtime_ns": 18144583281,
+      "ns_per_call": 3038.5821345353297
+    },
+    "post_rejit": {
+      "prog_id": "48",
+      "calls": 8099989,
+      "runtime_ns": 24845566040,
+      "ns_per_call": 3067.3579976466635
+    }
+  },
+  "entry_per_call_speedup": 0.9906186812450939,
+  "groups": {
+    "unwinder": {
+      "baseline": {
+        "samples": 4108,
+        "sampled_period_per_entry": 987.932239318163
+      },
+      "post_rejit": {
+        "samples": 4199,
+        "sampled_period_per_entry": 789.4842332501933
+      },
+      "native_over_ebpf": 0.7991279177153569
+    },
+    "trie_lookup_elem": {
+      "baseline": {
+        "samples": 9897,
+        "sampled_period_per_entry": 2378.270464973194
+      },
+      "post_rejit": {
+        "samples": 14701,
+        "sampled_period_per_entry": 2768.335860209193
+      },
+      "native_over_ebpf": 1.1640122101253085
+    },
+    "array_map_lookup_elem": {
+      "baseline": {
+        "samples": 843,
+        "sampled_period_per_entry": 204.99955538049883
+      },
+      "post_rejit": {
+        "samples": 631,
+        "sampled_period_per_entry": 118.43138441299118
+      },
+      "native_over_ebpf": 0.5777153232999515
+    },
+    "hash-named functions": {
+      "baseline": {
+        "samples": 2730,
+        "sampled_period_per_entry": 652.5804161772503
+      },
+      "post_rejit": {
+        "samples": 3611,
+        "sampled_period_per_entry": 674.5325707232441
+      },
+      "native_over_ebpf": 1.033639002951678
+    },
+    "copy_from_user_nofault": {
+      "baseline": {
+        "samples": 6071,
+        "sampled_period_per_entry": 1462.6903157351092
+      },
+      "post_rejit": {
+        "samples": 9032,
+        "sampled_period_per_entry": 1704.2505439204917
+      },
+      "native_over_ebpf": 1.1651478960288193
+    }
+  },
+  "own_qemu_pid": 1165484,
+  "phase_windows": {
+    "baseline": [
+      98.80055,
+      109.450196
+    ],
+    "post_rejit": [
+      128.772911,
+      139.823355
+    ]
+  },
+  "native_unwinder": {
+    "input_proof": "linkcache/native_kernel_link_cache/d933e3c6378a052c.proof.o",
+    "optimized_proof": "linkcache/native_kernel_link_cache/d933e3c6378a052c.tmp.2981.2981.blob.frozen.proof.o",
+    "object_sha256": "f2896b31b903fe4eb0e5beb71431e5416d3ab75c6789391ab6d5e3c6e1a729a4",
+    "blob_bytes": 14327,
+    "blob_sha256": "e96c3f707b9ed94d40ec396f6cd58346223cfde6bf02512e0e3b1bdf6afabbd9",
+    "direct_trie_relocations": [
+      {
+        "offset": 3477,
+        "kind": 1,
+        "target": 18446744072120757504
+      },
+      {
+        "offset": 6749,
+        "kind": 1,
+        "target": 18446744072120757504
+      },
+      {
+        "offset": 10091,
+        "kind": 1,
+        "target": 18446744072120757504
+      },
+      {
+        "offset": 14038,
+        "kind": 1,
+        "target": 18446744072120757504
+      }
+    ],
+    "plans": [
+      {
+        "path": "linkcache/native_kernel_link_cache/d933e3c6378a052c.tmp.2981.2981.link-plan.json",
+        "trie_helper": [],
+        "lookup_sites": [
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 1,
+            "elem_size": 8,
+            "index_mask": 0,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "per_cpu_records"
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "hash",
+            "target_addr": 18446744072639352448,
+            "key_offset": 64,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0,
+            "map_name": "stack_delta_pag"
+          },
+          {
+            "kind": "hash_of_maps",
+            "target_addr": 18446744072639350288,
+            "key_offset": 56,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0,
+            "map_name": "exe_id_to_22_st"
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "hash",
+            "target_addr": 18446744072639352448,
+            "key_offset": 64,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0,
+            "map_name": "stack_delta_pag"
+          },
+          {
+            "kind": "hash_of_maps",
+            "target_addr": 18446744072639350288,
+            "key_offset": 56,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0,
+            "map_name": "exe_id_to_22_st"
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 16384,
+            "elem_size": 16,
+            "index_mask": 16383,
+            "value_offset": 304,
+            "percpu_base_addr": 0,
+            "map_name": "unwind_info_arr"
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120757504,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0,
+            "map_name": "pid_page_to_map"
+          },
+          {
+            "kind": "hash",
+            "target_addr": 18446744072639350288,
+            "key_offset": 56,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0,
+            "map_name": "interpreter_off"
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "hash",
+            "target_addr": 18446744072639352448,
+            "key_offset": 64,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0,
+            "map_name": "stack_delta_pag"
+          },
+          {
+            "kind": "hash_of_maps",
+            "target_addr": 18446744072639350288,
+            "key_offset": 56,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0,
+            "map_name": "exe_id_to_22_st"
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 16384,
+            "elem_size": 16,
+            "index_mask": 16383,
+            "value_offset": 304,
+            "percpu_base_addr": 0,
+            "map_name": "unwind_info_arr"
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120757504,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0,
+            "map_name": "pid_page_to_map"
+          },
+          {
+            "kind": "hash",
+            "target_addr": 18446744072639350288,
+            "key_offset": 56,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0,
+            "map_name": "interpreter_off"
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "hash",
+            "target_addr": 18446744072639352448,
+            "key_offset": 64,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0,
+            "map_name": "stack_delta_pag"
+          },
+          {
+            "kind": "hash_of_maps",
+            "target_addr": 18446744072639350288,
+            "key_offset": 56,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0,
+            "map_name": "exe_id_to_22_st"
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 16384,
+            "elem_size": 16,
+            "index_mask": 16383,
+            "value_offset": 304,
+            "percpu_base_addr": 0,
+            "map_name": "unwind_info_arr"
+          },
+          {
+            "kind": "array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 16384,
+            "elem_size": 16,
+            "index_mask": 16383,
+            "value_offset": 304,
+            "percpu_base_addr": 0,
+            "map_name": "unwind_info_arr"
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120757504,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0,
+            "map_name": "pid_page_to_map"
+          },
+          {
+            "kind": "hash",
+            "target_addr": 18446744072639350288,
+            "key_offset": 56,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0,
+            "map_name": "interpreter_off"
+          },
+          {
+            "kind": "call",
+            "target_addr": 18446744072120757504,
+            "key_offset": 0,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0,
+            "map_name": "pid_page_to_map"
+          },
+          {
+            "kind": "hash",
+            "target_addr": 18446744072639350288,
+            "key_offset": 56,
+            "max_entries": 0,
+            "elem_size": 0,
+            "index_mask": 0,
+            "value_offset": 0,
+            "percpu_base_addr": 0,
+            "map_name": "interpreter_off"
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 1,
+            "elem_size": 8,
+            "index_mask": 0,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "per_cpu_records"
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          },
+          {
+            "kind": "percpu_array",
+            "target_addr": 18446744072120666656,
+            "key_offset": 0,
+            "max_entries": 99,
+            "elem_size": 8,
+            "index_mask": 127,
+            "value_offset": 304,
+            "percpu_base_addr": 18446744072168865832,
+            "map_name": "metrics"
+          }
+        ]
+      }
+    ]
+  },
+  "interpretation": "Group directions are specific to this observation. PMU differences identify residual work to investigate; they do not establish a causal per-call latency or justify changing a kernel function.",
+  "limits": "Whole measurement socket windows are approximations of stats boundaries; PMU period sums have skid/frequency/multiplexing limits. Different entry counts and changing lookup/query paths prevent assigning exact kernel ns or causal call-cost changes. Native direct relocation count is static, not dynamic helper invocation parity. This10s PMU check is separate from full timing and does not establish a new optimization gain."
+}
