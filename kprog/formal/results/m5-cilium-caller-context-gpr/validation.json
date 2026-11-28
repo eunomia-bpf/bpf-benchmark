@@ -1,0 +1,130 @@
+{
+  "scope": "originalR0unionptr=originalctx,R30tag10,R0tag1;actualnineinternalsteps andthreefinalreadbacks",
+  "source_sha256": "c1095306db70d80d95f4a58c5cb4523240ddce54adbac58f3d15246ead15f599",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-context-gpr/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 38.355637550354004,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerContextGPR"
+      ],
+      "exit": 0,
+      "seconds": 36.924880266189575,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 4.500614643096924,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-context-gpr/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 3.050713539123535,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "failed_stage1": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cilium-caller-context-gpr/Proof.lean"
+    ],
+    "exit": 1,
+    "seconds": 39.92925190925598,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "stage1_diagnostic": "generic indexed binding notrewritten after name-unfold; explicitactualthreebindingfacts close allreal lvalue evaluations; statements/layout/currentrights/casts unchanged",
+  "focused_jobs": 226,
+  "full_jobs": 1516,
+  "root_queries": [
+    "source",
+    "pointer_layout",
+    "declared",
+    "names_distinct",
+    "storage",
+    "separate",
+    "store_row",
+    "execute"
+  ],
+  "actual_abi_entry_commit": "1ae591baf998637381591f54f2c1db93da5cded8",
+  "actual_internal_steps": 9,
+  "actual_stores": 3,
+  "actual_targets": [
+    "R0 union _ptr field",
+    "R30 tag byte",
+    "R0 tag byte"
+  ],
+  "actual_values": [
+    "originalctx pointer",
+    "10",
+    "1"
+  ],
+  "storage": "actual3declaredbindings from SAME795allocation;currentrightsderiveMint64pointerandtwoMint8stores",
+  "layout": "actualge GPRunion _ptr fieldoffset0 andactualsizes/types/chunks;no oldproducerworld orallocatorbridge",
+  "execution": "realCompCertlvalue/RHScasts/stores;distinct3blocks retain earliernewreads,allnon-targetblocks/caller/access/frontier/SAMEtemps",
+  "context": "execute takes originalctx temporary read;existingHelperSetup.reached_context proves it foractualreachedTempEnv;notneworacle",
+  "entry_endpoint": "originalentry.cells headerassignmentcontinuation;wholeentrycomposition notyetclaimed",
+  "next_postcondition": "R0wordnowpointer/R0tag1/R30tag10;do notassertoldallVlong/tag0 Initialized",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

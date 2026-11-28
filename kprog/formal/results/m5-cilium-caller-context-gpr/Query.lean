@@ -1,0 +1,17 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContextGPR.source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContextGPR.source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContextGPR.pointer_layout
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContextGPR.pointer_layout
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContextGPR.declared
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContextGPR.declared
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContextGPR.names_distinct
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContextGPR.names_distinct
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContextGPR.storage
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContextGPR.storage
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContextGPR.separate
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContextGPR.separate
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContextGPR.store_row
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContextGPR.store_row
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContextGPR.execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContextGPR.execute
