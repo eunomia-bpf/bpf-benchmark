@@ -1,0 +1,102 @@
+{
+  "prepared_utc": "2026-11-28T10:42:43Z",
+  "newest_resume": "COORDINATOR 2026-11-28T07:17Z",
+  "recipe_sha256": "14e409df1e8f8683d613ec275cd37833fd9b0b5ca049a5a441bc7b33597caebf",
+  "objects": [
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "sha256": "1373794b9611d99815dd255edd47fd54707b404ae3256097fe6e360f0804d263",
+      "architecture": "x86",
+      "shift_record": "x86-cilium-bpf_lxc.native.json",
+      "review_sites": 25
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "sha256": "79db42e767775c7343bffe55ac498f062946bf3af34da452441bef696be98dc4",
+      "architecture": "x86",
+      "shift_record": "x86-cilium-bpf_host.native.json",
+      "review_sites": 23
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "sha256": "21e265e92c9b906094d22ac87da9c64af8bf1df8b7877734029c9f9ff8be4152",
+      "architecture": "x86",
+      "shift_record": "x86-cilium-bpf_overlay.native.json",
+      "review_sites": 16
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "sha256": "a9abda8fb5d5c2e6f0c8edf1935af9c7b42a7364f03cb343e49391fe1d3a53ab",
+      "architecture": "x86",
+      "shift_record": "x86-cilium-bpf_wireguard.native.json",
+      "review_sites": 21
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+      "sha256": "f2299977fa0ffba5fab0075fb164701ba46fcbaa81c30dc5cd0bfc74a48b84fc",
+      "architecture": "x86",
+      "shift_record": "x86-cilium-bpf_sock.native.json",
+      "review_sites": 60
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "sha256": "e5959faa80f1d85b3035f507fd9e8cb8c586b4a91a25d36574a0789819a08f80",
+      "architecture": "arm64",
+      "shift_record": "arm64-cilium-bpf_lxc.native.json",
+      "review_sites": 25
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "sha256": "2329ee0c89d3744e58a0cf65b1ba01d93e08f1b8e33483864bd023bd88e64d38",
+      "architecture": "arm64",
+      "shift_record": "arm64-cilium-bpf_host.native.json",
+      "review_sites": 23
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o",
+      "sha256": "86578195b5d0075c8104dc176dd30a6fb72652dd1b29d2e26bef95de054005e8",
+      "architecture": "arm64",
+      "shift_record": "arm64-cilium-bpf_overlay.native.json",
+      "review_sites": 16
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_wireguard.native.o",
+      "sha256": "bb8442d848b9c12bc54ad4e13c34773d1dafef47c84fbfec4af5515064517f2a",
+      "architecture": "arm64",
+      "shift_record": "arm64-cilium-bpf_wireguard.native.json",
+      "review_sites": 21
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_sock.native.o",
+      "sha256": "10e17ce4f1e731aad12d60445ff284b6a203f7f6a68494e3940ee63886ce6f76",
+      "architecture": "arm64",
+      "shift_record": "arm64-cilium-bpf_sock.native.json",
+      "review_sites": 60
+    }
+  ],
+  "original_review_sites": 290,
+  "source_sha256": {
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/programs.json": "6a23a92783d8195bc5f43cc9f9a845ebbc298ca1eeec9e72e7da0fe58995bdc7",
+    "kprog/results/native-ebpf-alignment-20261128/runtime-plan-audit/runtime-plans.json": "a2653369e9ce17c3c12bebc32ddd1f4e646a4de27080346a822e0892e97eb51b",
+    "kprog/results/native-ebpf-alignment-20261128/runtime-plan-audit/runtime-plans-archive.json": "10d0f98469f58c625348676a981f509f01de8163b2ffb7fd15c81c8bfae99286",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/controller.json": "550c30c22b7a55e2751b96a457e46c17f257f0e8927092ffe9ea504bbe8559e5",
+    "vendor/bpf/cilium/bpf/lib/eps.h": "cbae40763827434129816f9751012da1d8de30296c56b21dc8767a4582168b17",
+    "vendor/bpf/cilium/bpf/lib/ipv4.h": "7cc4d7f1420dcc3cd553da33f7605b9a1865f8e160dd4cb68affcd01737cc814",
+    "vendor/bpf/cilium/bpf/lib/ipv6.h": "8dbbd1ec7ded36becc212a1d2d2f5be7344083ae35abf4b9b3e6f8128b2a4fa2",
+    "vendor/bpf/cilium/bpf/lib/clustermesh.h": "44df3892c12c5dbb88b926eb0ac27246f34b091ea83f099a3a49146056e1a781",
+    "vendor/bpf/cilium/bpf/lib/identity.h": "07d5cd85bf6095493380f3c90a3eb0d34ca19dd7fcc59244e6447ed5582a6a1d",
+    "vendor/bpf/cilium/bpf/lib/policy.h": "f822e1bd9b0d2b6ea42b05a44be9ad66035a76fb14068e79a37d2c9a54b84eec",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/x86-cilium-bpf_lxc.native.json": "1ab2ef669c01af3b97d57b22c53981b7309ab622e3ecc11c7f6a7312ef38a26b",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/x86-cilium-bpf_host.native.json": "f8ade93fcbc46a2a940ac60621ac77f0ba922544e2ee2cdd9767f745a704711a",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/x86-cilium-bpf_overlay.native.json": "0b9092e61e6709beec2423b0af035794571002ed679719dca813fb5dbd2918d0",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/x86-cilium-bpf_wireguard.native.json": "f5c7510a60210f75b303b9ee3f9e99a290f20566f0cb1fa0d935fd3bc72858d6",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/x86-cilium-bpf_sock.native.json": "c01d6ed6b6bc352453ce4f05ac5c718b0965b722590f4c59cdce56e7eeeb1b71",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/arm64-cilium-bpf_lxc.native.json": "ec37e1541db88a524056a824448853ee17f2acb1bf79d8b2ad0199c8c682056c",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/arm64-cilium-bpf_host.native.json": "a9e5273ceef2ce788f1d344bbcffba7f54bc2752df6e8aefc55bd336682ea15e",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/arm64-cilium-bpf_overlay.native.json": "25d6c93159be0c9599bfe25a779c5a6b98c62e8e98363fc42e4642da3edb3019",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/arm64-cilium-bpf_wireguard.native.json": "db4ca6ba5c4200a2510b913a5c09cbb084f9c35ea9fd15d15e6fcba7b7d1c48f",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/arm64-cilium-bpf_sock.native.json": "f60a839cfdc9a93e5fa7590c034145732fa4634770ff9b392a3bde646ff5e14c"
+  },
+  "validation": "Python compile(source), existing10object hashes/shift records and make-n audit passed; runtime pending.",
+  "scope": "Same real Cilium native objects, analysis only; no production selection/flag changes."
+}

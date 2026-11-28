@@ -1,0 +1,7 @@
+# Cilium prefix and configuration shift evidence
+
+Continue shift census3f0fa8407 under latest resume COORDINATOR2026-11-28T07:17Z. Inspect the actual Cilium native objects containing unresolved shift helpers; use mem2reg only to expose local values, preserving all selected manifest roots. Retain exact helper IR including nsw/nuw/exact flags and branch structure, all direct callers, prefix argument constants/SSA dependencies, and referenced configuration globals. Reuse existing captured native-plan values with their exact cache/proof origins. A captured x86 constant is not an ARM runtime value or automatically the value of every staged helper.
+
+GET_PREFIX has branch boundaries, while ipv4_is_in_subnet requires actual caller prefixes. The guard/operand count alone does not settle source-C validity, poison, corresponding eBPF instructions or the active selected entry. No generic mask or new app configuration is introduced. Existing reported cluster_id_bits8 is a captured-plan observation to join, not an unconditional architecture invariant.
+
+make audit runs one serial opt mem2reg per selected actual object onCPU16 under48GiB, metadata onCPU19 under48GiB. No compiler/code generation, O3 root elimination, new P/native build, guest, timing/image lock, app/root/image activation or kernel/benchmark change. Launch detached once and collect the same job next turn. Preserve partial records on failure and reuse the completed114-object census. OTel2689 hold, x86 owner, FORMALCPU17 and perf STOP remain intact.
