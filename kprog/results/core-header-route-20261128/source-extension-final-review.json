@@ -1,0 +1,455 @@
+{
+  "controller_pid": 1602862,
+  "ended_utc": "2026-11-28T18:43:38.431876+00:00",
+  "cases": [
+    {
+      "arch": "x86",
+      "app": "bcc",
+      "query_count": 17,
+      "query_kinds": [
+        "access_delta",
+        "field_exists",
+        "type_exists"
+      ],
+      "unresolved_core_calls": false
+    },
+    {
+      "arch": "x86",
+      "app": "tetragon",
+      "query_count": 168,
+      "query_kinds": [
+        "access_delta",
+        "enum_value",
+        "enum_value_exists",
+        "field_exists",
+        "field_size",
+        "type_exists"
+      ],
+      "unresolved_core_calls": false
+    },
+    {
+      "arch": "x86",
+      "app": "tetragon-iter",
+      "query_count": 1,
+      "query_kinds": [
+        "access_delta"
+      ],
+      "unresolved_core_calls": false
+    },
+    {
+      "arch": "x86",
+      "app": "tracee",
+      "query_count": 462,
+      "query_kinds": [
+        "access_delta",
+        "enum_value_exists",
+        "field_exists",
+        "field_size",
+        "type_exists",
+        "type_size"
+      ],
+      "unresolved_core_calls": false,
+      "start_boottime_exists": {
+        "kind": "field_exists",
+        "query": "struct task_struct, start_boottime",
+        "site": null,
+        "answer": 1,
+        "tu": "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/tracee.bpf.c"
+      },
+      "scoped_namespace_deltas": [
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->ns.inum)",
+          "site": [
+            "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/namespaces.h",
+            21
+          ],
+          "answer": 88,
+          "tu": "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/tracee.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->ns.inum)",
+          "site": [
+            "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/namespaces.h",
+            26
+          ],
+          "answer": 332,
+          "tu": "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/tracee.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->ns.inum)",
+          "site": [
+            "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/namespaces.h",
+            31
+          ],
+          "answer": 468,
+          "tu": "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/tracee.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->ns.inum)",
+          "site": [
+            "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/namespaces.h",
+            36
+          ],
+          "answer": 1240,
+          "tu": "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/tracee.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->ns.inum)",
+          "site": [
+            "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/namespaces.h",
+            41
+          ],
+          "answer": 280,
+          "tu": "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/tracee.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->ns.inum)",
+          "site": [
+            "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/namespaces.h",
+            46
+          ],
+          "answer": 88,
+          "tu": "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/tracee.bpf.c"
+        }
+      ]
+    },
+    {
+      "arch": "arm64",
+      "app": "bcc",
+      "query_count": 17,
+      "query_kinds": [
+        "access_delta",
+        "field_exists",
+        "type_exists"
+      ],
+      "unresolved_core_calls": false
+    },
+    {
+      "arch": "arm64",
+      "app": "tetragon",
+      "query_count": 168,
+      "query_kinds": [
+        "access_delta",
+        "enum_value",
+        "enum_value_exists",
+        "field_exists",
+        "field_size",
+        "type_exists"
+      ],
+      "unresolved_core_calls": false
+    },
+    {
+      "arch": "arm64",
+      "app": "tetragon-iter",
+      "query_count": 1,
+      "query_kinds": [
+        "access_delta"
+      ],
+      "unresolved_core_calls": false
+    },
+    {
+      "arch": "arm64",
+      "app": "tracee",
+      "query_count": 443,
+      "query_kinds": [
+        "access_delta",
+        "enum_value_exists",
+        "field_exists",
+        "field_size",
+        "type_exists",
+        "type_size"
+      ],
+      "unresolved_core_calls": false,
+      "start_boottime_exists": {
+        "kind": "field_exists",
+        "query": "struct task_struct, start_boottime",
+        "site": null,
+        "answer": 1,
+        "tu": "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/tracee.bpf.c"
+      },
+      "scoped_namespace_deltas": [
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->ns.inum)",
+          "site": [
+            "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/namespaces.h",
+            21
+          ],
+          "answer": 88,
+          "tu": "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/tracee.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->ns.inum)",
+          "site": [
+            "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/namespaces.h",
+            26
+          ],
+          "answer": 332,
+          "tu": "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/tracee.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->ns.inum)",
+          "site": [
+            "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/namespaces.h",
+            31
+          ],
+          "answer": 468,
+          "tu": "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/tracee.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->ns.inum)",
+          "site": [
+            "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/namespaces.h",
+            36
+          ],
+          "answer": 1240,
+          "tu": "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/tracee.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->ns.inum)",
+          "site": [
+            "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/namespaces.h",
+            41
+          ],
+          "answer": 280,
+          "tu": "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/tracee.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->ns.inum)",
+          "site": [
+            "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/common/namespaces.h",
+            46
+          ],
+          "answer": 88,
+          "tu": "/workspaces/repository/vendor/bpf/tracee/pkg/ebpf/c/tracee.bpf.c"
+        }
+      ]
+    }
+  ],
+  "fixture_cases": [
+    {
+      "arch": "x86",
+      "status": "complete",
+      "target": {
+        "path": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "bytes": 408901736,
+        "sha256": "ef8733dbbfb41c1d1ea13f5704d7b1b95a12c5ca0a262f687fd1ff9db725c0de"
+      },
+      "dynamic_execution": {
+        "command": [
+          "lli-18",
+          "--force-interpreter",
+          "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-typefields-fixture-baseline/x86-dynamic.ll"
+        ],
+        "indices": [
+          0,
+          1,
+          7,
+          31
+        ],
+        "all_four_returns_equal_oracle": true,
+        "harness": {
+          "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-typefields-fixture-baseline/x86-dynamic.ll",
+          "bytes": 5419,
+          "sha256": "96d996c02c7f08b9144ba7dd7a032fc983df7668449eff3ecca7e922822e142f"
+        }
+      },
+      "expected": {
+        "disk_exists": 0,
+        "thread_offset": 2904,
+        "thread_exists_type": 1,
+        "thread_address": 2904,
+        "thread_address_short": 2904,
+        "pid_namespace_address": 136,
+        "module_text_address": 320,
+        "login_address": 3552,
+        "ancestor_address": 2304,
+        "pid_link_exists": 0,
+        "timespec_size": 16,
+        "retprobe_exists": 1,
+        "retprobe_value": 1,
+        "ancestor_index": 2304,
+        "queue_disk_address": 96
+      },
+      "actual": {
+        "disk_exists": 0,
+        "thread_offset": 2904,
+        "thread_exists_type": 1,
+        "thread_address": 2904,
+        "thread_address_short": 2904,
+        "pid_namespace_address": 136,
+        "module_text_address": 320,
+        "login_address": 3552,
+        "ancestor_address": 2304,
+        "pid_link_exists": 0,
+        "timespec_size": 16,
+        "retprobe_exists": 1,
+        "retprobe_value": 1,
+        "ancestor_index": 2304,
+        "queue_disk_address": 96
+      },
+      "mismatches": {},
+      "oracle": {
+        "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-typefields-fixture-baseline/oracle.bpf.o",
+        "bytes": 14808,
+        "sha256": "1b2c84955d173a9015e6bf94d0e8c5896a6b0d9dac5ad487de51426fa6891957"
+      },
+      "table": {
+        "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-typefields-fixture-baseline/x86-answers.h",
+        "bytes": 3958,
+        "sha256": "8a1d260d02c7ee2155326d43e88669f0c32c1f3a8d5fa73f247cc530b33b1d72"
+      },
+      "report": {
+        "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-typefields-fixture-baseline/x86-answers.json",
+        "bytes": 3881,
+        "sha256": "24c0518092e23b65119305dcdfc5da4f73aafb6630b6c63ca5712c3becf59b80"
+      },
+      "native_ir": {
+        "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-typefields-fixture-baseline/x86-native.ll",
+        "bytes": 4855,
+        "sha256": "d4cdca2545663e1d39def428a26750b4d14bcf14b12937ba946a82239a80f725"
+      },
+      "target_unchanged": true
+    },
+    {
+      "arch": "arm64",
+      "status": "complete",
+      "target": {
+        "path": "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+        "bytes": 457575688,
+        "sha256": "8407e20d8c8c198e06fc84cb0c338fdcdbb957001352f4116058a3ff7befda17"
+      },
+      "dynamic_execution": {
+        "command": [
+          "lli-18",
+          "--force-interpreter",
+          "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-typefields-fixture-baseline/arm64-dynamic.ll"
+        ],
+        "indices": [
+          0,
+          1,
+          7,
+          31
+        ],
+        "all_four_returns_equal_oracle": true,
+        "harness": {
+          "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-typefields-fixture-baseline/arm64-dynamic.ll",
+          "bytes": 5423,
+          "sha256": "8f60ddd27f6ff0ef5fb6daefa925a7272e67991a8ec1e2013086a42642771a60"
+        }
+      },
+      "expected": {
+        "disk_exists": 0,
+        "thread_offset": 2360,
+        "thread_exists_type": 1,
+        "thread_address": 2360,
+        "thread_address_short": 2360,
+        "pid_namespace_address": 136,
+        "module_text_address": 320,
+        "login_address": 3008,
+        "ancestor_address": 2288,
+        "pid_link_exists": 0,
+        "timespec_size": 16,
+        "retprobe_exists": 1,
+        "retprobe_value": 1,
+        "ancestor_index": 2288,
+        "queue_disk_address": 96
+      },
+      "actual": {
+        "disk_exists": 0,
+        "thread_offset": 2360,
+        "thread_exists_type": 1,
+        "thread_address": 2360,
+        "thread_address_short": 2360,
+        "pid_namespace_address": 136,
+        "module_text_address": 320,
+        "login_address": 3008,
+        "ancestor_address": 2288,
+        "pid_link_exists": 0,
+        "timespec_size": 16,
+        "retprobe_exists": 1,
+        "retprobe_value": 1,
+        "ancestor_index": 2288,
+        "queue_disk_address": 96
+      },
+      "mismatches": {},
+      "oracle": {
+        "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-typefields-fixture-baseline/oracle.bpf.o",
+        "bytes": 14808,
+        "sha256": "1b2c84955d173a9015e6bf94d0e8c5896a6b0d9dac5ad487de51426fa6891957"
+      },
+      "table": {
+        "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-typefields-fixture-baseline/arm64-answers.h",
+        "bytes": 3958,
+        "sha256": "c76800ff64cb445a3446906af62d5e1b366a22282ed0c4199ea84befc9f7ec14"
+      },
+      "report": {
+        "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-typefields-fixture-baseline/arm64-answers.json",
+        "bytes": 3881,
+        "sha256": "3a92e119faec25c082262b68f228de43f09e4ccd505ca789c59d2612034c055d"
+      },
+      "native_ir": {
+        "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-typefields-fixture-baseline/arm64-native.ll",
+        "bytes": 4859,
+        "sha256": "9b309f38c24b8db56b91fe9e585096ae1f2c80ab7ace2f816b1819a9f65b5a36"
+      },
+      "target_unchanged": true
+    }
+  ],
+  "inputs": [
+    {
+      "path": "/workspaces/repository/vendor/bpf/Makefile",
+      "bytes": 28905,
+      "sha256": "0f630a987737d0df8f8392632d431b1dbcc83ae0a5c3ef096c2069979ea7431c"
+    },
+    {
+      "path": "/workspaces/repository/vendor/bpf/core-answers.py",
+      "bytes": 36842,
+      "sha256": "4486e89ebfc5d8eac8c1e590996f8b572be55562276b96fda707b173e948ac42"
+    },
+    {
+      "path": "/workspaces/repository/vendor/bpf/core-compat.h",
+      "bytes": 6909,
+      "sha256": "92ea15403313470f40cd6b7b25cee6cefd342a26a5c81edc834fe552aa4b8672"
+    },
+    {
+      "path": "/workspaces/repository/vendor/bpf/native_compat.h",
+      "bytes": 15663,
+      "sha256": "906737856b4c533575095e11e090b125ed6bc95a676bd9087411234b44d74494"
+    },
+    {
+      "path": "/workspaces/repository/vendor/bpf/native-helpers.h",
+      "bytes": 15720,
+      "sha256": "5a7c6c823c5e20a326aa0033adcd4cfaee146cd704cfb7690e81f4eae6dd18ef"
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/check_app_sources.py",
+      "bytes": 6212,
+      "sha256": "75e1bf0c3224020299d699c3ec2e541545f4b3fb27c45dd4cc77207d9de98b61"
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/check_restored.py",
+      "bytes": 5563,
+      "sha256": "acecf25a375fc159fda8b108b5268c200c2abb6d4964fe37aa3ab1c7a09e3e60"
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/input/queries.c",
+      "bytes": 4086,
+      "sha256": "6f2c2406687dca7e116f0ffb6cec875b18b8887db8ba6930cab4127387011bf8"
+    }
+  ],
+  "all_eight_sources_compile": true,
+  "both_targets_fifteen_functions_match": true,
+  "scope": "Original C with current producer flags, metadata header and native LLVM IR; dynamic fixture execution is LLVM interpretation. No all-producer P/image/guest/timing acceptance."
+}

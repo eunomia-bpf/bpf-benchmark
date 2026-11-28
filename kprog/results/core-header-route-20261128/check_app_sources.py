@@ -28,18 +28,27 @@ try:
    result=run(['make','-s','--no-print-directory','-C',str(V),'ARCH='+arch,'--eval=__perf_read_flags:;@echo NATIVE=$(NATIVE_CFLAGS); echo SYS=$(SYS_INC); echo BPF_ARCH=$(BPF_ARCH)','__perf_read_flags'],arch+'-producer-flags')
    values=dict(line.split('=',1) for line in Path(result['stdout']['path']).read_text().splitlines() if '=' in line)
    native=shlex.split(values['NATIVE']);system=shlex.split(values['SYS']);assert values['BPF_ARCH']==arch
-   for app in ['bcc','tetragon']:
+   for app in ['bcc','tetragon','tetragon-iter','tracee']:
     case=dict(arch=arch,app=app,status='running',producer_flags=result);r['cases'].append(case);save()
     try:
      target=Path('/workspaces/.agent-state/kprog-ck')/('build-'+arch)/'vmlinux'
      if app=='bcc':
       source=V/'bcc/libbpf-tools/biosnoop.bpf.c';header=V/('bcc/libbpf-tools/'+arch+'/vmlinux.h')
       flags=native+['-I'+str(V/'bcc/libbpf-tools'),'-I'+str(V/('bcc/libbpf-tools/'+arch)),'-I'+str(V/'bcc/src/cc/libbpf/include/uapi')]+system
-     else:
-      source=V/'tetragon/bpf/process/bpf_generic_kprobe.c';header=V/('tetragon/bpf/include/vmlinux_generated_'+arch+'.h')
+     elif app.startswith('tetragon'):
+      source=V/('tetragon/bpf/process/'+('bpf_prog_iter.c' if app=='tetragon-iter' else 'bpf_generic_kprobe.c'));header=V/('tetragon/bpf/include/vmlinux_generated_'+arch+'.h')
       includes=['tetragon/bpf','tetragon/bpf/include','tetragon/bpf/lib','tetragon/bpf/libbpf','tetragon/bpf/process','tetragon/bpf/errmetrics']
       # Existing producer's v61 variant, not a new optimization or program choice.
-      flags=native+['-fms-extensions','-DMICRO_NATIVE_TETRAGON','-D__TARGET_ARCH_'+arch]+['-I'+str(V/p) for p in includes]+system+['-D__LARGE_BPF_PROG','-D__V511_BPF_PROG','-D__V61_BPF_PROG']
+      flags=native+['-fms-extensions','-DMICRO_NATIVE_TETRAGON','-D__TARGET_ARCH_'+arch]+['-I'+str(V/p) for p in includes]+system
+      if app=='tetragon':flags+=['-D__LARGE_BPF_PROG','-D__V511_BPF_PROG','-D__V61_BPF_PROG']
+     else:
+      # Reuse the exact failed producer command, changing only diagnostic output.
+      log=(OUT/'producer-regeneration'/(arch+'-build.stdout')).read_text().replace('\\\n',' ')
+      command=next(shlex.split(line) for line in log.splitlines() if line.startswith('python3 ') and 'tracee.native.o"' in line and '--compile' in line)
+      argv=command[command.index('--compile')+1:];output=argv.index('-o')
+      source=(V/argv[-1]).resolve();header=V/('tracee/dist/vmlinux.h')
+      flags=[a for i,a in enumerate(argv) if i not in (output,output+1,len(argv)-1)]
+      header=source  # Tracee includes its architecture header through the recorded flags.
      case['inputs']=[seal(p) for p in [source,header,target]];case['flags']=flags
      stem=arch+'-'+app;temp=D/(stem+'-tmp');temp.mkdir();env=dict(os.environ,TMPDIR=str(temp));table=D/(stem+'.h');report=D/(stem+'.json')
      case['generate']=run(['python3',str(V/'core-answers.py'),'--btf',str(target),'--bpftool',str(ROOT/'vendor/build/x86/bpftool/bin/bpftool'),'--clang','clang-18','--cflags='+shlex.join(flags),'--out',str(table),'--report',str(report),str(source)],stem+'-generate',V,env);save()

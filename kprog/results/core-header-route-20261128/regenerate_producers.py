@@ -1,10 +1,12 @@
 """Regenerate the one native P/stage per architecture through the common header entry."""
 from pathlib import Path
-import datetime,fcntl,hashlib,json,os,resource,subprocess,time,traceback
+import datetime,fcntl,hashlib,json,os,re,resource,subprocess,sys,time,traceback
 from elftools.elf.elffile import ELFFile
 ROOT=Path('/workspaces/repository');V=ROOT/'vendor/bpf';OUT=Path(__file__).resolve().parent
 os.sched_setaffinity(0,{16,18});resource.setrlimit(resource.RLIMIT_AS,(48*1024**3,48*1024**3))
-D=OUT/'producer-regeneration';D.mkdir(exist_ok=False)
+NAME=sys.argv[1] if len(sys.argv)>1 else 'producer-regeneration'
+assert re.fullmatch(r'producer-regeneration(?:-[a-z0-9]+)*',NAME)
+D=OUT/NAME;D.mkdir(exist_ok=False)
 def now():return datetime.datetime.now(datetime.timezone.utc).isoformat()
 def seal(p):
  h=hashlib.sha256()
@@ -25,7 +27,7 @@ def objects(folder):
 guards=[ROOT/p for p in ['vendor/bpf/Makefile','vendor/bpf/core-answers.py','vendor/bpf/core-compat.h','vendor/bpf/native_compat.h','vendor/bpf/native-helpers.h','kprog/perf/one-image/Makefile','runner/mk/build.mk','runner/containers/runner-runtime.Dockerfile']]
 guards += [p for folder in ['runner/libs','corpus/config','corpus/configs','micro/configs','e2e'] if (ROOT/folder).exists() for p in sorted((ROOT/folder).rglob('*')) if p.is_file() and p.suffix in ('.py','.json','.yaml','.yml','.toml','.sh')]
 r=dict(pid=os.getpid(),started_utc=now(),status='running',scope='All six native-artifacts producers, existing flags/default target lists, one canonical P/stage per architecture; no image or benchmark/timing run. x86 then arm64, make -k -j2, CPU16/18/48GiBAS.',inputs=[],otel_pin=None,architectures=[])
-def save():(OUT/'producer-regeneration-controller.json').write_text(json.dumps(r,indent=2)+'\n')
+def save():(OUT/(NAME+'-controller.json')).write_text(json.dumps(r,indent=2)+'\n')
 def run(args,stem):
  with (D/(stem+'.stdout')).open('w') as stdout,(D/(stem+'.stderr')).open('w') as stderr:
   p=subprocess.run(args,cwd=ROOT,stdin=subprocess.DEVNULL,stdout=stdout,stderr=stderr)

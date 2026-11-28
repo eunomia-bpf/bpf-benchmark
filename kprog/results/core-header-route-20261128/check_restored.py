@@ -36,7 +36,7 @@ try:
      assert row['status']==0 and not row['poison']
      name=row['section'].split('/')[-1]
      if row['kind']==0:expected[name]=expected.get(name,0)+row['new_val']
-     elif row['kind'] in [2,8,10,11]:expected[name]=row['new_val']
+     elif row['kind'] in [2,8,9,10,11]:expected[name]=row['new_val']
      else:raise RuntimeError(('Unexpected relocation kind',row))
     flags=['-DMICRO_NATIVE','-I'+str(VENDOR)]
     if arch=='arm64':flags+=['--target=aarch64-linux-gnu']

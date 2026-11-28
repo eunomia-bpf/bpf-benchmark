@@ -23,12 +23,15 @@
 #undef __native_core_read_into_6
 
 #ifdef __KPROG_SCAN_ONLY__
-static void *__kprog_scan_access(const char *, const char *, const void *);
+static unsigned long __kprog_scan_access(const char *, const char *, ...);
 #define __builtin_preserve_access_index(expr) \
-    ((typeof(expr))__kprog_scan_access("access_delta", #expr, (expr)))
+    ((typeof(expr))__kprog_scan_access("access_delta", #expr, (expr), __FILE__, __LINE__))
 #else
 #define __builtin_preserve_access_index(expr) \
-    ((typeof(expr))((char *)(expr) + __kprog_core_lookup_access_delta(#expr)))
+    __builtin_choose_expr(__builtin_classify_type(expr) == 5, \
+        (typeof(expr))(unsigned long)((char *)(unsigned long)(expr) + \
+            __kprog_core_lookup_access_delta(#expr, __FILE__, __LINE__)), \
+        (__kprog_core_lookup_access_delta(#expr, __FILE__, __LINE__), (expr)))
 #endif
 
 /* CO-RE answers come from the sole kernel's BTF (core-answers.py writes

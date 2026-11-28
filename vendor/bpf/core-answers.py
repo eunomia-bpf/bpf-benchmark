@@ -159,7 +159,7 @@ class Btf:
             if i == len(path) - 1:
                 return hit, base
             t = self.resolve(hit["type_id"])
-            while t is not None and t["kind"] == "PTR":
+            while t is not None and t["kind"] in ("PTR", "ARRAY"):
                 t = self.resolve(t["type"])
             if t is None or t["kind"] not in ("STRUCT", "UNION"):
                 return None
@@ -252,6 +252,7 @@ def source_layout(ast: dict, text: str) -> tuple[dict[str, int], dict[str, int]]
         offsets = tuple(int(x.strip()) for x in match[3].split(",") if x.strip())
         layouts[match[1].strip()] = (int(match[2]) // 8, offsets)
     fields, sizes, records, aliases = {}, {q: v[0] for q, v in layouts.items()}, [], {}
+    constants = {}
     stack = [ast]
     while stack:
         node = stack.pop()
@@ -262,6 +263,13 @@ def source_layout(ast: dict, text: str) -> tuple[dict[str, int], dict[str, int]]
         if node.get("kind") == "TypedefDecl":
             t = node.get("type", {})
             aliases[node["name"]] = t.get("desugaredQualType", t.get("qualType", ""))
+        if node.get("kind") == "EnumDecl":
+            value = -1
+            for item in node.get("inner", []):
+                if item.get("kind") == "EnumConstantDecl":
+                    expr = (item.get("inner") or [{}])[0]
+                    value = int(expr["value"]) if "value" in expr else value + 1
+                    constants[item["id"]] = value
         stack.extend(node.get("inner") or [])
     for node in records:
         children = [x for x in node.get("inner", []) if x.get("kind") == "FieldDecl"]
@@ -290,10 +298,10 @@ def source_layout(ast: dict, text: str) -> tuple[dict[str, int], dict[str, int]]
             q = aliases[q]
         if q in sizes:
             sizes[name] = sizes[q]
-    return fields, sizes
+    return fields, sizes, constants
 
 
-def source_access(node: dict, fields: dict[str, int], sizes: dict[str, int]):
+def source_access(node: dict, fields: dict[str, int], sizes: dict[str, int], constants: dict[str, int]):
     """Constant source offset and array strides for a preserved address."""
     original = node
     while original.get("kind") == "ImplicitCastExpr":
@@ -315,7 +323,7 @@ def source_access(node: dict, fields: dict[str, int], sizes: dict[str, int]):
                 base = (base.get("inner") or [{}])[0]
             if current.get("isArrow") and base.get("kind") == "MemberExpr":
                 local = source_access({"kind": "UnaryOperator",
-                    "type": {"qualType": "void *"}, "inner": [base]}, fields, sizes)
+                    "type": {"qualType": "void *"}, "inner": [base]}, fields, sizes, constants)
                 if local is None:
                     return None
                 crossings.append((_members(base, []), local[0]))
@@ -328,6 +336,8 @@ def source_access(node: dict, fields: dict[str, int], sizes: dict[str, int]):
             while index.get("kind") in ("ImplicitCastExpr", "ParenExpr", "ConstantExpr"):
                 index = (index.get("inner") or [{}])[0]
             number = int(index["value"]) if index.get("kind") == "IntegerLiteral" else None
+            if index.get("kind") == "DeclRefExpr":
+                number = constants.get(index.get("referencedDecl", {}).get("id"))
             arrays.append((_members(children[0], []), stride, number))
         current = children[0] if children else None
     return bits // 8, arrays, crossings
@@ -372,7 +382,9 @@ def scan(sources: list[Path], clang: str, flags: list[str],
                     query = _literal(args[2]) if len(args) > 2 else None
                     if kind and query:
                         query = " ".join(query.split())
-                        tu.add((kind, query))
+                        site = ((_literal(args[4]), int(args[5]["value"]))
+                                if kind == "access_delta" else None)
+                        tu.add((kind, query, site))
                         if len(args) > 3:
                             extra = None
                             if kind == "access_delta":
@@ -385,8 +397,20 @@ def scan(sources: list[Path], clang: str, flags: list[str],
                                         sys.exit(f"core-answers: source layout failed: {dumped.stderr}")
                                     layout = source_layout(ast, dumped.stdout)
                                 extra = source_access(args[3], *layout)
+                                if extra is None:
+                                    # preserve_access_index can wrap a scalar
+                                    # assignment. Identity is valid only when
+                                    # every enclosed field has target layout.
+                                    members, pending = [], [args[3]]
+                                    while pending:
+                                        item = pending.pop()
+                                        if item.get("kind") == "MemberExpr":
+                                            address = {"kind": "UnaryOperator", "type": {"qualType": "void *"}, "inner": [item]}
+                                            members.append((_var_type(item), _members(item, []), source_access(address, *layout)))
+                                        pending.extend(item.get("inner") or [])
+                                    extra = ("scalar", members)
                             entry = (_var_type(args[3]), _members(args[3], []), extra)
-                            values = types.setdefault((str(src), kind, query), [])
+                            values = types.setdefault((str(src), kind, query, site), [])
                             if entry not in values:
                                 values.append(entry)
             stack.extend(node.get("inner") or [])
@@ -401,7 +425,7 @@ def scan(sources: list[Path], clang: str, flags: list[str],
 
 def split_flavor(arg: str) -> str:
     """Strip the `___x` / `___o` suffix libbpf uses to name a flavor type."""
-    return re.sub(r"___[a-z]+(?=\s*(,|\)|$|->|\.))", "", arg)
+    return re.sub(r"___[A-Za-z_0-9]+(?=\s*(,|\)|$|->|\.))", "", arg)
 
 
 def field_path(expr: str, decls: dict[str, str]) -> tuple[str, list[str]] | None:
@@ -485,13 +509,20 @@ def answer(btf: Btf, kind: str, arg: str, decls: dict[str, str],
     preference to reading declarations as text, because the same spelling can
     name different types in different translation units.
     """
+    if kind == "access_delta" and ast_type and ast_type[2] and ast_type[2][0] == "scalar":
+        for member in ast_type[2][1]:
+            delta, detail = answer(btf, kind, arg, decls, member)
+            if delta != 0:
+                return None, f"scalar expression requires field relocation: {detail}"
+        return 0, "all scalar expression fields already have target layout"
     if kind in ("field_exists", "field_size", "field_offset", "access_delta"):
         fp = None
         if ast_type and ast_type[0] and ast_type[1]:
             base, members = ast_type[:2]
             base = re.sub(r"\b(const|volatile|restrict)\b", "", base).strip()
-            base = re.sub(r"^(?:(?:struct|union|enum)\s+)+", "", base)
             base = re.sub(r"\s*(\*|\[.*\])+$", "", base.strip())
+            base = re.sub(r"^typeof\s*\((.*)\)$", r"\1", base).strip()
+            base = re.sub(r"^(?:(?:struct|union|enum)\s+)+", "", base)
             fp = (split_flavor(base), members)
         if kind == "access_delta" and ast_type and not ast_type[1]:
             return 0, "address has no CO-RE field access"
@@ -557,6 +588,9 @@ def answer(btf: Btf, kind: str, arg: str, decls: dict[str, str],
             if t.group(1) not in decls:
                 return None, f"typeof({name}): variable not declared in the app"
             name = decls[t.group(1)]
+        # Clang can retain typeof(type) in an explicit cast's spelling even
+        # though the operand names a concrete record, rather than a variable.
+        name = re.sub(r"^typeof\s*\((.*)\)$", r"\1", name).strip()
         name = split_flavor(re.sub(r"^(?:(?:const|volatile|struct|union|enum)\s+)+", "", name.strip()))
         t = btf.type_named(name)
         if kind == "type_exists":
@@ -639,22 +673,21 @@ def main() -> None:
         # query. The preprocessed text is what the compiler's own name lookup
         # sees, so read declarations from there.
         decls = declarations([work / f"{Path(tu).stem}.i"])
-        for kind, arg in sorted(tu_queries):
-            for ast_type in types.get((str(tu), kind, arg), [None]):
+        for kind, arg, site in sorted(tu_queries):
+            for ast_type in types.get((str(tu), kind, arg, site), [None]):
                 value, detail = answer(btf, kind, arg, decls, ast_type)
                 if value is None:
                     unresolved.append(f"{tu}: {kind}({arg}): {detail}")
                     continue
-                if (kind, arg) in answered and answered[(kind, arg)][0] != value:
-                    sys.exit(f"core-answers: {kind}({arg}) is {answered[(kind, arg)][0]} in "
-                             f"{answered[(kind, arg)][1]} and {value} in {tu}; "
-                             f"the answer table holds one entry per query text")
-                answered[(kind, arg)] = (value, str(tu))
+                if (kind, arg, site) in answered and answered[(kind, arg, site)][0] != value:
+                    sys.exit(f"core-answers: {kind}({arg}) at {site} has conflicting answers "
+                             f"{answered[(kind, arg, site)][0]} and {value} in {tu}")
+                answered[(kind, arg, site)] = (value, str(tu))
     if unresolved:
         sys.exit("core-answers: unresolved queries:\n  " + "\n  ".join(unresolved))
 
-    report = [{"kind": k, "query": q, "answer": v, "tu": tu}
-              for (k, q), (v, tu) in sorted(answered.items())]
+    report = [{"kind": k, "query": q, "site": site, "answer": v, "tu": tu}
+              for (k, q, site), (v, tu) in sorted(answered.items())]
     skb_cb = btf.member("sk_buff", ["cb"])[1] // 8
     qdisc_data = btf.member("qdisc_skb_cb", ["data"])[1] // 8
     qdisc_classid = btf.member("qdisc_skb_cb", ["tc_classid"])[1] // 8
@@ -663,14 +696,16 @@ def main() -> None:
            f"#define __KPROG_SKB_TC_CLASSID_OFFSET {skb_cb + qdisc_classid}"]
     for kind in sorted({entry["kind"] for entry in report}):
         entries = [e for e in report if e["kind"] == kind]
-        # Nested, fully parenthesised: a bare `a ? b : c ? d : e` chain reads as
-        # `a ? b : (c ? d : e)` but the macro continuation hides that from the eye.
-        lines = [f"#define __kprog_core_lookup_{kind}(text) \\"]
+        # Conditional expressions associate right-to-left. Keep one outer
+        # pair so large source files do not exhaust Clang's bracket depth.
+        parameters = "text, file, line" if kind == "access_delta" else "text"
+        lines = [f"#define __kprog_core_lookup_{kind}({parameters}) ( \\"]
         for e in entries:
-            lines.append(f'    (__builtin_strcmp((text), {json.dumps(e["query"])}) == 0 '
-                         f'? {e["answer"]} : \\')
-        lines.append("     (__kprog_core_unanswered(), 0)"
-                     + ")" * len(entries))
+            location = (f' && __builtin_strcmp((file), {json.dumps(e["site"][0])}) == 0 && (line) == {e["site"][1]}'
+                        if e["site"] else "")
+            lines.append(f'    __builtin_strcmp((text), {json.dumps(e["query"])}) == 0{location} '
+                         f'? ({e["answer"]}) : \\')
+        lines.append("     (__kprog_core_unanswered(), 0))")
         out.append("\n".join(lines))
     for macro in ("field_exists", "field_size", "field_offset", "type_exists",
                   "type_size", "type_matches", "enum_value_exists", "enum_value"):
