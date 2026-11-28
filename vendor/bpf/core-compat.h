@@ -71,6 +71,9 @@ static int __kprog_scan(const char *kind, const char *query, ...);
 static void __kprog_core_unanswered(void)
     __attribute__((error("CO-RE query is not in the answer table; "
                          "rerun core-answers.py for this app's sources")));
+/* Like libbpf's poisoned relocation: dead accesses fold away; a live marker
+ * has no target and the existing native linker refuses it. */
+extern void __kprog_core_poisoned(void);
 /* One table per app: the Makefile passes its path, and the default keeps a
  * single-app build working without it. */
 #ifndef __KPROG_CORE_ANSWERS

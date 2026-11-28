@@ -344,7 +344,7 @@ def source_access(node: dict, fields: dict[str, int], sizes: dict[str, int], con
 
 
 def scan(sources: list[Path], clang: str, flags: list[str],
-         work: Path) -> tuple[list[tuple[str, str]], list[tuple[Path, set[tuple[str, str]]]], dict]:
+         work: Path, source_arg: str | None = None) -> tuple[list[tuple[str, str]], list[tuple[Path, set[tuple[str, str]]]], dict]:
     """Every (kind, query text) the compiled sources ask, per translation unit."""
     header = work / "scan.h"
     header.write_text(SCAN_HEADER.replace('"core-compat.h"',
@@ -353,8 +353,9 @@ def scan(sources: list[Path], clang: str, flags: list[str],
     per_tu: list[tuple[Path, set[tuple[str, str]]]] = []
     types: dict[tuple[str, str, str], list[tuple]] = {}
     for src in sorted(p for p in sources if p.suffix == ".c"):
+        arg = source_arg if source_arg is not None else str(src)
         out = subprocess.run([clang, "-Xclang", "-ast-dump=json", "-fsyntax-only", "-w"
-                              ] + flags + ["-include", str(header), str(src)],
+                              ] + flags + ["-include", str(header), arg],
                              capture_output=True, text=True)
         # An incomplete AST can silently omit queries after a parse error.
         if out.returncode:
@@ -391,7 +392,7 @@ def scan(sources: list[Path], clang: str, flags: list[str],
                                 if layout is None:
                                     dumped = subprocess.run([clang, "-Xclang", "-fdump-record-layouts-complete",
                                         "-Xclang", "-fdump-record-layouts-simple", "-fsyntax-only", "-w"
-                                        ] + flags + ["-include", str(header), str(src)],
+                                        ] + flags + ["-include", str(header), arg],
                                         capture_output=True, text=True)
                                     if dumped.returncode:
                                         sys.exit(f"core-answers: source layout failed: {dumped.stderr}")
@@ -416,7 +417,7 @@ def scan(sources: list[Path], clang: str, flags: list[str],
             stack.extend(node.get("inner") or [])
         if tu:
             (work / f"{Path(src).stem}.i").write_text(
-                subprocess.run([clang, "-E", "-w"] + flags + ["-include", str(header), str(src)],
+                subprocess.run([clang, "-E", "-w"] + flags + ["-include", str(header), arg],
                                capture_output=True, text=True).stdout)
             per_tu.append((src, tu))
             found |= tu
@@ -512,6 +513,8 @@ def answer(btf: Btf, kind: str, arg: str, decls: dict[str, str],
     if kind == "access_delta" and ast_type and ast_type[2] and ast_type[2][0] == "scalar":
         for member in ast_type[2][1]:
             delta, detail = answer(btf, kind, arg, decls, member)
+            if isinstance(delta, str):
+                return delta, detail
             if delta != 0:
                 return None, f"scalar expression requires field relocation: {detail}"
         return 0, "all scalar expression fields already have target layout"
@@ -533,7 +536,7 @@ def answer(btf: Btf, kind: str, arg: str, decls: dict[str, str],
         type_name, path = fp
         hit = btf.member(type_name, path)
         if hit is None and kind == "access_delta":
-            return "(__kprog_core_unanswered(), 0)", f"{type_name}.{'.'.join(path)} poisoned by absent target field"
+            return "(__kprog_core_poisoned(), 0)", f"{type_name}.{'.'.join(path)} poisoned by absent target field"
         if hit is None:
             return (0 if kind in ("field_exists", "field_size") else None), \
                 f"{type_name}.{'.'.join(path)} absent in target BTF"
@@ -658,7 +661,9 @@ def main() -> None:
         sources += [d] if d.is_file() else sorted(p for p in d.rglob("*") if p.suffix in (".c", ".h"))
     work = Path(tempfile.mkdtemp(prefix="core-answers-",
         dir=args.out.parent if compile_argv is not None else None))
-    queries, per_tu, types = scan(sources, args.clang, shlex.split(args.cflags), work)
+    # __FILE__ keys must use the exact original spelling, including './'.
+    queries, per_tu, types = scan(sources, args.clang, shlex.split(args.cflags), work,
+                                 source_args[0] if compile_argv is not None else None)
 
     # An app that makes no CO-RE query still gets a table: every lookup macro
     # exists, so a query it starts to make fails the compile instead of
