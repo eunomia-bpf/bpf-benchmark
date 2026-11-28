@@ -1,0 +1,23 @@
+{
+  "started_utc": "2026-11-28T09:06:14Z",
+  "launcher_pid": 1398321,
+  "args": [
+    "setsid",
+    "nohup",
+    "taskset",
+    "-c",
+    "19",
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/field-census",
+    "audit"
+  ],
+  "preparation_commit": "170b841562b2c5ceaccb1e9c01f6878b4b5e22ae",
+  "recipe_sha256": "1e4514540f8ef56c446fe16c4708fd407e8f821023d009b44475fd672abf48e4",
+  "controller": "kprog/results/native-ebpf-alignment-20261128/packet-context/field-census/controller.json",
+  "job_log": "kprog/results/native-ebpf-alignment-20261128/packet-context/field-census/job.log",
+  "resume_entry": "COORDINATOR 2026-11-28T07:17Z",
+  "resources": "Controller/BTFmetadata CPU19; serial LLVM reader CPU16 AS48GiB.",
+  "scope": "Read-only actual context field/callgraph census, no source/P/image/root/kernel/app/timing change.",
+  "collection": "Collect SAME job next turn, preserve unresolved candidates and failures; no semantic parity verdict from metadata completion."
+}
