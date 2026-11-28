@@ -428,3 +428,4 @@ import KProgFormal.ClightRefinement.Arm64CiliumCallerVectorSequence
 import KProgFormal.ClightRefinement.Arm64CiliumCallerVectorEntry
 import KProgFormal.ClightRefinement.Arm64CiliumCallerStackTags
 import KProgFormal.ClightRefinement.Arm64CiliumCallerStackTagEntry
+import KProgFormal.ClightRefinement.Arm64CiliumCallerEntryScalars
