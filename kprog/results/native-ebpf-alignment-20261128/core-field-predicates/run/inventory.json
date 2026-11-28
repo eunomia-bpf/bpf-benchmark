@@ -1,0 +1,1902 @@
+[
+  {
+    "arch": "x86",
+    "app": "bcc",
+    "searched_roots": [
+      "/workspaces/repository/vendor/build/.bcc-libbpf/x86/output"
+    ],
+    "target": {
+      "path": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+      "size": 408901736,
+      "sha256": "ef8733dbbfb41c1d1ea13f5704d7b1b95a12c5ca0a262f687fd1ff9db725c0de"
+    },
+    "original_bpf_elfs": [
+      {
+        "path": "/workspaces/repository/vendor/build/.bcc-libbpf/x86/output/biosnoop.bpf.o",
+        "size": 28736,
+        "sha256": "86e1380633ee337df9dec223491f1543f37b75105c65a936c8917ce0694e2462"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.bcc-libbpf/x86/output/capable.bpf.o",
+        "size": 11704,
+        "sha256": "0fe7f59ef0492c7bc7cdaff1a64da55a97e9fed67a694045afa5eed9ab585f2c"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.bcc-libbpf/x86/output/opensnoop.bpf.o",
+        "size": 13280,
+        "sha256": "34c994c52804c7d771f69c16aa16299d61210d85753e58e185ab00c7fcd0947e"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.bcc-libbpf/x86/output/runqlat.bpf.o",
+        "size": 47976,
+        "sha256": "34cefcb64d683d23508d3052daf5f059809ddaded59a5168892834d237f4bc6a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.bcc-libbpf/x86/output/syscount.bpf.o",
+        "size": 37480,
+        "sha256": "5fe91415cc1425690609a1350233a4dbbeeb8430bf3d54f53eb4d15962c2c93a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.bcc-libbpf/x86/output/tcpconnect.bpf.o",
+        "size": 47712,
+        "sha256": "aa863c974df7873f3f3a2d35f7604860ce11e17e814b040a6e8c1aef088075e5"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.bcc-libbpf/x86/output/tcplife.bpf.o",
+        "size": 56424,
+        "sha256": "4d3a9b75641a4dd8d34ade4f275eccd99935e95511ba90b27a6aef3eed0440c8"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.bcc-libbpf/x86/output/vfsstat.bpf.o",
+        "size": 6976,
+        "sha256": "e0dcb8b36e153a589eb4636c08c95bb5e6a124d6bbe6cf3f291be41a7f49119a"
+      }
+    ],
+    "coverage": "retained objects found; not a loaded-program census"
+  },
+  {
+    "arch": "x86",
+    "app": "katran",
+    "searched_roots": [
+      "/workspaces/repository/vendor/build/x86/katran/bpf"
+    ],
+    "target": {
+      "path": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+      "size": 408901736,
+      "sha256": "ef8733dbbfb41c1d1ea13f5704d7b1b95a12c5ca0a262f687fd1ff9db725c0de"
+    },
+    "original_bpf_elfs": [
+      {
+        "path": "/workspaces/repository/vendor/build/x86/katran/bpf/balancer.bpf.o",
+        "size": 131368,
+        "sha256": "2178f495720f0a81e44a8bc439978e259459fa0a6486f2c9c4a693f993cb2498"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/katran/bpf/healthchecking.bpf.o",
+        "size": 30696,
+        "sha256": "d539cce744abe87f225172ced0711625fc85dd961eac35b3a3f8b4232ce303db"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/katran/bpf/healthchecking_ipip.bpf.o",
+        "size": 15248,
+        "sha256": "7ce23695eff6fc575d07efe7aee427eec90f9af1019850bd53ee8a4977921189"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/katran/bpf/xdp_root.bpf.o",
+        "size": 6024,
+        "sha256": "2c7d943be15b98047124707428b78e79302ece3a6111244eb746ea81023286f1"
+      }
+    ],
+    "coverage": "retained objects found; not a loaded-program census"
+  },
+  {
+    "arch": "x86",
+    "app": "tracee",
+    "searched_roots": [
+      "/workspaces/repository/vendor/build/.tracee-build/x86/dist"
+    ],
+    "target": {
+      "path": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+      "size": 408901736,
+      "sha256": "ef8733dbbfb41c1d1ea13f5704d7b1b95a12c5ca0a262f687fd1ff9db725c0de"
+    },
+    "original_bpf_elfs": [
+      {
+        "path": "/workspaces/repository/vendor/build/.tracee-build/x86/dist/lsm_support/kprobe_check.bpf.o",
+        "size": 9016,
+        "sha256": "f34972db407a6f784db77c79149ee8c80872edbdff9e95daf95816c73b08a622"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tracee-build/x86/dist/lsm_support/lsm_check.bpf.o",
+        "size": 6608,
+        "sha256": "d9186bcd6fcbe7158966c4a75df9015b9e7e04ba32740e8cfcde754cd015ce6b"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tracee-build/x86/dist/tracee.bpf.o",
+        "size": 14893240,
+        "sha256": "1a5e69c4189680a796c9e8e386da02f30df00a5465b5f8a11076a6c6624b9fc9"
+      }
+    ],
+    "coverage": "retained objects found; not a loaded-program census"
+  },
+  {
+    "arch": "x86",
+    "app": "tetragon",
+    "searched_roots": [
+      "/workspaces/repository/vendor/build/x86/tetragon",
+      "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs"
+    ],
+    "target": {
+      "path": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+      "size": 408901736,
+      "sha256": "ef8733dbbfb41c1d1ea13f5704d7b1b95a12c5ca0a262f687fd1ff9db725c0de"
+    },
+    "original_bpf_elfs": [
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_cgroup_mkdir_v511.o",
+        "size": 987056,
+        "sha256": "d2b8c1fc0c99b33dc350be8dee2c8bf0cc16990691b2a289ec96da6a1a28d4c6"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_cgroup_release_v511.o",
+        "size": 983952,
+        "sha256": "d5592392d6bed8747fd73c0c2fa928d2be9b6401d5272fbba44c6c7fdc33326f"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_cgroup_rmdir_v511.o",
+        "size": 983944,
+        "sha256": "ef03bc4af979faaa33db60b877343a51c16671b877353ead9ebe4700dcc2ccf7"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_execve_event_v310.o",
+        "size": 1246896,
+        "sha256": "ab905498be96b1af22eb229e1cb63e9c991d25ceedec84094169f4e8e2ac859e"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_execve_event_v511.o",
+        "size": 2261488,
+        "sha256": "48122b730a843e382d8b84952d91fe1cf0d1b031203ea2fdd6b7f8bd489226c7"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_execve_event_v53.o",
+        "size": 2237104,
+        "sha256": "6637ff1f656d3ae65ad6af48e488cc2e5e944a269d78c98ead8c58ecbbe1d0fb"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_execve_event_v61.o",
+        "size": 1279656,
+        "sha256": "5f02b063c93db8e8c737a5778a3860b6cd58b17503a36be3b2671186e7e88b08"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_execve_map_update_v511.o",
+        "size": 37136,
+        "sha256": "d8ee575d93afa6dd6a085171d60662aa85df4fa8b4bd5f6a3e201641a12b25b1"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_execve_map_update_v53.o",
+        "size": 31360,
+        "sha256": "4738dcd375d5f1200e48b378dd1331464352b190b0cefeb3c31bbd48238eb06f"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_execve_map_update_v61.o",
+        "size": 37136,
+        "sha256": "d8ee575d93afa6dd6a085171d60662aa85df4fa8b4bd5f6a3e201641a12b25b1"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_exit_v310.o",
+        "size": 1002000,
+        "sha256": "3bac63f62d2ad006bfe9a66dbe054dab4a5f60ae91d36535977db30bb99e0f26"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_exit_v511.o",
+        "size": 1011416,
+        "sha256": "225d351e8f963733677de0aa043be6d84080b3f46c852cd122de20944b54ecf5"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_fork_v310.o",
+        "size": 1080200,
+        "sha256": "073fac9f5b150ff7b27849c6cd0b0f648cc6793e8ccef078f1729391197d155f"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_fork_v511.o",
+        "size": 1115536,
+        "sha256": "6a3b96f21b0bb9b962b1373aa7975ce5e831504cfb53e6a0710d139043419db4"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_fentry_v511.o",
+        "size": 3274200,
+        "sha256": "3fa75c8abccf4d4d6b3c21d639fb6a55ee2d863fd88ebc4c54ab80b4a737bd18"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_fentry_v53.o",
+        "size": 3207648,
+        "sha256": "b4159afd842620926239ff4d9046d83bb6b3456d4fd8aae6e550a4c2fd3d3139"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_fentry_v61.o",
+        "size": 1714072,
+        "sha256": "62adb3dcc14f5e247db152b1ff43ad3ce1ddbf8ad7bc3ef8d4eea965dcb3ba69"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_fexit_v511.o",
+        "size": 2007360,
+        "sha256": "602334d1b866cb466ef96c85e3ae5ffa2f68318be29f04717ca9a62f9af423cf"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_fexit_v53.o",
+        "size": 1966248,
+        "sha256": "90eaef930b1ebd30e0e0605f5117d26e97cab5d78df7942518be562576f48e48"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_fexit_v61.o",
+        "size": 1471640,
+        "sha256": "920302cf9c6be727ed8ce0bb1a44f819a4e41fcda3f84b0fcbf9567e08de7610"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_kprobe_v511.o",
+        "size": 3308456,
+        "sha256": "03b473b7478126aaf40f702dad58b2c99cf4257a14dbdefe3322f411087e2a9a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_kprobe_v53.o",
+        "size": 3242544,
+        "sha256": "dab0728b6793d4b35eb9476673b02870bd9f3bad074f7acf568da862e4a9867a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_kprobe_v61.o",
+        "size": 1748888,
+        "sha256": "7f938c1f10bf8c23b98bf804db70c47e20838d4201b94b04dc7d6437caf8821d"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_lsm_core_v511.o",
+        "size": 3257648,
+        "sha256": "8cb71e9df850cb88c20cfe5e63790a3cdaa6e9acb48e00d8017684c87041d39d"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_lsm_core_v61.o",
+        "size": 1698112,
+        "sha256": "c85bfb4f8798c7a698ce60dbb615332f09961f0351918e9ac5e744bb3dd89894"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_lsm_ima_bprm_v511.o",
+        "size": 983784,
+        "sha256": "6657c080d70f9056e34652a3755c11fb77b81292b006bbe06b052b431c079b26"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_lsm_ima_bprm_v61.o",
+        "size": 983048,
+        "sha256": "3c26a835e4f9ffc60c2ca7de815047bce4a94170160d60fb852c2a5940af4db6"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_lsm_ima_file_v511.o",
+        "size": 983728,
+        "sha256": "8a6e5a95aa5e5a942cb0b37a317146da77dfa08d18584b0e193ae208008b9d29"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_lsm_ima_file_v61.o",
+        "size": 982992,
+        "sha256": "280a1402fdfd9549a56f361431a71dcd1454c9f93728ef58830345a203c4db03"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_lsm_output_v511.o",
+        "size": 1093816,
+        "sha256": "8dd3eb13fd94e3d570cf4102f7ecce4e80267f8bc21737540b237375291fe8a6"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_lsm_output_v61.o",
+        "size": 1093216,
+        "sha256": "8e3777d239228c20037fbe1376898fc1b9791c072daf5551996b59fe42cadd5b"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_rawtp_v511.o",
+        "size": 3268312,
+        "sha256": "54f9c026278486f98f1259a79ce7b233dfdcfe36463ddd3ff8bd197782b612f5"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_rawtp_v53.o",
+        "size": 3201760,
+        "sha256": "1b7daee69ddd9339b841f12a65e903cbe0a9686f51752aa431ae5c2427d67827"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_rawtp_v61.o",
+        "size": 1708184,
+        "sha256": "005182c5d19ae1dd43bf2228016e0cf390a400152883668dee648314d38c7f1d"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_retkprobe_v511.o",
+        "size": 2008352,
+        "sha256": "d5ea58b19a2637001bd0a56f3b3ca41f5afa4b39cd80fa9dd765f0ed5abf2446"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_retkprobe_v53.o",
+        "size": 1967232,
+        "sha256": "e2e8b8008d4148d855bcb579900ecdbd205786bdf797c50a61000f1fdbbdc266"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_retkprobe_v61.o",
+        "size": 1472640,
+        "sha256": "42e1e59cae7763bc2a977861865bc573247a3226829cd80e7fd6cf13460ab403"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_retuprobe_v511.o",
+        "size": 2009936,
+        "sha256": "d367e8c6934023107ee029b824918fca92a81517c74354a9468ea198ae66ba53"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_retuprobe_v53.o",
+        "size": 1958152,
+        "sha256": "786884152921eb8af86a31c03e65c516a5e804583d327f0133d2e35ec276544a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_retuprobe_v61.o",
+        "size": 1470888,
+        "sha256": "2e829660cc89a1f4a2f02a018feccbcdfc623254dc34d1c666bec70c71148f69"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_tracepoint_v511.o",
+        "size": 2875824,
+        "sha256": "e71408ec68433853a383b769321db739ac712558bc4f869bb9f78649e261ab91"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_tracepoint_v53.o",
+        "size": 2813152,
+        "sha256": "30a3a74ab3c686503828198611232fc9322cee5adabade7a33092dac0f95b93d"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_tracepoint_v61.o",
+        "size": 1847120,
+        "sha256": "f3dc6c209c8d80fa9651b3e8633ece29d6d608b18f8581b59426c5ef20e53059"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_uprobe_v511.o",
+        "size": 3515352,
+        "sha256": "c4d3a3a4981f8909ae55bd7b1a6dbc54382727db7976f4a9f9f2b66ade524606"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_uprobe_v53.o",
+        "size": 3391608,
+        "sha256": "4d5cce551dc2abf039afba822e71d2f00555698792533e7813e6ad36a0a3d691"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_uprobe_v61.o",
+        "size": 1751440,
+        "sha256": "ec46c4438e1efdcf2b2eccdbc16782691c6768c8988db59ae1d048ca6bcc23b7"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_usdt_v511.o",
+        "size": 3512992,
+        "sha256": "4e60b9105f584ff4dffc923ed55833ae66265492c87db088e1a83a962862a58f"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_usdt_v53.o",
+        "size": 3379456,
+        "sha256": "4579e2d7aaec93c62cb6935c7fda07d213f1c525ca08763e230fb0a5d2bc1655"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_generic_usdt_v61.o",
+        "size": 1767272,
+        "sha256": "f319853ce3c93e340e33ecf68f0352311b598331ed1201c09532d691db72d827"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_loader_v511.o",
+        "size": 996488,
+        "sha256": "e42fb579438e3dd620825852ac27208cedb70bcbb60e936f56b4a649c4244c67"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_lseek_v511.o",
+        "size": 42288,
+        "sha256": "4a38326c43aa315edd97f378cb1af393fb30377385a79ad3c3d3b13444154cfc"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_multi_kprobe_v511.o",
+        "size": 3308944,
+        "sha256": "54fc33053f0b32f721b4cc688ae7e5e7564778ee50970d2235b2d545bf2cd6c9"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_multi_kprobe_v53.o",
+        "size": 3243032,
+        "sha256": "69cecb9291f5c7fa34dc538b8f1945c690902e9525dda011332e857747d1363d"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_multi_kprobe_v61.o",
+        "size": 1749368,
+        "sha256": "cc2e31d1d943425e4944fb4ea90371c4eff221eb72a3b8acee9d52734205f673"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_multi_retkprobe_v511.o",
+        "size": 2008680,
+        "sha256": "465d9bdc517bdaf582ba059d1e533fafcb971d97f39a612847db7113c3b60ff2"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_multi_retkprobe_v53.o",
+        "size": 1967560,
+        "sha256": "fe8d33ff7491717127b561e745c31d6ad969cc773101da1704b5f3575c922097"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_multi_retkprobe_v61.o",
+        "size": 1472960,
+        "sha256": "a05781d19f579115904a0cdaa51011c685335a9688048cc139e4aee4fd339eb4"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_multi_retuprobe_v511.o",
+        "size": 2010264,
+        "sha256": "94d2d0c3dabbeacfb4bd4e398e83bc016a5e0cf7e50c5ef6df9e14ec96514c39"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_multi_retuprobe_v61.o",
+        "size": 1471224,
+        "sha256": "a11e34d0c44ceaa55a02bd2192fb7c8a39fc7ea53f04dc343477448e9fce3154"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_multi_uprobe_v511.o",
+        "size": 3515888,
+        "sha256": "af2be0b331fe5144103c625e37ccb95591049b2d8b54d5bbfa3be49472ef8776"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_multi_uprobe_v61.o",
+        "size": 1752128,
+        "sha256": "6510edc5f69b522543c0045e1ab79a1e77f544c8ffcc4dca3878f39e27c0eca4"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_multi_usdt_v511.o",
+        "size": 3514056,
+        "sha256": "b26d5a53d71d3aa5a02fce33aba53286e8613f2a51d7b847ab9b15bb97dda763"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/x86/objs/bpf_multi_usdt_v61.o",
+        "size": 1767968,
+        "sha256": "e2d22a3fb7a85a882442d57cd7e409a53084b918688b8a865990a6e9cdb629e4"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_alignchecker.o",
+        "size": 970080,
+        "sha256": "7a0ab9319db89ad1c0c920a82db6d8278803b1c654ba18099708676685b0c3a3"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgroup.o",
+        "size": 961616,
+        "sha256": "3c9b34f10d7a1dac5bd771daa6cdbb492de6c97bf4c91cec802b87e6d3e9ee81"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgroup_mkdir.o",
+        "size": 982336,
+        "sha256": "81812294469aa3080e6660680ec7e948a6ab6522fc906aba9b2d8d8ae45d152d"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgroup_mkdir_v511.o",
+        "size": 987056,
+        "sha256": "d2b8c1fc0c99b33dc350be8dee2c8bf0cc16990691b2a289ec96da6a1a28d4c6"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgroup_release.o",
+        "size": 979400,
+        "sha256": "e72a6f5ceb76d52192835bbba010445b1904082c2984fffb01817bc55b03fc34"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgroup_release_v511.o",
+        "size": 983952,
+        "sha256": "d5592392d6bed8747fd73c0c2fa928d2be9b6401d5272fbba44c6c7fdc33326f"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgroup_rmdir.o",
+        "size": 979368,
+        "sha256": "052c71026748a0077119ea4bbac820dbd6e7c366d41970bf9f6a3e1d96192404"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgroup_rmdir_v511.o",
+        "size": 983944,
+        "sha256": "ef03bc4af979faaa33db60b877343a51c16671b877353ead9ebe4700dcc2ccf7"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_cgtracker.o",
+        "size": 971456,
+        "sha256": "6b8bdb394f4c6141984850f7ba0a3ccc07dd4d67e082f8245b9d459eb351b6cf"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_enforcer.o",
+        "size": 8816,
+        "sha256": "f04d9023646196739aedf346a33e55fec0fe3ea6be200f05e83549d87a743f27"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_bprm_commit_creds.o",
+        "size": 1000576,
+        "sha256": "d476e2f8ff675c7267b14e08de6a1fd28a7c371807b015e8e8986924ee4d26f7"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_event.o",
+        "size": 1270456,
+        "sha256": "c376263cc2628f735ad12b1193451d898f0ee836622a570b39ede5704c3ac68d"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_event_v310.o",
+        "size": 1246896,
+        "sha256": "ab905498be96b1af22eb229e1cb63e9c991d25ceedec84094169f4e8e2ac859e"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_event_v511.o",
+        "size": 2261488,
+        "sha256": "48122b730a843e382d8b84952d91fe1cf0d1b031203ea2fdd6b7f8bd489226c7"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_event_v53.o",
+        "size": 2237104,
+        "sha256": "6637ff1f656d3ae65ad6af48e488cc2e5e944a269d78c98ead8c58ecbbe1d0fb"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_event_v61.o",
+        "size": 1279656,
+        "sha256": "5f02b063c93db8e8c737a5778a3860b6cd58b17503a36be3b2671186e7e88b08"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_map_update.o",
+        "size": 28848,
+        "sha256": "7cbcba4315eb5f9d694e5219fdb545f6d54beca2021de2834c4dfb614b3d57b9"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_map_update_v511.o",
+        "size": 37136,
+        "sha256": "d8ee575d93afa6dd6a085171d60662aa85df4fa8b4bd5f6a3e201641a12b25b1"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_map_update_v53.o",
+        "size": 31360,
+        "sha256": "4738dcd375d5f1200e48b378dd1331464352b190b0cefeb3c31bbd48238eb06f"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_execve_map_update_v61.o",
+        "size": 37136,
+        "sha256": "d8ee575d93afa6dd6a085171d60662aa85df4fa8b4bd5f6a3e201641a12b25b1"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_exit.o",
+        "size": 1002000,
+        "sha256": "3bac63f62d2ad006bfe9a66dbe054dab4a5f60ae91d36535977db30bb99e0f26"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_exit_v310.o",
+        "size": 1002000,
+        "sha256": "3bac63f62d2ad006bfe9a66dbe054dab4a5f60ae91d36535977db30bb99e0f26"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_exit_v511.o",
+        "size": 1011416,
+        "sha256": "225d351e8f963733677de0aa043be6d84080b3f46c852cd122de20944b54ecf5"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_fmodret_enforcer.o",
+        "size": 8200,
+        "sha256": "ec146156596837500575fe66f17aaecff4177cb49f048822a04b59981f466d3d"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_fork.o",
+        "size": 1108392,
+        "sha256": "bff491ddb45c3d5f429d7094aa2de628ed950fbf643bf277dc783329f01e7fbb"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_fork_v310.o",
+        "size": 1080200,
+        "sha256": "073fac9f5b150ff7b27849c6cd0b0f648cc6793e8ccef078f1729391197d155f"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_fork_v511.o",
+        "size": 1115536,
+        "sha256": "6a3b96f21b0bb9b962b1373aa7975ce5e831504cfb53e6a0710d139043419db4"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_fentry.o",
+        "size": 1847152,
+        "sha256": "607564bd1b4d507190052f0e09d30d5879b1c9a32754cad9e065d2c5bfeb82e2"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_fentry_v511.o",
+        "size": 3274200,
+        "sha256": "3fa75c8abccf4d4d6b3c21d639fb6a55ee2d863fd88ebc4c54ab80b4a737bd18"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_fentry_v53.o",
+        "size": 3207648,
+        "sha256": "b4159afd842620926239ff4d9046d83bb6b3456d4fd8aae6e550a4c2fd3d3139"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_fentry_v61.o",
+        "size": 1714072,
+        "sha256": "62adb3dcc14f5e247db152b1ff43ad3ce1ddbf8ad7bc3ef8d4eea965dcb3ba69"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_fexit.o",
+        "size": 1509384,
+        "sha256": "73644832b1e5a0a2077c88afb6bc5dbd92a3fffc3c78f872e695eea27ac4bf76"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_fexit_v511.o",
+        "size": 2007360,
+        "sha256": "602334d1b866cb466ef96c85e3ae5ffa2f68318be29f04717ca9a62f9af423cf"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_fexit_v53.o",
+        "size": 1966248,
+        "sha256": "90eaef930b1ebd30e0e0605f5117d26e97cab5d78df7942518be562576f48e48"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_fexit_v61.o",
+        "size": 1471640,
+        "sha256": "920302cf9c6be727ed8ce0bb1a44f819a4e41fcda3f84b0fcbf9567e08de7610"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_kprobe.o",
+        "size": 1999472,
+        "sha256": "98ef02471fd1878cb304a6cd30c43bd8f2e62a06370e01c077380c65d9694f12"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_kprobe_v511.o",
+        "size": 3308456,
+        "sha256": "03b473b7478126aaf40f702dad58b2c99cf4257a14dbdefe3322f411087e2a9a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_kprobe_v53.o",
+        "size": 3242544,
+        "sha256": "dab0728b6793d4b35eb9476673b02870bd9f3bad074f7acf568da862e4a9867a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_kprobe_v61.o",
+        "size": 1748888,
+        "sha256": "7f938c1f10bf8c23b98bf804db70c47e20838d4201b94b04dc7d6437caf8821d"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_core.o",
+        "size": 3190824,
+        "sha256": "ec4d8fd51c7877ca180b36f65ebd51a5df5e2adccbab5dfded0da8101999236f"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_core_v511.o",
+        "size": 3257648,
+        "sha256": "8cb71e9df850cb88c20cfe5e63790a3cdaa6e9acb48e00d8017684c87041d39d"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_core_v61.o",
+        "size": 1698112,
+        "sha256": "c85bfb4f8798c7a698ce60dbb615332f09961f0351918e9ac5e744bb3dd89894"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_ima_bprm_v511.o",
+        "size": 983784,
+        "sha256": "6657c080d70f9056e34652a3755c11fb77b81292b006bbe06b052b431c079b26"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_ima_bprm_v61.o",
+        "size": 983048,
+        "sha256": "3c26a835e4f9ffc60c2ca7de815047bce4a94170160d60fb852c2a5940af4db6"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_ima_file_v511.o",
+        "size": 983728,
+        "sha256": "8a6e5a95aa5e5a942cb0b37a317146da77dfa08d18584b0e193ae208008b9d29"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_ima_file_v61.o",
+        "size": 982992,
+        "sha256": "280a1402fdfd9549a56f361431a71dcd1454c9f93728ef58830345a203c4db03"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_output.o",
+        "size": 1087312,
+        "sha256": "fff930834a1ceb5960da6b55d5974abdc9f4201559e787b2767d917f8d2b4195"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_output_v511.o",
+        "size": 1093816,
+        "sha256": "8dd3eb13fd94e3d570cf4102f7ecce4e80267f8bc21737540b237375291fe8a6"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_lsm_output_v61.o",
+        "size": 1093216,
+        "sha256": "8e3777d239228c20037fbe1376898fc1b9791c072daf5551996b59fe42cadd5b"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_rawtp.o",
+        "size": 1849776,
+        "sha256": "ebc7f2a5d7de073ca3be0bb072c58c1f871a18e0ab348da51bc01720174b34fb"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_rawtp_v511.o",
+        "size": 3268312,
+        "sha256": "54f9c026278486f98f1259a79ce7b233dfdcfe36463ddd3ff8bd197782b612f5"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_rawtp_v53.o",
+        "size": 3201760,
+        "sha256": "1b7daee69ddd9339b841f12a65e903cbe0a9686f51752aa431ae5c2427d67827"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_rawtp_v61.o",
+        "size": 1708184,
+        "sha256": "005182c5d19ae1dd43bf2228016e0cf390a400152883668dee648314d38c7f1d"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retkprobe.o",
+        "size": 1511552,
+        "sha256": "2a6bf43a901cb7a7276dddf9afce8b71e11b38aed82cf2a643affc0262b32208"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retkprobe_v511.o",
+        "size": 2008352,
+        "sha256": "d5ea58b19a2637001bd0a56f3b3ca41f5afa4b39cd80fa9dd765f0ed5abf2446"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retkprobe_v53.o",
+        "size": 1967232,
+        "sha256": "e2e8b8008d4148d855bcb579900ecdbd205786bdf797c50a61000f1fdbbdc266"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retkprobe_v61.o",
+        "size": 1472640,
+        "sha256": "42e1e59cae7763bc2a977861865bc573247a3226829cd80e7fd6cf13460ab403"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retuprobe.o",
+        "size": 1511552,
+        "sha256": "b2da7f633c132cd7b8a59b1470ca0c446fd41ddf5ab563500ef9695a5c60b599"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retuprobe_v511.o",
+        "size": 2009936,
+        "sha256": "d367e8c6934023107ee029b824918fca92a81517c74354a9468ea198ae66ba53"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retuprobe_v53.o",
+        "size": 1958152,
+        "sha256": "786884152921eb8af86a31c03e65c516a5e804583d327f0133d2e35ec276544a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_retuprobe_v61.o",
+        "size": 1470888,
+        "sha256": "2e829660cc89a1f4a2f02a018feccbcdfc623254dc34d1c666bec70c71148f69"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_tracepoint.o",
+        "size": 1941592,
+        "sha256": "dea668a7a916b174d98dfe05d9162eeb26204320738eb32e8c2d8d635e882fc6"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_tracepoint_v511.o",
+        "size": 2875824,
+        "sha256": "e71408ec68433853a383b769321db739ac712558bc4f869bb9f78649e261ab91"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_tracepoint_v53.o",
+        "size": 2813152,
+        "sha256": "30a3a74ab3c686503828198611232fc9322cee5adabade7a33092dac0f95b93d"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_tracepoint_v61.o",
+        "size": 1847120,
+        "sha256": "f3dc6c209c8d80fa9651b3e8633ece29d6d608b18f8581b59426c5ef20e53059"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_uprobe.o",
+        "size": 2085640,
+        "sha256": "bfea05872b0ecf2ce88c504de66a7e05d0dd6d359e4b37113400d7c67758cb99"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_uprobe_v511.o",
+        "size": 3515352,
+        "sha256": "c4d3a3a4981f8909ae55bd7b1a6dbc54382727db7976f4a9f9f2b66ade524606"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_uprobe_v53.o",
+        "size": 3391608,
+        "sha256": "4d5cce551dc2abf039afba822e71d2f00555698792533e7813e6ad36a0a3d691"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_uprobe_v61.o",
+        "size": 1751440,
+        "sha256": "ec46c4438e1efdcf2b2eccdbc16782691c6768c8988db59ae1d048ca6bcc23b7"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_usdt.o",
+        "size": 1963296,
+        "sha256": "4d98444ca00cefd3a7a509475a1b7feeaf3b7a930102355649651ef9b4f4851f"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_usdt_v511.o",
+        "size": 3512992,
+        "sha256": "4e60b9105f584ff4dffc923ed55833ae66265492c87db088e1a83a962862a58f"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_usdt_v53.o",
+        "size": 3379456,
+        "sha256": "4579e2d7aaec93c62cb6935c7fda07d213f1c525ca08763e230fb0a5d2bc1655"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_generic_usdt_v61.o",
+        "size": 1767272,
+        "sha256": "f319853ce3c93e340e33ecf68f0352311b598331ed1201c09532d691db72d827"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_loader.o",
+        "size": 991352,
+        "sha256": "f222263c13656573e013c0dc49d96860a51287f67614768a2b71f366dc23ca7e"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_loader_v511.o",
+        "size": 996488,
+        "sha256": "e42fb579438e3dd620825852ac27208cedb70bcbb60e936f56b4a649c4244c67"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_lseek.o",
+        "size": 36144,
+        "sha256": "53b295de6489b662eebbe7d15a853b566213ecfffef26dedf2a991e196f084a0"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_lseek_v511.o",
+        "size": 42288,
+        "sha256": "4a38326c43aa315edd97f378cb1af393fb30377385a79ad3c3d3b13444154cfc"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_map_test_p1.o",
+        "size": 6960,
+        "sha256": "c8a5ea0a0ec43b444288545d8e64b2c4e1d5054830ee940156c71869532eb513"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_map_test_p2.o",
+        "size": 6960,
+        "sha256": "7a753313fd446ca74a5ba7484a6eaccfef384e00d22da05dc4fd1ac69d37779f"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_map_test_p3.o",
+        "size": 6448,
+        "sha256": "189a18850dd83d67f58e4a49899a3945fae7c760c1f304b2b012f2a511167342"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_enforcer.o",
+        "size": 8848,
+        "sha256": "5bbb475799fa1cb371dc731ceaee4abe961733965096b4ac3f49f06be9c31b1a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_kprobe_v511.o",
+        "size": 3308944,
+        "sha256": "54fc33053f0b32f721b4cc688ae7e5e7564778ee50970d2235b2d545bf2cd6c9"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_kprobe_v53.o",
+        "size": 3243032,
+        "sha256": "69cecb9291f5c7fa34dc538b8f1945c690902e9525dda011332e857747d1363d"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_kprobe_v61.o",
+        "size": 1749368,
+        "sha256": "cc2e31d1d943425e4944fb4ea90371c4eff221eb72a3b8acee9d52734205f673"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_retkprobe_v511.o",
+        "size": 2008680,
+        "sha256": "465d9bdc517bdaf582ba059d1e533fafcb971d97f39a612847db7113c3b60ff2"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_retkprobe_v53.o",
+        "size": 1967560,
+        "sha256": "fe8d33ff7491717127b561e745c31d6ad969cc773101da1704b5f3575c922097"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_retkprobe_v61.o",
+        "size": 1472960,
+        "sha256": "a05781d19f579115904a0cdaa51011c685335a9688048cc139e4aee4fd339eb4"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_retuprobe_v511.o",
+        "size": 2010264,
+        "sha256": "94d2d0c3dabbeacfb4bd4e398e83bc016a5e0cf7e50c5ef6df9e14ec96514c39"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_retuprobe_v61.o",
+        "size": 1471224,
+        "sha256": "a11e34d0c44ceaa55a02bd2192fb7c8a39fc7ea53f04dc343477448e9fce3154"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_uprobe_v511.o",
+        "size": 3515888,
+        "sha256": "af2be0b331fe5144103c625e37ccb95591049b2d8b54d5bbfa3be49472ef8776"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_uprobe_v61.o",
+        "size": 1752128,
+        "sha256": "6510edc5f69b522543c0045e1ab79a1e77f544c8ffcc4dca3878f39e27c0eca4"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_usdt_v511.o",
+        "size": 3514056,
+        "sha256": "b26d5a53d71d3aa5a02fce33aba53286e8613f2a51d7b847ab9b15bb97dda763"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_multi_usdt_v61.o",
+        "size": 1767968,
+        "sha256": "e2d22a3fb7a85a882442d57cd7e409a53084b918688b8a865990a6e9cdb629e4"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/x86/tetragon/bpf_prog_iter.o",
+        "size": 936128,
+        "sha256": "2ae855754be64e0aeff67836ab927ff5d8ecfc55b19b1778ca988841f9187e15"
+      }
+    ],
+    "coverage": "retained objects found; not a loaded-program census"
+  },
+  {
+    "arch": "x86",
+    "app": "cilium",
+    "searched_roots": [
+      "/workspaces/repository/vendor/build/x86/cilium"
+    ],
+    "target": {
+      "path": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+      "size": 408901736,
+      "sha256": "ef8733dbbfb41c1d1ea13f5704d7b1b95a12c5ca0a262f687fd1ff9db725c0de"
+    },
+    "original_bpf_elfs": [],
+    "coverage": "GAP: no retained original BPF ELF in searched roots; not zero relocations"
+  },
+  {
+    "arch": "x86",
+    "app": "otelcol-ebpf-profiler",
+    "searched_roots": [
+      "/workspaces/repository/vendor/build/x86/otelcol-ebpf-profiler",
+      "/workspaces/repository/vendor/build/otelcol-ebpf-profiler-build-x86"
+    ],
+    "target": {
+      "path": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+      "size": 408901736,
+      "sha256": "ef8733dbbfb41c1d1ea13f5704d7b1b95a12c5ca0a262f687fd1ff9db725c0de"
+    },
+    "original_bpf_elfs": [],
+    "coverage": "GAP: no retained original BPF ELF in searched roots; not zero relocations"
+  },
+  {
+    "arch": "arm64",
+    "app": "bcc",
+    "searched_roots": [
+      "/workspaces/repository/vendor/build/.bcc-libbpf/arm64/output"
+    ],
+    "target": {
+      "path": "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+      "size": 457575688,
+      "sha256": "8407e20d8c8c198e06fc84cb0c338fdcdbb957001352f4116058a3ff7befda17"
+    },
+    "original_bpf_elfs": [
+      {
+        "path": "/workspaces/repository/vendor/build/.bcc-libbpf/arm64/output/biosnoop.bpf.o",
+        "size": 28928,
+        "sha256": "ab4adae09a49f2c371862802eddb2fc42eca18ac2a9a5391927caac3b853a8e3"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.bcc-libbpf/arm64/output/capable.bpf.o",
+        "size": 11840,
+        "sha256": "924a6428eb0d762f70933e473c207e2642fa69b24e763eba6a286cf87b4a04c1"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.bcc-libbpf/arm64/output/opensnoop.bpf.o",
+        "size": 13280,
+        "sha256": "34c994c52804c7d771f69c16aa16299d61210d85753e58e185ab00c7fcd0947e"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.bcc-libbpf/arm64/output/runqlat.bpf.o",
+        "size": 47168,
+        "sha256": "9c8564b97318c1128ad4d3008b37e412972a3ed0ce975b05a17210da80ab66b8"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.bcc-libbpf/arm64/output/syscount.bpf.o",
+        "size": 36656,
+        "sha256": "68b9261e580baed03b4c526ed03a3dd7c33240286026e2e03adce84a43d90c63"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.bcc-libbpf/arm64/output/tcpconnect.bpf.o",
+        "size": 48016,
+        "sha256": "a28a16d1cf89aafd774997409e96863a288c66497f7c6b53ca0aee8fe84278d4"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.bcc-libbpf/arm64/output/tcplife.bpf.o",
+        "size": 56592,
+        "sha256": "d07b6e30fe23cc74ee2d75ce01bf3169663b972c162a1de17df6d592a7a50233"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.bcc-libbpf/arm64/output/vfsstat.bpf.o",
+        "size": 7184,
+        "sha256": "d6d23a1b1a339048fd6e1f265d3c36ae17d95994cfc53829fa72a99792428707"
+      }
+    ],
+    "coverage": "retained objects found; not a loaded-program census"
+  },
+  {
+    "arch": "arm64",
+    "app": "katran",
+    "searched_roots": [
+      "/workspaces/repository/vendor/build/arm64/katran/bpf"
+    ],
+    "target": {
+      "path": "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+      "size": 457575688,
+      "sha256": "8407e20d8c8c198e06fc84cb0c338fdcdbb957001352f4116058a3ff7befda17"
+    },
+    "original_bpf_elfs": [
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/katran/bpf/balancer.bpf.o",
+        "size": 131368,
+        "sha256": "db3b1f1288448a964d760248cb465c7c6b2f58a6729aa4aa3d1442e1cd67c526"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/katran/bpf/healthchecking.bpf.o",
+        "size": 30696,
+        "sha256": "5d59f7fa01fddd1a8dbe50b65fc9be87802777e2e3cbff8ca752b015e2e9bf1b"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/katran/bpf/healthchecking_ipip.bpf.o",
+        "size": 15248,
+        "sha256": "a99ae9508e1791d5a05f7327d217e13ef718dc80a5d6c48f9cb18434d264061d"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/katran/bpf/xdp_root.bpf.o",
+        "size": 6024,
+        "sha256": "2c7d943be15b98047124707428b78e79302ece3a6111244eb746ea81023286f1"
+      }
+    ],
+    "coverage": "retained objects found; not a loaded-program census"
+  },
+  {
+    "arch": "arm64",
+    "app": "tracee",
+    "searched_roots": [
+      "/workspaces/repository/vendor/build/.tracee-build/arm64/dist"
+    ],
+    "target": {
+      "path": "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+      "size": 457575688,
+      "sha256": "8407e20d8c8c198e06fc84cb0c338fdcdbb957001352f4116058a3ff7befda17"
+    },
+    "original_bpf_elfs": [
+      {
+        "path": "/workspaces/repository/vendor/build/.tracee-build/arm64/dist/lsm_support/kprobe_check.bpf.o",
+        "size": 8112,
+        "sha256": "100641d212c92b3b38b11e8eaa48f7989b72f3338be1bfcdd6a78fedac0dc310"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tracee-build/arm64/dist/lsm_support/lsm_check.bpf.o",
+        "size": 6608,
+        "sha256": "c74b14fb1fcddc554d5648d197b9871d61b57b428db738ea2bcfe69e7716c1d4"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tracee-build/arm64/dist/tracee.bpf.o",
+        "size": 14839328,
+        "sha256": "58a4c639dcc5b00a8015e6c2005fa31dbf5cb04e4e6df665293e1fa2d68790f2"
+      }
+    ],
+    "coverage": "retained objects found; not a loaded-program census"
+  },
+  {
+    "arch": "arm64",
+    "app": "tetragon",
+    "searched_roots": [
+      "/workspaces/repository/vendor/build/arm64/tetragon",
+      "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs"
+    ],
+    "target": {
+      "path": "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+      "size": 457575688,
+      "sha256": "8407e20d8c8c198e06fc84cb0c338fdcdbb957001352f4116058a3ff7befda17"
+    },
+    "original_bpf_elfs": [
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_cgroup_mkdir_v511.o",
+        "size": 978600,
+        "sha256": "41eae1255e60a802fceb4f3323673d34402ecd8bfadf7da6007b4a58bcaf6190"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_cgroup_release_v511.o",
+        "size": 975496,
+        "sha256": "74900a40575d12c08e9201cdc34a0df24e32c15506ffc73ebec781675f925ddf"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_cgroup_rmdir_v511.o",
+        "size": 975488,
+        "sha256": "45907a894d6b6e973cb9fdedeefacdc7badc5653d128d3b35d77023a6cbe0221"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_execve_event_v310.o",
+        "size": 1236704,
+        "sha256": "97a82b409462ed8b968c6d2b76a08ae09d66eda1360fce27a4832937403c1160"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_execve_event_v511.o",
+        "size": 2251328,
+        "sha256": "976b26cde2145a6f5ee97c0495d6ab2b978dc02b27d39b3905513e94c77da312"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_execve_event_v53.o",
+        "size": 2226888,
+        "sha256": "e25083ef9bc564b18baeac4a60d1f35a0eb88b5037fd700cfcf2e6f72cf4a6f2"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_execve_event_v61.o",
+        "size": 1269424,
+        "sha256": "c114160cde70f568a46442def67564f1b409e7451af6d2aab308011c0789bf1c"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_execve_map_update_v511.o",
+        "size": 37176,
+        "sha256": "f45a7fe30948f63dd15a449d021a5d7aeee8e582f8f4e63f0ab8ed72830e3154"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_execve_map_update_v53.o",
+        "size": 31368,
+        "sha256": "a30a189951a8afe403a884489e3beee1ee8aaf4a3615895d03da15c01d26134a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_execve_map_update_v61.o",
+        "size": 37144,
+        "sha256": "c9693d94f803a71042a40b25c459a96f9ccd7fc19dabc626c4efa0c10d2bd518"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_exit_v310.o",
+        "size": 992024,
+        "sha256": "39190343fa7c95f3305e3b321eddfc57e433ca448a2f0d7e74359c9d618a879a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_exit_v511.o",
+        "size": 1001432,
+        "sha256": "eeec931e112b69b87f15834ed2fd507628fd47564eb44e65ee41eb40c85d41f9"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_fork_v310.o",
+        "size": 1070008,
+        "sha256": "f7c62938a385d849222194ac3750e7a5fdf128557e3fc3997cade646c8f26339"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_fork_v511.o",
+        "size": 1105312,
+        "sha256": "2475b60906371ce8b09d8285e7843292fff47fdea716a0375f923ca6e557c6d0"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_fentry_v511.o",
+        "size": 3265248,
+        "sha256": "fb3caa14427529d9279e29c6039611bc78a832b69bc26bd2d7f9f9de50007953"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_fentry_v53.o",
+        "size": 3198624,
+        "sha256": "eea691557e6d2062068da1c453af67a7d316aa7f479c7f6ff940f22bbef7663a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_fentry_v61.o",
+        "size": 1705032,
+        "sha256": "95dccd8cba8417e15e77c84e16cf6684f23a1f3b30e5d8a749a8aad286e03429"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_fexit_v511.o",
+        "size": 1998536,
+        "sha256": "2953387e91b7b1e348b1ce00ea74f9aa480f844b99e6f83f4823aa5408456009"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_fexit_v53.o",
+        "size": 1957424,
+        "sha256": "47a4b9f12454c58c323d55b9e0bc827ffc621b15a51136bd983b9bb30d2f96ec"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_fexit_v61.o",
+        "size": 1462816,
+        "sha256": "43a7a9770dac8e88ca5f018118fcd39fc77483deb66068bdd89821d392fcf76c"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_kprobe_v511.o",
+        "size": 3304680,
+        "sha256": "49a3fddcf24fd8edcd9ce1813fb77cb5e89d4c575dbb44a7631b94f99f5cf419"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_kprobe_v53.o",
+        "size": 3240352,
+        "sha256": "4c0453cbbee2aa20b91f7d39a88aca3e5ac2ed7e5f8a6c30eb03374e1dd0f19c"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_kprobe_v61.o",
+        "size": 1744016,
+        "sha256": "fcc191dc556b6e3a1b043b7e3352a4dd25576f0e69572907cf1a55665136e9f1"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_lsm_core_v511.o",
+        "size": 3248560,
+        "sha256": "d55b71804e6f253395712d4e17eb0e19de0f4ce5504eae745cd737f9336e3354"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_lsm_core_v61.o",
+        "size": 1688944,
+        "sha256": "45ccec300b9286f930e0aac68012deebf65c32c6c43c845454cf09c99e4ecb81"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_lsm_ima_bprm_v511.o",
+        "size": 975328,
+        "sha256": "03692bbee5a814860edf114955410dc9d36550c25feb4518baae8252d9d6fd03"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_lsm_ima_bprm_v61.o",
+        "size": 974592,
+        "sha256": "fe1aaa9a3b88d9859bc729d477e35bdb145370ecc11579187388be65660268d1"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_lsm_ima_file_v511.o",
+        "size": 975272,
+        "sha256": "a09f7cca80e0615ff18e014db526da748c7974708ec8e7ba10293b047ac0c789"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_lsm_ima_file_v61.o",
+        "size": 974536,
+        "sha256": "0c6a23399f8b91777dc19080561dd1ee9448be62405e735bc2ba50a9db4b023a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_lsm_output_v511.o",
+        "size": 1083600,
+        "sha256": "f98b94237a44e8f560dd98b21eda47d0a67d0684d0eb22b657cca207a9cc0584"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_lsm_output_v61.o",
+        "size": 1083000,
+        "sha256": "1186ef1145a158636a88cd3e70bcc857e2b91b4a7b3cac5dac62754aa8175e66"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_rawtp_v511.o",
+        "size": 3259224,
+        "sha256": "9c76bdac51ce7e543764cfe7f7f5c6eed5a36069699a06b3f05e6b14e4a01b24"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_rawtp_v53.o",
+        "size": 3192592,
+        "sha256": "8413d4541d9903c2c3320553018062e8da14aa52f35a689fd000c6e6835b6134"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_rawtp_v61.o",
+        "size": 1699016,
+        "sha256": "8ea277c8fd6c67304f282239251c0df6cb32f3cdd82f75d2decff71e3cc18cb6"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_retkprobe_v511.o",
+        "size": 1999528,
+        "sha256": "1e38fc47039735e8b54e1bb61ca1ec59959fa7bb6af344534e2ae3a9cde96ac6"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_retkprobe_v53.o",
+        "size": 1958416,
+        "sha256": "18dc9772d859bb1c6820bc8e1e30b9cacdcceac9b58c7e8d88f8281cdb41f072"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_retkprobe_v61.o",
+        "size": 1463816,
+        "sha256": "d4b7a4be6e6aa6224e33ad363ed07a2815d5c39d76d2f44e6ae05f2a8ae14caf"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_retuprobe_v511.o",
+        "size": 2001112,
+        "sha256": "05f90220a5c3e43ab49185e9ced519c9817eef055bdb7bbed7f175c6dbb53bd1"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_retuprobe_v53.o",
+        "size": 1949336,
+        "sha256": "649dceaff37eddf34fc125567dd4fcb8542b0e3f87eb9d54b6c86825cc790ffb"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_retuprobe_v61.o",
+        "size": 1462064,
+        "sha256": "0839fbe78f938d247e05a05de7176c0fc7f1b3fd4d2f865312fe1f9db8bc8fc0"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_tracepoint_v511.o",
+        "size": 2867488,
+        "sha256": "f9816cca0a02dbbab3c33a06ae8bf112a668888b81baeb6296a4b9a30fcde028"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_tracepoint_v53.o",
+        "size": 2804736,
+        "sha256": "e2be33c4d8b0d5776466037da82d4eb4148d3db1d14b032ba10913e1b8a3b655"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_tracepoint_v61.o",
+        "size": 1838704,
+        "sha256": "bba84e4c72fa6526999d86222be3cf2b6e55fc3a885ad186a999fefaa9e9ef16"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_uprobe_v511.o",
+        "size": 3574920,
+        "sha256": "19bafad372af72cd308fe2f274156381de8bf17243b6f87a4fc37abd1c09754a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_uprobe_v53.o",
+        "size": 3443448,
+        "sha256": "17206c8515446250a42e248cf2d73a3925e1eb8b68b8d1f15171b5893686b702"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_uprobe_v61.o",
+        "size": 1749488,
+        "sha256": "892bd196eb4578ce44ba12eaa507adc67066a7cf7b7a11590c5cc0faf1d94f41"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_usdt_v511.o",
+        "size": 3535176,
+        "sha256": "3d831b7ebdd8398e1367463522608dd190a806e77c6cb29cd01dd0179117ea66"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_usdt_v53.o",
+        "size": 3397136,
+        "sha256": "40234dd0a8847cc577180bc8ffcfbb571589955adbff6591f7ba304177a5f24a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_generic_usdt_v61.o",
+        "size": 1762288,
+        "sha256": "b1d519917fb17566d7e75fdf0a34a7b33aaeb1238c770c9e02210ae522bcdae2"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_loader_v511.o",
+        "size": 986512,
+        "sha256": "3a77a48c8c149eecff82906543a6f38e6b27755f31d72d8ed4079c5a312c81e0"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_lseek_v511.o",
+        "size": 42296,
+        "sha256": "f85298664ef267039445fca0836ce2e31dbc4768af91ceaf2b2aaad9b26b5c76"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_multi_kprobe_v511.o",
+        "size": 3305168,
+        "sha256": "57f148bd3ee5d94d1e2b337bb5f75a9bfc46cfd342ba52490babbfacbbf33a7f"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_multi_kprobe_v53.o",
+        "size": 3240840,
+        "sha256": "7d56354cbd1da90c40ae9626b2fee4a2ccca65a8c1b5716b1157a59ae87b47a0"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_multi_kprobe_v61.o",
+        "size": 1744512,
+        "sha256": "84117d909d5514a4941689debbe977c95bc1770683f9791726781c602d5aba2e"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_multi_retkprobe_v511.o",
+        "size": 1999856,
+        "sha256": "b21212d5280086e52b45da81979c4d712ed0dff9cbc326e081ba050a87300366"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_multi_retkprobe_v53.o",
+        "size": 1958736,
+        "sha256": "99ac7c4848bb859f6861454a1b2329ebd114431e3447b2af50f8876afa993654"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_multi_retkprobe_v61.o",
+        "size": 1464136,
+        "sha256": "d19f68f1cfca82f4ec61c89e61170ee058657bfa3da88a616d7985f59d2d3379"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_multi_retuprobe_v511.o",
+        "size": 2001448,
+        "sha256": "3dda436cdec0fcdeb9bf07124dc22a3232213d70e73415765386ea8a2ea5aff8"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_multi_retuprobe_v61.o",
+        "size": 1462400,
+        "sha256": "963c07f968733882e954f42a8ddd7482c9025570902ab379480c6bdce00a79e5"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_multi_uprobe_v511.o",
+        "size": 3575456,
+        "sha256": "6da03709abe13e51f9f5d2159534da65f1c0742569b234a4050e25177176f942"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_multi_uprobe_v61.o",
+        "size": 1750176,
+        "sha256": "27b681c3c3b993ef0a0ffc7cde63c686a4ab38eecbfbccf6a4a4e9d7c67a8c76"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_multi_usdt_v511.o",
+        "size": 3536544,
+        "sha256": "daf3b80b2b0d7279ec2caa0b42da093a35099ce36e0bf05c6c1a23836f013b6d"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/.tetragon-bpf/arm64/objs/bpf_multi_usdt_v61.o",
+        "size": 1762968,
+        "sha256": "792887ed387a9c84d1d024d2780e39f750930fc6e645b04e5a9acd9f7fd31e3f"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_alignchecker.o",
+        "size": 961632,
+        "sha256": "dd9ff061a66ffe6e0b648fcd21f8ca8b058d41e3584ba2819ff1f9f656ec4689"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_cgroup.o",
+        "size": 953160,
+        "sha256": "8d4465b357467a21d1de1c63b273e5c9b7d4f02fcb41ecda27a672d1ecf91c7d"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_cgroup_mkdir.o",
+        "size": 973880,
+        "sha256": "093919773f560f5368fc1c146ca4e152036806373aeacb9d6ef7b38a780da419"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_cgroup_mkdir_v511.o",
+        "size": 978600,
+        "sha256": "41eae1255e60a802fceb4f3323673d34402ecd8bfadf7da6007b4a58bcaf6190"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_cgroup_release.o",
+        "size": 970944,
+        "sha256": "6d28e0e0b729466b76dbf6147f93608a3fc4488d260d8374c8e06b333a275c87"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_cgroup_release_v511.o",
+        "size": 975496,
+        "sha256": "74900a40575d12c08e9201cdc34a0df24e32c15506ffc73ebec781675f925ddf"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_cgroup_rmdir.o",
+        "size": 970920,
+        "sha256": "f65aebea835f9dcde5c90c5ec0bc8edc78896c77d4d63c7c1dd2be9072e4b9e7"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_cgroup_rmdir_v511.o",
+        "size": 975488,
+        "sha256": "45907a894d6b6e973cb9fdedeefacdc7badc5653d128d3b35d77023a6cbe0221"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_cgtracker.o",
+        "size": 963008,
+        "sha256": "5725c2c51bbe88f0978d530f45204607914e49c4ac60d40abc0e5dbb7d01b015"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_enforcer.o",
+        "size": 8816,
+        "sha256": "65ac9dd4ce318bfbc623b2d1887fce155b2180233eb721500135de4f279a2b98"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_execve_bprm_commit_creds.o",
+        "size": 990592,
+        "sha256": "b16fbc65864b530c4ba4714a1d1db4d521454f8c5ad1a528120e24d42ed84832"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_execve_event.o",
+        "size": 1260232,
+        "sha256": "35fd0606712789302b27bbe5e4f663a2fce44d654d798b2f88e9372ba891e423"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_execve_event_v310.o",
+        "size": 1236704,
+        "sha256": "97a82b409462ed8b968c6d2b76a08ae09d66eda1360fce27a4832937403c1160"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_execve_event_v511.o",
+        "size": 2251328,
+        "sha256": "976b26cde2145a6f5ee97c0495d6ab2b978dc02b27d39b3905513e94c77da312"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_execve_event_v53.o",
+        "size": 2226888,
+        "sha256": "e25083ef9bc564b18baeac4a60d1f35a0eb88b5037fd700cfcf2e6f72cf4a6f2"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_execve_event_v61.o",
+        "size": 1269424,
+        "sha256": "c114160cde70f568a46442def67564f1b409e7451af6d2aab308011c0789bf1c"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_execve_map_update.o",
+        "size": 28856,
+        "sha256": "1896c77d2fceff3e53a917d54ae2ab3ac40c27f97c20d7c4dbc6595b84c1aacd"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_execve_map_update_v511.o",
+        "size": 37176,
+        "sha256": "f45a7fe30948f63dd15a449d021a5d7aeee8e582f8f4e63f0ab8ed72830e3154"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_execve_map_update_v53.o",
+        "size": 31368,
+        "sha256": "a30a189951a8afe403a884489e3beee1ee8aaf4a3615895d03da15c01d26134a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_execve_map_update_v61.o",
+        "size": 37144,
+        "sha256": "c9693d94f803a71042a40b25c459a96f9ccd7fc19dabc626c4efa0c10d2bd518"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_exit.o",
+        "size": 992024,
+        "sha256": "39190343fa7c95f3305e3b321eddfc57e433ca448a2f0d7e74359c9d618a879a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_exit_v310.o",
+        "size": 992024,
+        "sha256": "39190343fa7c95f3305e3b321eddfc57e433ca448a2f0d7e74359c9d618a879a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_exit_v511.o",
+        "size": 1001432,
+        "sha256": "eeec931e112b69b87f15834ed2fd507628fd47564eb44e65ee41eb40c85d41f9"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_fmodret_enforcer.o",
+        "size": 8200,
+        "sha256": "bc8a8de04b3a437a0cda9ce716e9c65d39925a7be5eb3bd86120b5e465c0c904"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_fork.o",
+        "size": 1098160,
+        "sha256": "edb0ed0177f68edc245ffd29fa11b24a4e17ebde3403859bda17d04baf11f3d5"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_fork_v310.o",
+        "size": 1070008,
+        "sha256": "f7c62938a385d849222194ac3750e7a5fdf128557e3fc3997cade646c8f26339"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_fork_v511.o",
+        "size": 1105312,
+        "sha256": "2475b60906371ce8b09d8285e7843292fff47fdea716a0375f923ca6e557c6d0"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_fentry.o",
+        "size": 1838120,
+        "sha256": "4db57dbd6eef6261bb4bd2156e75e7eec290f375a02ea94830c303fa5682d164"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_fentry_v511.o",
+        "size": 3265248,
+        "sha256": "fb3caa14427529d9279e29c6039611bc78a832b69bc26bd2d7f9f9de50007953"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_fentry_v53.o",
+        "size": 3198624,
+        "sha256": "eea691557e6d2062068da1c453af67a7d316aa7f479c7f6ff940f22bbef7663a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_fentry_v61.o",
+        "size": 1705032,
+        "sha256": "95dccd8cba8417e15e77c84e16cf6684f23a1f3b30e5d8a749a8aad286e03429"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_fexit.o",
+        "size": 1500568,
+        "sha256": "5a7d51f654b7d9effaec62dd0c1bf087f07b34ad5888a88852704999a039c896"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_fexit_v511.o",
+        "size": 1998536,
+        "sha256": "2953387e91b7b1e348b1ce00ea74f9aa480f844b99e6f83f4823aa5408456009"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_fexit_v53.o",
+        "size": 1957424,
+        "sha256": "47a4b9f12454c58c323d55b9e0bc827ffc621b15a51136bd983b9bb30d2f96ec"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_fexit_v61.o",
+        "size": 1462816,
+        "sha256": "43a7a9770dac8e88ca5f018118fcd39fc77483deb66068bdd89821d392fcf76c"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_kprobe.o",
+        "size": 2002800,
+        "sha256": "4573115cfc47e6af07b50c0e6315a50bed18c40a7f9c7c70e0801f75334c8cb1"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_kprobe_v511.o",
+        "size": 3304680,
+        "sha256": "49a3fddcf24fd8edcd9ce1813fb77cb5e89d4c575dbb44a7631b94f99f5cf419"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_kprobe_v53.o",
+        "size": 3240352,
+        "sha256": "4c0453cbbee2aa20b91f7d39a88aca3e5ac2ed7e5f8a6c30eb03374e1dd0f19c"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_kprobe_v61.o",
+        "size": 1744016,
+        "sha256": "fcc191dc556b6e3a1b043b7e3352a4dd25576f0e69572907cf1a55665136e9f1"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_lsm_core.o",
+        "size": 3181648,
+        "sha256": "6787a987415b4200136f3c99d98af7cd9f5bdd150c9a8032f4c1e72e4f425920"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_lsm_core_v511.o",
+        "size": 3248560,
+        "sha256": "d55b71804e6f253395712d4e17eb0e19de0f4ce5504eae745cd737f9336e3354"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_lsm_core_v61.o",
+        "size": 1688944,
+        "sha256": "45ccec300b9286f930e0aac68012deebf65c32c6c43c845454cf09c99e4ecb81"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_lsm_ima_bprm_v511.o",
+        "size": 975328,
+        "sha256": "03692bbee5a814860edf114955410dc9d36550c25feb4518baae8252d9d6fd03"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_lsm_ima_bprm_v61.o",
+        "size": 974592,
+        "sha256": "fe1aaa9a3b88d9859bc729d477e35bdb145370ecc11579187388be65660268d1"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_lsm_ima_file_v511.o",
+        "size": 975272,
+        "sha256": "a09f7cca80e0615ff18e014db526da748c7974708ec8e7ba10293b047ac0c789"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_lsm_ima_file_v61.o",
+        "size": 974536,
+        "sha256": "0c6a23399f8b91777dc19080561dd1ee9448be62405e735bc2ba50a9db4b023a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_lsm_output.o",
+        "size": 1077096,
+        "sha256": "51c678fac7804c375b8608543b9917d91b4ef6d7e5fbbe5adf7536593f148e1d"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_lsm_output_v511.o",
+        "size": 1083600,
+        "sha256": "f98b94237a44e8f560dd98b21eda47d0a67d0684d0eb22b657cca207a9cc0584"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_lsm_output_v61.o",
+        "size": 1083000,
+        "sha256": "1186ef1145a158636a88cd3e70bcc857e2b91b4a7b3cac5dac62754aa8175e66"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_rawtp.o",
+        "size": 1840608,
+        "sha256": "43b38c38a0227ced66713263c584049605dad61e606119bfd7ac1aa578c7c9e5"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_rawtp_v511.o",
+        "size": 3259224,
+        "sha256": "9c76bdac51ce7e543764cfe7f7f5c6eed5a36069699a06b3f05e6b14e4a01b24"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_rawtp_v53.o",
+        "size": 3192592,
+        "sha256": "8413d4541d9903c2c3320553018062e8da14aa52f35a689fd000c6e6835b6134"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_rawtp_v61.o",
+        "size": 1699016,
+        "sha256": "8ea277c8fd6c67304f282239251c0df6cb32f3cdd82f75d2decff71e3cc18cb6"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_retkprobe.o",
+        "size": 1502728,
+        "sha256": "5d60067d3f29d6508f5bd9d16274ba0aff66f308e1cf1730bd982849fbdbf7c9"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_retkprobe_v511.o",
+        "size": 1999528,
+        "sha256": "1e38fc47039735e8b54e1bb61ca1ec59959fa7bb6af344534e2ae3a9cde96ac6"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_retkprobe_v53.o",
+        "size": 1958416,
+        "sha256": "18dc9772d859bb1c6820bc8e1e30b9cacdcceac9b58c7e8d88f8281cdb41f072"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_retkprobe_v61.o",
+        "size": 1463816,
+        "sha256": "d4b7a4be6e6aa6224e33ad363ed07a2815d5c39d76d2f44e6ae05f2a8ae14caf"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_retuprobe.o",
+        "size": 1502728,
+        "sha256": "970e89ea3e02f1b3db4b63cb39ce7959f9661ffb69ac0882fcc783f7401d55fa"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_retuprobe_v511.o",
+        "size": 2001112,
+        "sha256": "05f90220a5c3e43ab49185e9ced519c9817eef055bdb7bbed7f175c6dbb53bd1"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_retuprobe_v53.o",
+        "size": 1949336,
+        "sha256": "649dceaff37eddf34fc125567dd4fcb8542b0e3f87eb9d54b6c86825cc790ffb"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_retuprobe_v61.o",
+        "size": 1462064,
+        "sha256": "0839fbe78f938d247e05a05de7176c0fc7f1b3fd4d2f865312fe1f9db8bc8fc0"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_tracepoint.o",
+        "size": 1933176,
+        "sha256": "01b438b5261e38987be73608fbccb2c9f09b8f591b076781c58baf48b51abdab"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_tracepoint_v511.o",
+        "size": 2867488,
+        "sha256": "f9816cca0a02dbbab3c33a06ae8bf112a668888b81baeb6296a4b9a30fcde028"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_tracepoint_v53.o",
+        "size": 2804736,
+        "sha256": "e2be33c4d8b0d5776466037da82d4eb4148d3db1d14b032ba10913e1b8a3b655"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_tracepoint_v61.o",
+        "size": 1838704,
+        "sha256": "bba84e4c72fa6526999d86222be3cf2b6e55fc3a885ad186a999fefaa9e9ef16"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_uprobe.o",
+        "size": 2138376,
+        "sha256": "93eb6c316482fbc14041acca313bc1f83abaa428bd9395b16fb06bf5499eb611"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_uprobe_v511.o",
+        "size": 3574920,
+        "sha256": "19bafad372af72cd308fe2f274156381de8bf17243b6f87a4fc37abd1c09754a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_uprobe_v53.o",
+        "size": 3443448,
+        "sha256": "17206c8515446250a42e248cf2d73a3925e1eb8b68b8d1f15171b5893686b702"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_uprobe_v61.o",
+        "size": 1749488,
+        "sha256": "892bd196eb4578ce44ba12eaa507adc67066a7cf7b7a11590c5cc0faf1d94f41"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_usdt.o",
+        "size": 1989848,
+        "sha256": "4b7d57115afed869026bfd879314a48a25a7cb1b341eb61324e12ae51a50fb5b"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_usdt_v511.o",
+        "size": 3535176,
+        "sha256": "3d831b7ebdd8398e1367463522608dd190a806e77c6cb29cd01dd0179117ea66"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_usdt_v53.o",
+        "size": 3397136,
+        "sha256": "40234dd0a8847cc577180bc8ffcfbb571589955adbff6591f7ba304177a5f24a"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_generic_usdt_v61.o",
+        "size": 1762288,
+        "sha256": "b1d519917fb17566d7e75fdf0a34a7b33aaeb1238c770c9e02210ae522bcdae2"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_loader.o",
+        "size": 981384,
+        "sha256": "ac48c2b2019170b87587cfe7baa16c79879e003bcf35b0c56373b07bb1d7e673"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_loader_v511.o",
+        "size": 986512,
+        "sha256": "3a77a48c8c149eecff82906543a6f38e6b27755f31d72d8ed4079c5a312c81e0"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_lseek.o",
+        "size": 36152,
+        "sha256": "31a96beae1d14cd7eeae8355b77eabb488ff0573a9bcea05a3e68960cef06075"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_lseek_v511.o",
+        "size": 42296,
+        "sha256": "f85298664ef267039445fca0836ce2e31dbc4768af91ceaf2b2aaad9b26b5c76"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_map_test_p1.o",
+        "size": 6152,
+        "sha256": "308ab1c79893e20c19f4493f71ec9657bd4b732a9cc5216008a3a1df58807148"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_map_test_p2.o",
+        "size": 6152,
+        "sha256": "d71ab48ae1e598c5af49220cf7f645fbaa3d208709c1da020b85e9d43d2f79d2"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_map_test_p3.o",
+        "size": 5704,
+        "sha256": "bb09fe94020fa5922bc900289380ad5db5785a818c5f525c6f9fadef4ed1f0d8"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_multi_enforcer.o",
+        "size": 8848,
+        "sha256": "c63cc83813e38a0a5cfff549715c4c19900bbf3b4435115765f555c46d3a339b"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_multi_kprobe_v511.o",
+        "size": 3305168,
+        "sha256": "57f148bd3ee5d94d1e2b337bb5f75a9bfc46cfd342ba52490babbfacbbf33a7f"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_multi_kprobe_v53.o",
+        "size": 3240840,
+        "sha256": "7d56354cbd1da90c40ae9626b2fee4a2ccca65a8c1b5716b1157a59ae87b47a0"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_multi_kprobe_v61.o",
+        "size": 1744512,
+        "sha256": "84117d909d5514a4941689debbe977c95bc1770683f9791726781c602d5aba2e"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_multi_retkprobe_v511.o",
+        "size": 1999856,
+        "sha256": "b21212d5280086e52b45da81979c4d712ed0dff9cbc326e081ba050a87300366"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_multi_retkprobe_v53.o",
+        "size": 1958736,
+        "sha256": "99ac7c4848bb859f6861454a1b2329ebd114431e3447b2af50f8876afa993654"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_multi_retkprobe_v61.o",
+        "size": 1464136,
+        "sha256": "d19f68f1cfca82f4ec61c89e61170ee058657bfa3da88a616d7985f59d2d3379"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_multi_retuprobe_v511.o",
+        "size": 2001448,
+        "sha256": "3dda436cdec0fcdeb9bf07124dc22a3232213d70e73415765386ea8a2ea5aff8"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_multi_retuprobe_v61.o",
+        "size": 1462400,
+        "sha256": "963c07f968733882e954f42a8ddd7482c9025570902ab379480c6bdce00a79e5"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_multi_uprobe_v511.o",
+        "size": 3575456,
+        "sha256": "6da03709abe13e51f9f5d2159534da65f1c0742569b234a4050e25177176f942"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_multi_uprobe_v61.o",
+        "size": 1750176,
+        "sha256": "27b681c3c3b993ef0a0ffc7cde63c686a4ab38eecbfbccf6a4a4e9d7c67a8c76"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_multi_usdt_v511.o",
+        "size": 3536544,
+        "sha256": "daf3b80b2b0d7279ec2caa0b42da093a35099ce36e0bf05c6c1a23836f013b6d"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_multi_usdt_v61.o",
+        "size": 1762968,
+        "sha256": "792887ed387a9c84d1d024d2780e39f750930fc6e645b04e5a9acd9f7fd31e3f"
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/arm64/tetragon/bpf_prog_iter.o",
+        "size": 927672,
+        "sha256": "79474336a2587f4306554c9e03f6b085f3d05b6cbed2bdf191846afda7df519c"
+      }
+    ],
+    "coverage": "retained objects found; not a loaded-program census"
+  },
+  {
+    "arch": "arm64",
+    "app": "cilium",
+    "searched_roots": [
+      "/workspaces/repository/vendor/build/arm64/cilium"
+    ],
+    "target": {
+      "path": "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+      "size": 457575688,
+      "sha256": "8407e20d8c8c198e06fc84cb0c338fdcdbb957001352f4116058a3ff7befda17"
+    },
+    "original_bpf_elfs": [],
+    "coverage": "GAP: no retained original BPF ELF in searched roots; not zero relocations"
+  },
+  {
+    "arch": "arm64",
+    "app": "otelcol-ebpf-profiler",
+    "searched_roots": [
+      "/workspaces/repository/vendor/build/arm64/otelcol-ebpf-profiler",
+      "/workspaces/repository/vendor/build/otelcol-ebpf-profiler-build-arm64"
+    ],
+    "target": {
+      "path": "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+      "size": 457575688,
+      "sha256": "8407e20d8c8c198e06fc84cb0c338fdcdbb957001352f4116058a3ff7befda17"
+    },
+    "original_bpf_elfs": [],
+    "coverage": "GAP: no retained original BPF ELF in searched roots; not zero relocations"
+  }
+]
