@@ -1,0 +1,11 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerABIBase.source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerABIBase.source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerABIBase.default_replaced
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerABIBase.default_replaced
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerABIBase.storage
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerABIBase.storage
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerABIBase.execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerABIBase.execute
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerABIBase.bound_frame
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerABIBase.bound_frame
