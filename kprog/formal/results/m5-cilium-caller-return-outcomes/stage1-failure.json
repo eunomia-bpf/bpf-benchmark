@@ -1,0 +1,22 @@
+{
+  "receipt": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cilium-caller-return-outcomes/Proof.lean"
+    ],
+    "exit": 1,
+    "seconds": 1.6401331424713135,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "source_sha256": "08acb3eb8e7eab84925228503b09cc494c86d31a3ceda8b71898e8c2939379ee",
+  "source_lines": 105,
+  "error": "Lean parser rejects local binder prefix at line95 (reserved keyword)",
+  "repair": "rename only the local proof binder prefix to prefixRun; no theorem/source-model/trace/memory/setting change"
+}

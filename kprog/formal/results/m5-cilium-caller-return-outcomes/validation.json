@@ -1,0 +1,123 @@
+{
+  "scope": "actual linked RETURN-provider outcomes composed with original202-step prefix and15-step cache/materialization suffix",
+  "source_sha256": "e71014995661442b89e86c1abc1616b8590413b2df4314f5af1260fc444931ee",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-return-outcomes/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.4689388275146484,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerReturnOutcomes"
+      ],
+      "exit": 0,
+      "seconds": 1.7888686656951904,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.61340069770813,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-return-outcomes/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.2395501136779785,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 297,
+  "full_jobs": 1564,
+  "root_queries": [
+    "values",
+    "provider_returns",
+    "outcomes"
+  ],
+  "actual_return_materialization_commit": "590a79e9de1064aeabaa4b5361d3e2464edc390a",
+  "provider_relation": "actual externalCall inputEF under the actual SAME linked ge/Senv with original kind3 and real reached SPStore heap; every admitted scalar/trace/supplied outcome with current allocation rights is quantified",
+  "execution": "original external_function rule retains exact provider trace and complete supplied heap; actual rights derive SAME two cache stores consumed by original15-step suffix",
+  "composition": "derive original202-step reached call exactly once, then compose its silent prefix with the actual external outcome and silent15-step suffix; this is Star with provider trace, not an InternalRun across external execution",
+  "resources": "SP borrowed readback retained before provider only; cache Store exposes post-supplied readbacks/other-block/caller/access/frontier frames, actual final store_value equals returned scalar",
+  "open": "provider outcome existence/purity/determinism and original whole-entry-to-linked-world transport are not established; real data stores/native whole-state and global refinement remain open",
+  "old_allocator_or_successful_store_oracle_used": false,
+  "provider_relation_is_actual_same_world_antecedent": true,
+  "provider_success_existence_or_purity_claimed": false,
+  "native_whole_state_proved_here": false,
+  "resource_assignment": "existing run.py timingSH/CPU17/j1/nice0/32GiB/unchanged proof settings/fullEX-nformal-full-check; nonblocking shared timing preflight before launch",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
+  "failed_stage1": {
+    "receipt": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-return-outcomes/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 1.6401331424713135,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "source_sha256": "08acb3eb8e7eab84925228503b09cc494c86d31a3ceda8b71898e8c2939379ee",
+    "source_lines": 105,
+    "error": "Lean parser rejects local binder prefix at line95 (reserved keyword)",
+    "repair": "rename only the local proof binder prefix to prefixRun; no theorem/source-model/trace/memory/setting change"
+  },
+  "proof_repair": "rename reserved local binder prefix to prefixRun only; same theorem, original semantics and unchanged settings"
+}

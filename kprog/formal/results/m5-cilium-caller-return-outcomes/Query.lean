@@ -1,0 +1,7 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerReturnOutcomes.values
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerReturnOutcomes.values
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerReturnOutcomes.provider_returns
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerReturnOutcomes.provider_returns
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerReturnOutcomes.outcomes
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerReturnOutcomes.outcomes
