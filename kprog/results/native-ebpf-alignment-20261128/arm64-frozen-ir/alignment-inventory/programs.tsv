@@ -175,7 +175,7 @@ x86	tetragon	filter_8ty	exact	filter_8ty	71	True		vendor/build/native-bpf/x86/st
 x86	tetragon	filter_8ty_map	exact	filter_8ty_map	130	True	bpf_map_lookup_elem	vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o
 x86	tetragon	filter_8ty_rang	exact	filter_8ty_range	440	True		vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o
 x86	tetragon	filter_8ty_sele	exact	filter_8ty_selector_val	538	True		vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o
-x86	tetragon	filter_char_buf	exact	filter_char_buf	163	True		vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o
+x86	tetragon	filter_char_buf	ambiguous-prefix	filter_char_buf,filter_char_buf_equal,filter_char_buf_postfix,filter_char_buf_prefix		True		vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o
 x86	tetragon	filter_char_sub	exact	filter_char_substring	614	True	bpf_map_lookup_elem	vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o
 x86	tetragon	filter_file_buf	exact	filter_file_buf	195	True		vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o
 x86	tetragon	filter_file_typ	exact	filter_file_type	185	True	bpf_probe_read_user	vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o
@@ -334,7 +334,7 @@ x86	tracee	trace_utimes_co	exact	trace_utimes_common	13775	True	bpf_get_current_
 x86	tracee	trace_vfs_read	exact	trace_vfs_read	111	True	bpf_get_current_pid_tgid,bpf_map_update_elem	vendor/build/native-bpf/x86/stage/tracee/tracee.native.o
 x86	tracee	trace_vfs_readv	exact	trace_vfs_readv	111	True	bpf_get_current_pid_tgid,bpf_map_update_elem	vendor/build/native-bpf/x86/stage/tracee/tracee.native.o
 x86	tracee	trace_vfs_utime	exact	trace_vfs_utimes	13775	True	bpf_get_current_cgroup_id,bpf_get_current_comm,bpf_get_current_pid_tgid,bpf_get_current_task,bpf_get_current_task_btf,bpf_get_current_uid_gid,bpf_get_smp_processor_id,bpf_get_stackid,bpf_ktime_get_boot_ns,bpf_map_lookup_elem,bpf_map_update_elem,bpf_perf_event_output,bpf_probe_read_user,bpf_probe_read_user_str,bpf_task_pt_regs,memset	vendor/build/native-bpf/x86/stage/tracee/tracee.native.o
-x86	tracee	trace_vfs_write	exact	trace_vfs_write	111	True	bpf_get_current_pid_tgid,bpf_map_update_elem	vendor/build/native-bpf/x86/stage/tracee/tracee.native.o
+x86	tracee	trace_vfs_write	ambiguous-prefix	trace_vfs_write,trace_vfs_writev		True		vendor/build/native-bpf/x86/stage/tracee/tracee.native.o
 x86	tracee	tracepoint__cgr	ambiguous-prefix	tracepoint__cgroup__cgroup_attach_task,tracepoint__cgroup__cgroup_mkdir,tracepoint__cgroup__cgroup_rmdir		True		vendor/build/native-bpf/x86/stage/tracee/tracee.native.o
 x86	tracee	tracepoint__exe	exact	tracepoint__exec_test	43261	True	bpf_get_current_cgroup_id,bpf_get_current_comm,bpf_get_current_pid_tgid,bpf_get_current_task,bpf_get_current_task_btf,bpf_get_current_uid_gid,bpf_get_smp_processor_id,bpf_get_stackid,bpf_ktime_get_boot_ns,bpf_map_lookup_elem,bpf_map_update_elem,bpf_perf_event_output,bpf_task_pt_regs,memset	vendor/build/native-bpf/x86/stage/tracee/tracee.native.o
 x86	tracee	tracepoint__mod	ambiguous-prefix	tracepoint__module__module_load,tracepoint__module__module_free		True		vendor/build/native-bpf/x86/stage/tracee/tracee.native.o
@@ -524,7 +524,7 @@ arm64	tetragon	filter_8ty	exact	filter_8ty	124	True		vendor/build/native-bpf/arm
 arm64	tetragon	filter_8ty_map	exact	filter_8ty_map	160	True	bpf_map_lookup_elem	vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_usdt_v61.native.o
 arm64	tetragon	filter_8ty_rang	exact	filter_8ty_range	580	True		vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_usdt_v61.native.o
 arm64	tetragon	filter_8ty_sele	exact	filter_8ty_selector_val	856	True		vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_usdt_v61.native.o
-arm64	tetragon	filter_char_buf	exact	filter_char_buf	232	True		vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_usdt_v61.native.o
+arm64	tetragon	filter_char_buf	ambiguous-prefix	filter_char_buf,filter_char_buf_equal,filter_char_buf_postfix,filter_char_buf_prefix		True		vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_usdt_v61.native.o
 arm64	tetragon	filter_char_sub	exact	filter_char_substring	600	True	bpf_map_lookup_elem	vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_usdt_v61.native.o
 arm64	tetragon	filter_file_buf	exact	filter_file_buf	292	True		vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_usdt_v61.native.o
 arm64	tetragon	filter_file_typ	exact	filter_file_type	268	True	bpf_probe_read_user	vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_usdt_v61.native.o
@@ -683,7 +683,7 @@ arm64	tracee	trace_utimes_co	exact	trace_utimes_common	13956	True	bpf_get_curren
 arm64	tracee	trace_vfs_read	exact	trace_vfs_read	84	True	bpf_get_current_pid_tgid,bpf_map_update_elem	vendor/build/native-bpf/arm64/stage/tracee/tracee.native.o
 arm64	tracee	trace_vfs_readv	exact	trace_vfs_readv	84	True	bpf_get_current_pid_tgid,bpf_map_update_elem	vendor/build/native-bpf/arm64/stage/tracee/tracee.native.o
 arm64	tracee	trace_vfs_utime	exact	trace_vfs_utimes	13956	True	bpf_get_current_cgroup_id,bpf_get_current_comm,bpf_get_current_pid_tgid,bpf_get_current_task,bpf_get_current_task_btf,bpf_get_current_uid_gid,bpf_get_smp_processor_id,bpf_get_stackid,bpf_ktime_get_boot_ns,bpf_map_lookup_elem,bpf_map_update_elem,bpf_perf_event_output,bpf_probe_read_user,bpf_probe_read_user_str,bpf_task_pt_regs,memset	vendor/build/native-bpf/arm64/stage/tracee/tracee.native.o
-arm64	tracee	trace_vfs_write	exact	trace_vfs_write	84	True	bpf_get_current_pid_tgid,bpf_map_update_elem	vendor/build/native-bpf/arm64/stage/tracee/tracee.native.o
+arm64	tracee	trace_vfs_write	ambiguous-prefix	trace_vfs_writev,trace_vfs_write		True		vendor/build/native-bpf/arm64/stage/tracee/tracee.native.o
 arm64	tracee	tracepoint__cgr	ambiguous-prefix	tracepoint__cgroup__cgroup_mkdir,tracepoint__cgroup__cgroup_rmdir,tracepoint__cgroup__cgroup_attach_task		True		vendor/build/native-bpf/arm64/stage/tracee/tracee.native.o
 arm64	tracee	tracepoint__exe	exact	tracepoint__exec_test	40460	True	bpf_get_current_cgroup_id,bpf_get_current_comm,bpf_get_current_pid_tgid,bpf_get_current_task,bpf_get_current_task_btf,bpf_get_current_uid_gid,bpf_get_smp_processor_id,bpf_get_stackid,bpf_ktime_get_boot_ns,bpf_map_lookup_elem,bpf_map_update_elem,bpf_perf_event_output,bpf_task_pt_regs,memset	vendor/build/native-bpf/arm64/stage/tracee/tracee.native.o
 arm64	tracee	tracepoint__mod	ambiguous-prefix	tracepoint__module__module_free,tracepoint__module__module_load		True		vendor/build/native-bpf/arm64/stage/tracee/tracee.native.o

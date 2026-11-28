@@ -1,0 +1,401 @@
+{
+  "scope": "All siblings sharing a kernel15-byte name remain candidates when manifest symbol is unspecified. Explicit symbols retain their existing selection.",
+  "changes": [
+    {
+      "before": {
+        "architecture": "x86",
+        "app": "tetragon",
+        "program": "filter_char_buf",
+        "manifest_symbol": null,
+        "object": "vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+        "symbol_resolution": "exact",
+        "symbol_candidates": [
+          "filter_char_buf"
+        ],
+        "entry_text_bytes": 163,
+        "elf_machine": "EM_X86_64",
+        "frontend_ir_present": true,
+        "direct_entry_external_symbols": [],
+        "direct_entry_tail_call_reference": false,
+        "runtime_alignment": "not-decided-by-static-inventory",
+        "alignment_evidence": {
+          "frozen_globals": {
+            "frontend_ir_present": true,
+            "readonly_candidates_in_object": 2,
+            "actual_live_frozen_map_values": "pending-plan-and-installed-code-join"
+          },
+          "context_rewrites": {
+            "native_source": "mechanisms.md#context",
+            "program_attach_type_and_actual_offsets": "pending-load-and-code-join"
+          },
+          "helpers": {
+            "direct_entry_external_symbols": [],
+            "transitive_and_actual_targets": "not-proven-by-entry-relocations"
+          },
+          "tail_calls": {
+            "direct_entry_reference": false,
+            "live_prog_arrays_and_taken_targets": "pending-runtime-evidence"
+          },
+          "map_dispatch": {
+            "object_map_symbols": 66,
+            "object_truncated_alias_collision_groups": 4,
+            "actual_name_id_type_shape_binding": "pending-live-link-plan-join"
+          },
+          "app_compile_and_load_switches": {
+            "embedded_command_available": true,
+            "record": "codegen-policy.json and objects.json",
+            "live_loader_written_values_and_feature_set": "pending-current-app-source-and-plan-join"
+          }
+        }
+      },
+      "after": {
+        "architecture": "x86",
+        "app": "tetragon",
+        "program": "filter_char_buf",
+        "manifest_symbol": null,
+        "object": "vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+        "symbol_resolution": "ambiguous-prefix",
+        "symbol_candidates": [
+          "filter_char_buf",
+          "filter_char_buf_equal",
+          "filter_char_buf_postfix",
+          "filter_char_buf_prefix"
+        ],
+        "entry_text_bytes": null,
+        "elf_machine": "EM_X86_64",
+        "frontend_ir_present": true,
+        "direct_entry_external_symbols": null,
+        "direct_entry_tail_call_reference": null,
+        "runtime_alignment": "not-decided-by-static-inventory",
+        "alignment_evidence": {
+          "frozen_globals": {
+            "frontend_ir_present": true,
+            "readonly_candidates_in_object": 2,
+            "actual_live_frozen_map_values": "pending-plan-and-installed-code-join"
+          },
+          "context_rewrites": {
+            "native_source": "mechanisms.md#context",
+            "program_attach_type_and_actual_offsets": "pending-load-and-code-join"
+          },
+          "helpers": {
+            "direct_entry_external_symbols": null,
+            "transitive_and_actual_targets": "not-proven-by-entry-relocations"
+          },
+          "tail_calls": {
+            "direct_entry_reference": null,
+            "live_prog_arrays_and_taken_targets": "pending-runtime-evidence"
+          },
+          "map_dispatch": {
+            "object_map_symbols": 66,
+            "object_truncated_alias_collision_groups": 4,
+            "actual_name_id_type_shape_binding": "pending-live-link-plan-join"
+          },
+          "app_compile_and_load_switches": {
+            "embedded_command_available": true,
+            "record": "codegen-policy.json and objects.json",
+            "live_loader_written_values_and_feature_set": "pending-current-app-source-and-plan-join"
+          }
+        }
+      }
+    },
+    {
+      "before": {
+        "architecture": "x86",
+        "app": "tracee",
+        "program": "trace_vfs_write",
+        "manifest_symbol": null,
+        "object": "vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+        "symbol_resolution": "exact",
+        "symbol_candidates": [
+          "trace_vfs_write"
+        ],
+        "entry_text_bytes": 111,
+        "elf_machine": "EM_X86_64",
+        "frontend_ir_present": true,
+        "direct_entry_external_symbols": [
+          "bpf_get_current_pid_tgid",
+          "bpf_map_update_elem"
+        ],
+        "direct_entry_tail_call_reference": false,
+        "runtime_alignment": "not-decided-by-static-inventory",
+        "alignment_evidence": {
+          "frozen_globals": {
+            "frontend_ir_present": true,
+            "readonly_candidates_in_object": 13,
+            "actual_live_frozen_map_values": "pending-plan-and-installed-code-join"
+          },
+          "context_rewrites": {
+            "native_source": "mechanisms.md#context",
+            "program_attach_type_and_actual_offsets": "pending-load-and-code-join"
+          },
+          "helpers": {
+            "direct_entry_external_symbols": [
+              "bpf_get_current_pid_tgid",
+              "bpf_map_update_elem"
+            ],
+            "transitive_and_actual_targets": "not-proven-by-entry-relocations"
+          },
+          "tail_calls": {
+            "direct_entry_reference": false,
+            "live_prog_arrays_and_taken_targets": "pending-runtime-evidence"
+          },
+          "map_dispatch": {
+            "object_map_symbols": 87,
+            "object_truncated_alias_collision_groups": 6,
+            "actual_name_id_type_shape_binding": "pending-live-link-plan-join"
+          },
+          "app_compile_and_load_switches": {
+            "embedded_command_available": true,
+            "record": "codegen-policy.json and objects.json",
+            "live_loader_written_values_and_feature_set": "pending-current-app-source-and-plan-join"
+          }
+        }
+      },
+      "after": {
+        "architecture": "x86",
+        "app": "tracee",
+        "program": "trace_vfs_write",
+        "manifest_symbol": null,
+        "object": "vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+        "symbol_resolution": "ambiguous-prefix",
+        "symbol_candidates": [
+          "trace_vfs_write",
+          "trace_vfs_writev"
+        ],
+        "entry_text_bytes": null,
+        "elf_machine": "EM_X86_64",
+        "frontend_ir_present": true,
+        "direct_entry_external_symbols": null,
+        "direct_entry_tail_call_reference": null,
+        "runtime_alignment": "not-decided-by-static-inventory",
+        "alignment_evidence": {
+          "frozen_globals": {
+            "frontend_ir_present": true,
+            "readonly_candidates_in_object": 13,
+            "actual_live_frozen_map_values": "pending-plan-and-installed-code-join"
+          },
+          "context_rewrites": {
+            "native_source": "mechanisms.md#context",
+            "program_attach_type_and_actual_offsets": "pending-load-and-code-join"
+          },
+          "helpers": {
+            "direct_entry_external_symbols": null,
+            "transitive_and_actual_targets": "not-proven-by-entry-relocations"
+          },
+          "tail_calls": {
+            "direct_entry_reference": null,
+            "live_prog_arrays_and_taken_targets": "pending-runtime-evidence"
+          },
+          "map_dispatch": {
+            "object_map_symbols": 87,
+            "object_truncated_alias_collision_groups": 6,
+            "actual_name_id_type_shape_binding": "pending-live-link-plan-join"
+          },
+          "app_compile_and_load_switches": {
+            "embedded_command_available": true,
+            "record": "codegen-policy.json and objects.json",
+            "live_loader_written_values_and_feature_set": "pending-current-app-source-and-plan-join"
+          }
+        }
+      }
+    },
+    {
+      "before": {
+        "architecture": "arm64",
+        "app": "tetragon",
+        "program": "filter_char_buf",
+        "manifest_symbol": null,
+        "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_usdt_v61.native.o",
+        "symbol_resolution": "exact",
+        "symbol_candidates": [
+          "filter_char_buf"
+        ],
+        "entry_text_bytes": 232,
+        "elf_machine": "EM_AARCH64",
+        "frontend_ir_present": true,
+        "direct_entry_external_symbols": [],
+        "direct_entry_tail_call_reference": false,
+        "runtime_alignment": "not-decided-by-static-inventory",
+        "alignment_evidence": {
+          "frozen_globals": {
+            "frontend_ir_present": true,
+            "readonly_candidates_in_object": 2,
+            "actual_live_frozen_map_values": "pending-plan-and-installed-code-join"
+          },
+          "context_rewrites": {
+            "native_source": "mechanisms.md#context",
+            "program_attach_type_and_actual_offsets": "pending-load-and-code-join"
+          },
+          "helpers": {
+            "direct_entry_external_symbols": [],
+            "transitive_and_actual_targets": "not-proven-by-entry-relocations"
+          },
+          "tail_calls": {
+            "direct_entry_reference": false,
+            "live_prog_arrays_and_taken_targets": "pending-runtime-evidence"
+          },
+          "map_dispatch": {
+            "object_map_symbols": 66,
+            "object_truncated_alias_collision_groups": 4,
+            "actual_name_id_type_shape_binding": "pending-live-link-plan-join"
+          },
+          "app_compile_and_load_switches": {
+            "embedded_command_available": true,
+            "record": "codegen-policy.json and objects.json",
+            "live_loader_written_values_and_feature_set": "pending-current-app-source-and-plan-join"
+          }
+        }
+      },
+      "after": {
+        "architecture": "arm64",
+        "app": "tetragon",
+        "program": "filter_char_buf",
+        "manifest_symbol": null,
+        "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_usdt_v61.native.o",
+        "symbol_resolution": "ambiguous-prefix",
+        "symbol_candidates": [
+          "filter_char_buf",
+          "filter_char_buf_equal",
+          "filter_char_buf_postfix",
+          "filter_char_buf_prefix"
+        ],
+        "entry_text_bytes": null,
+        "elf_machine": "EM_AARCH64",
+        "frontend_ir_present": true,
+        "direct_entry_external_symbols": null,
+        "direct_entry_tail_call_reference": null,
+        "runtime_alignment": "not-decided-by-static-inventory",
+        "alignment_evidence": {
+          "frozen_globals": {
+            "frontend_ir_present": true,
+            "readonly_candidates_in_object": 2,
+            "actual_live_frozen_map_values": "pending-plan-and-installed-code-join"
+          },
+          "context_rewrites": {
+            "native_source": "mechanisms.md#context",
+            "program_attach_type_and_actual_offsets": "pending-load-and-code-join"
+          },
+          "helpers": {
+            "direct_entry_external_symbols": null,
+            "transitive_and_actual_targets": "not-proven-by-entry-relocations"
+          },
+          "tail_calls": {
+            "direct_entry_reference": null,
+            "live_prog_arrays_and_taken_targets": "pending-runtime-evidence"
+          },
+          "map_dispatch": {
+            "object_map_symbols": 66,
+            "object_truncated_alias_collision_groups": 4,
+            "actual_name_id_type_shape_binding": "pending-live-link-plan-join"
+          },
+          "app_compile_and_load_switches": {
+            "embedded_command_available": true,
+            "record": "codegen-policy.json and objects.json",
+            "live_loader_written_values_and_feature_set": "pending-current-app-source-and-plan-join"
+          }
+        }
+      }
+    },
+    {
+      "before": {
+        "architecture": "arm64",
+        "app": "tracee",
+        "program": "trace_vfs_write",
+        "manifest_symbol": null,
+        "object": "vendor/build/native-bpf/arm64/stage/tracee/tracee.native.o",
+        "symbol_resolution": "exact",
+        "symbol_candidates": [
+          "trace_vfs_write"
+        ],
+        "entry_text_bytes": 84,
+        "elf_machine": "EM_AARCH64",
+        "frontend_ir_present": true,
+        "direct_entry_external_symbols": [
+          "bpf_get_current_pid_tgid",
+          "bpf_map_update_elem"
+        ],
+        "direct_entry_tail_call_reference": false,
+        "runtime_alignment": "not-decided-by-static-inventory",
+        "alignment_evidence": {
+          "frozen_globals": {
+            "frontend_ir_present": true,
+            "readonly_candidates_in_object": 3,
+            "actual_live_frozen_map_values": "pending-plan-and-installed-code-join"
+          },
+          "context_rewrites": {
+            "native_source": "mechanisms.md#context",
+            "program_attach_type_and_actual_offsets": "pending-load-and-code-join"
+          },
+          "helpers": {
+            "direct_entry_external_symbols": [
+              "bpf_get_current_pid_tgid",
+              "bpf_map_update_elem"
+            ],
+            "transitive_and_actual_targets": "not-proven-by-entry-relocations"
+          },
+          "tail_calls": {
+            "direct_entry_reference": false,
+            "live_prog_arrays_and_taken_targets": "pending-runtime-evidence"
+          },
+          "map_dispatch": {
+            "object_map_symbols": 87,
+            "object_truncated_alias_collision_groups": 6,
+            "actual_name_id_type_shape_binding": "pending-live-link-plan-join"
+          },
+          "app_compile_and_load_switches": {
+            "embedded_command_available": true,
+            "record": "codegen-policy.json and objects.json",
+            "live_loader_written_values_and_feature_set": "pending-current-app-source-and-plan-join"
+          }
+        }
+      },
+      "after": {
+        "architecture": "arm64",
+        "app": "tracee",
+        "program": "trace_vfs_write",
+        "manifest_symbol": null,
+        "object": "vendor/build/native-bpf/arm64/stage/tracee/tracee.native.o",
+        "symbol_resolution": "ambiguous-prefix",
+        "symbol_candidates": [
+          "trace_vfs_writev",
+          "trace_vfs_write"
+        ],
+        "entry_text_bytes": null,
+        "elf_machine": "EM_AARCH64",
+        "frontend_ir_present": true,
+        "direct_entry_external_symbols": null,
+        "direct_entry_tail_call_reference": null,
+        "runtime_alignment": "not-decided-by-static-inventory",
+        "alignment_evidence": {
+          "frozen_globals": {
+            "frontend_ir_present": true,
+            "readonly_candidates_in_object": 3,
+            "actual_live_frozen_map_values": "pending-plan-and-installed-code-join"
+          },
+          "context_rewrites": {
+            "native_source": "mechanisms.md#context",
+            "program_attach_type_and_actual_offsets": "pending-load-and-code-join"
+          },
+          "helpers": {
+            "direct_entry_external_symbols": null,
+            "transitive_and_actual_targets": "not-proven-by-entry-relocations"
+          },
+          "tail_calls": {
+            "direct_entry_reference": null,
+            "live_prog_arrays_and_taken_targets": "pending-runtime-evidence"
+          },
+          "map_dispatch": {
+            "object_map_symbols": 87,
+            "object_truncated_alias_collision_groups": 6,
+            "actual_name_id_type_shape_binding": "pending-live-link-plan-join"
+          },
+          "app_compile_and_load_switches": {
+            "embedded_command_available": true,
+            "record": "codegen-policy.json and objects.json",
+            "live_loader_written_values_and_feature_set": "pending-current-app-source-and-plan-join"
+          }
+        }
+      }
+    }
+  ]
+}

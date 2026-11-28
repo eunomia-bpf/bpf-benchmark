@@ -10174,15 +10174,18 @@
     "program": "filter_char_buf",
     "manifest_symbol": null,
     "object": "vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
-    "symbol_resolution": "exact",
+    "symbol_resolution": "ambiguous-prefix",
     "symbol_candidates": [
-      "filter_char_buf"
+      "filter_char_buf",
+      "filter_char_buf_equal",
+      "filter_char_buf_postfix",
+      "filter_char_buf_prefix"
     ],
-    "entry_text_bytes": 163,
+    "entry_text_bytes": null,
     "elf_machine": "EM_X86_64",
     "frontend_ir_present": true,
-    "direct_entry_external_symbols": [],
-    "direct_entry_tail_call_reference": false,
+    "direct_entry_external_symbols": null,
+    "direct_entry_tail_call_reference": null,
     "runtime_alignment": "not-decided-by-static-inventory",
     "alignment_evidence": {
       "frozen_globals": {
@@ -10195,11 +10198,11 @@
         "program_attach_type_and_actual_offsets": "pending-load-and-code-join"
       },
       "helpers": {
-        "direct_entry_external_symbols": [],
+        "direct_entry_external_symbols": null,
         "transitive_and_actual_targets": "not-proven-by-entry-relocations"
       },
       "tail_calls": {
-        "direct_entry_reference": false,
+        "direct_entry_reference": null,
         "live_prog_arrays_and_taken_targets": "pending-runtime-evidence"
       },
       "map_dispatch": {
@@ -20057,18 +20060,16 @@
     "program": "trace_vfs_write",
     "manifest_symbol": null,
     "object": "vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
-    "symbol_resolution": "exact",
+    "symbol_resolution": "ambiguous-prefix",
     "symbol_candidates": [
-      "trace_vfs_write"
+      "trace_vfs_write",
+      "trace_vfs_writev"
     ],
-    "entry_text_bytes": 111,
+    "entry_text_bytes": null,
     "elf_machine": "EM_X86_64",
     "frontend_ir_present": true,
-    "direct_entry_external_symbols": [
-      "bpf_get_current_pid_tgid",
-      "bpf_map_update_elem"
-    ],
-    "direct_entry_tail_call_reference": false,
+    "direct_entry_external_symbols": null,
+    "direct_entry_tail_call_reference": null,
     "runtime_alignment": "not-decided-by-static-inventory",
     "alignment_evidence": {
       "frozen_globals": {
@@ -20081,14 +20082,11 @@
         "program_attach_type_and_actual_offsets": "pending-load-and-code-join"
       },
       "helpers": {
-        "direct_entry_external_symbols": [
-          "bpf_get_current_pid_tgid",
-          "bpf_map_update_elem"
-        ],
+        "direct_entry_external_symbols": null,
         "transitive_and_actual_targets": "not-proven-by-entry-relocations"
       },
       "tail_calls": {
-        "direct_entry_reference": false,
+        "direct_entry_reference": null,
         "live_prog_arrays_and_taken_targets": "pending-runtime-evidence"
       },
       "map_dispatch": {
@@ -31054,15 +31052,18 @@
     "program": "filter_char_buf",
     "manifest_symbol": null,
     "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_usdt_v61.native.o",
-    "symbol_resolution": "exact",
+    "symbol_resolution": "ambiguous-prefix",
     "symbol_candidates": [
-      "filter_char_buf"
+      "filter_char_buf",
+      "filter_char_buf_equal",
+      "filter_char_buf_postfix",
+      "filter_char_buf_prefix"
     ],
-    "entry_text_bytes": 232,
+    "entry_text_bytes": null,
     "elf_machine": "EM_AARCH64",
     "frontend_ir_present": true,
-    "direct_entry_external_symbols": [],
-    "direct_entry_tail_call_reference": false,
+    "direct_entry_external_symbols": null,
+    "direct_entry_tail_call_reference": null,
     "runtime_alignment": "not-decided-by-static-inventory",
     "alignment_evidence": {
       "frozen_globals": {
@@ -31075,11 +31076,11 @@
         "program_attach_type_and_actual_offsets": "pending-load-and-code-join"
       },
       "helpers": {
-        "direct_entry_external_symbols": [],
+        "direct_entry_external_symbols": null,
         "transitive_and_actual_targets": "not-proven-by-entry-relocations"
       },
       "tail_calls": {
-        "direct_entry_reference": false,
+        "direct_entry_reference": null,
         "live_prog_arrays_and_taken_targets": "pending-runtime-evidence"
       },
       "map_dispatch": {
@@ -40921,18 +40922,16 @@
     "program": "trace_vfs_write",
     "manifest_symbol": null,
     "object": "vendor/build/native-bpf/arm64/stage/tracee/tracee.native.o",
-    "symbol_resolution": "exact",
+    "symbol_resolution": "ambiguous-prefix",
     "symbol_candidates": [
+      "trace_vfs_writev",
       "trace_vfs_write"
     ],
-    "entry_text_bytes": 84,
+    "entry_text_bytes": null,
     "elf_machine": "EM_AARCH64",
     "frontend_ir_present": true,
-    "direct_entry_external_symbols": [
-      "bpf_get_current_pid_tgid",
-      "bpf_map_update_elem"
-    ],
-    "direct_entry_tail_call_reference": false,
+    "direct_entry_external_symbols": null,
+    "direct_entry_tail_call_reference": null,
     "runtime_alignment": "not-decided-by-static-inventory",
     "alignment_evidence": {
       "frozen_globals": {
@@ -40945,14 +40944,11 @@
         "program_attach_type_and_actual_offsets": "pending-load-and-code-join"
       },
       "helpers": {
-        "direct_entry_external_symbols": [
-          "bpf_get_current_pid_tgid",
-          "bpf_map_update_elem"
-        ],
+        "direct_entry_external_symbols": null,
         "transitive_and_actual_targets": "not-proven-by-entry-relocations"
       },
       "tail_calls": {
-        "direct_entry_reference": false,
+        "direct_entry_reference": null,
         "live_prog_arrays_and_taken_targets": "pending-runtime-evidence"
       },
       "map_dispatch": {
