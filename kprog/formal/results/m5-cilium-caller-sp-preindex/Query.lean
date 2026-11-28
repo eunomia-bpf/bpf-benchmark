@@ -1,0 +1,11 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerSPPreindex.source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerSPPreindex.source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerSPPreindex.setup_source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerSPPreindex.setup_source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerSPPreindex.branch_source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerSPPreindex.branch_source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerSPPreindex.condition_value
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerSPPreindex.condition_value
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerSPPreindex.execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerSPPreindex.execute
