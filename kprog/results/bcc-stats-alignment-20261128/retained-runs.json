@@ -1,0 +1,2449 @@
+{
+  "newest_resume": "COORDINATOR 2026-11-28T11:20Z",
+  "scope": "Existing3x180s counters/workloads/load receipts only. Stats0 counter zeros are disabled accounting, not zero BPF work. No new guest or source changes.",
+  "parser": {
+    "path": "kprog/docs/archive/native_eval_20260529.py",
+    "bytes": 18199,
+    "sha256": "8b3cd99572449d333000e6f05d1a73ad328a2e740721d369a48d87cad9599157"
+  },
+  "cases": {
+    "off": {
+      "run": "corpus/results/x86_kvm_corpus_20261128_061040_622818",
+      "inputs": [
+        {
+          "path": "corpus/results/x86_kvm_corpus_20261128_061040_622818/details/apps/bcc__set.json",
+          "bytes": 30740,
+          "sha256": "638744e8e04623d293b308e766324abaeec7d8b2e14dfe3b2f03d468753f61c3"
+        },
+        {
+          "path": "corpus/results/x86_kvm_corpus_20261128_061040_622818/metadata.json",
+          "bytes": 987,
+          "sha256": "29115d5cb942ead2f6d7c898af86cfa454e845656abaca1ae58bd8428248e51f"
+        },
+        {
+          "path": "corpus/results/x86_kvm_corpus_20261128_061040_622818/details/shim-logs/bcc__set.baseline.log",
+          "bytes": 63008,
+          "sha256": "99f9346de8b44470de40ce0eae5e76006f627844de3eb99d5035c17b66d68d65"
+        },
+        {
+          "path": "corpus/results/x86_kvm_corpus_20261128_061040_622818/details/shim-logs/bcc__set.post_rejit.log",
+          "bytes": 83750,
+          "sha256": "537248d08f554f1335396e83f1a1d4abb9915425738c0ea13133f3b2036f36a6"
+        }
+      ],
+      "phases": {
+        "baseline": {
+          "samples": [
+            {
+              "total": 659038.63,
+              "by_stressor": {
+                "syscall": 2.84,
+                "cap": 381586.05,
+                "set": 29183.01,
+                "sockfd": 248266.73
+              },
+              "errors": 0
+            },
+            {
+              "total": 658984.54,
+              "by_stressor": {
+                "syscall": 2.85,
+                "cap": 381632.07,
+                "set": 29021.44,
+                "sockfd": 248328.18
+              },
+              "errors": 0
+            },
+            {
+              "total": 654157.24,
+              "by_stressor": {
+                "syscall": 2.84,
+                "cap": 380046.19,
+                "set": 28929.37,
+                "sockfd": 245178.84
+              },
+              "errors": 0
+            }
+          ],
+          "median_total": 658984.54,
+          "by_stressor_medians": {
+            "cap": 381586.05,
+            "set": 29021.44,
+            "sockfd": 248266.73,
+            "syscall": 2.84
+          },
+          "bpf_records": {
+            "33": {
+              "bytes_jited": 143,
+              "bytes_xlated": 232,
+              "id": 33,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "36": {
+              "bytes_jited": 383,
+              "bytes_xlated": 616,
+              "id": 36,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "38": {
+              "bytes_jited": 110,
+              "bytes_xlated": 184,
+              "id": 38,
+              "name": "tcp_v4_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "42": {
+              "bytes_jited": 141,
+              "bytes_xlated": 240,
+              "id": 42,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "45": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 45,
+              "name": "fentry_vfs_read",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "46": {
+              "bytes_jited": 493,
+              "bytes_xlated": 752,
+              "id": 46,
+              "name": "tcp_v4_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "50": {
+              "bytes_jited": 121,
+              "bytes_xlated": 200,
+              "id": 50,
+              "name": "blk_account_io_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "51": {
+              "bytes_jited": 110,
+              "bytes_xlated": 184,
+              "id": 51,
+              "name": "tcp_v6_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "52": {
+              "bytes_jited": 141,
+              "bytes_xlated": 240,
+              "id": 52,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "53": {
+              "bytes_jited": 121,
+              "bytes_xlated": 184,
+              "id": 53,
+              "name": "sched_wakeup",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "54": {
+              "bytes_jited": 1501,
+              "bytes_xlated": 2240,
+              "id": 54,
+              "name": "inet_sock_set_s",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "55": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 55,
+              "name": "fentry_vfs_writ",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "56": {
+              "bytes_jited": 496,
+              "bytes_xlated": 752,
+              "id": 56,
+              "name": "tcp_v6_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "59": {
+              "bytes_jited": 602,
+              "bytes_xlated": 792,
+              "id": 59,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "61": {
+              "bytes_jited": 602,
+              "bytes_xlated": 792,
+              "id": 61,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "62": {
+              "bytes_jited": 121,
+              "bytes_xlated": 184,
+              "id": 62,
+              "name": "sched_wakeup_ne",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "63": {
+              "bytes_jited": 354,
+              "bytes_xlated": 648,
+              "id": 63,
+              "name": "block_rq_insert",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "66": {
+              "bytes_jited": 935,
+              "bytes_xlated": 1632,
+              "id": 66,
+              "name": "sched_switch",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "67": {
+              "bytes_jited": 440,
+              "bytes_xlated": 824,
+              "id": 67,
+              "name": "block_rq_issue",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "68": {
+              "bytes_jited": 437,
+              "bytes_xlated": 712,
+              "id": 68,
+              "name": "block_rq_comple",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "70": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 70,
+              "name": "fentry_vfs_fsyn",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "71": {
+              "bytes_jited": 108,
+              "bytes_xlated": 168,
+              "id": 71,
+              "name": "sys_enter",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "72": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 72,
+              "name": "fentry_vfs_open",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "74": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 74,
+              "name": "fentry_vfs_crea",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "77": {
+              "bytes_jited": 406,
+              "bytes_xlated": 656,
+              "id": 77,
+              "name": "sys_exit",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            }
+          },
+          "workload_commands": [
+            [
+              "/usr/bin/stress-ng",
+              "--syscall",
+              "1",
+              "--syscall-method",
+              "fast75",
+              "--cap",
+              "1",
+              "--set",
+              "1",
+              "--sockfd",
+              "1",
+              "--sockfd-port",
+              "14700",
+              "--timeout",
+              "180s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/3a830d0e"
+            ],
+            [
+              "/usr/bin/stress-ng",
+              "--syscall",
+              "1",
+              "--syscall-method",
+              "fast75",
+              "--cap",
+              "1",
+              "--set",
+              "1",
+              "--sockfd",
+              "1",
+              "--sockfd-port",
+              "15212",
+              "--timeout",
+              "180s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/3a830d0e"
+            ],
+            [
+              "/usr/bin/stress-ng",
+              "--syscall",
+              "1",
+              "--syscall-method",
+              "fast75",
+              "--cap",
+              "1",
+              "--set",
+              "1",
+              "--sockfd",
+              "1",
+              "--sockfd-port",
+              "15724",
+              "--timeout",
+              "180s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/3a830d0e"
+            ]
+          ]
+        },
+        "post_rejit": {
+          "samples": [
+            {
+              "total": 587889.8400000001,
+              "by_stressor": {
+                "syscall": 2.84,
+                "cap": 369570.03,
+                "set": 28658.84,
+                "sockfd": 189658.13
+              },
+              "errors": 0
+            },
+            {
+              "total": 567510.04,
+              "by_stressor": {
+                "syscall": 2.82,
+                "cap": 358241.2,
+                "set": 28537.44,
+                "sockfd": 180728.58
+              },
+              "errors": 0
+            },
+            {
+              "total": 578093.01,
+              "by_stressor": {
+                "syscall": 2.84,
+                "cap": 369581.1,
+                "set": 28821.26,
+                "sockfd": 179687.81
+              },
+              "errors": 0
+            }
+          ],
+          "median_total": 578093.01,
+          "by_stressor_medians": {
+            "cap": 369570.03,
+            "set": 28658.84,
+            "sockfd": 180728.58,
+            "syscall": 2.84
+          },
+          "bpf_records": {
+            "128": {
+              "bytes_jited": 34,
+              "bytes_xlated": 16,
+              "id": 128,
+              "name": "fentry_vfs_read",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "130": {
+              "bytes_jited": 35,
+              "bytes_xlated": 16,
+              "id": 130,
+              "name": "fentry_vfs_writ",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "132": {
+              "bytes_jited": 35,
+              "bytes_xlated": 16,
+              "id": 132,
+              "name": "fentry_vfs_fsyn",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "134": {
+              "bytes_jited": 35,
+              "bytes_xlated": 16,
+              "id": 134,
+              "name": "fentry_vfs_open",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "135": {
+              "bytes_jited": 94,
+              "bytes_xlated": 16,
+              "id": 135,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "139": {
+              "bytes_jited": 35,
+              "bytes_xlated": 16,
+              "id": 139,
+              "name": "fentry_vfs_crea",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "140": {
+              "bytes_jited": 99,
+              "bytes_xlated": 16,
+              "id": 140,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "143": {
+              "bytes_jited": 78,
+              "bytes_xlated": 16,
+              "id": 143,
+              "name": "tcp_v4_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "146": {
+              "bytes_jited": 110,
+              "bytes_xlated": 16,
+              "id": 146,
+              "name": "blk_account_io_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "149": {
+              "bytes_jited": 82,
+              "bytes_xlated": 16,
+              "id": 149,
+              "name": "sched_wakeup",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "152": {
+              "bytes_jited": 74,
+              "bytes_xlated": 16,
+              "id": 152,
+              "name": "sys_enter",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "155": {
+              "bytes_jited": 94,
+              "bytes_xlated": 16,
+              "id": 155,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "157": {
+              "bytes_jited": 1062,
+              "bytes_xlated": 16,
+              "id": 157,
+              "name": "inet_sock_set_s",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "160": {
+              "bytes_jited": 281,
+              "bytes_xlated": 16,
+              "id": 160,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "161": {
+              "bytes_jited": 362,
+              "bytes_xlated": 16,
+              "id": 161,
+              "name": "tcp_v4_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "164": {
+              "bytes_jited": 390,
+              "bytes_xlated": 16,
+              "id": 164,
+              "name": "block_rq_insert",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "166": {
+              "bytes_jited": 82,
+              "bytes_xlated": 16,
+              "id": 166,
+              "name": "sched_wakeup_ne",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "168": {
+              "bytes_jited": 272,
+              "bytes_xlated": 16,
+              "id": 168,
+              "name": "sys_exit",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "170": {
+              "bytes_jited": 283,
+              "bytes_xlated": 16,
+              "id": 170,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "172": {
+              "bytes_jited": 78,
+              "bytes_xlated": 16,
+              "id": 172,
+              "name": "tcp_v6_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "174": {
+              "bytes_jited": 316,
+              "bytes_xlated": 16,
+              "id": 174,
+              "name": "block_rq_issue",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "176": {
+              "bytes_jited": 995,
+              "bytes_xlated": 16,
+              "id": 176,
+              "name": "sched_switch",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "177": {
+              "bytes_jited": 283,
+              "bytes_xlated": 16,
+              "id": 177,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "179": {
+              "bytes_jited": 456,
+              "bytes_xlated": 16,
+              "id": 179,
+              "name": "tcp_v6_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "181": {
+              "bytes_jited": 365,
+              "bytes_xlated": 16,
+              "id": 181,
+              "name": "block_rq_comple",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            }
+          },
+          "workload_commands": [
+            [
+              "/usr/bin/stress-ng",
+              "--syscall",
+              "1",
+              "--syscall-method",
+              "fast75",
+              "--cap",
+              "1",
+              "--set",
+              "1",
+              "--sockfd",
+              "1",
+              "--sockfd-port",
+              "16748",
+              "--timeout",
+              "180s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/3a830d0e"
+            ],
+            [
+              "/usr/bin/stress-ng",
+              "--syscall",
+              "1",
+              "--syscall-method",
+              "fast75",
+              "--cap",
+              "1",
+              "--set",
+              "1",
+              "--sockfd",
+              "1",
+              "--sockfd-port",
+              "17260",
+              "--timeout",
+              "180s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/3a830d0e"
+            ],
+            [
+              "/usr/bin/stress-ng",
+              "--syscall",
+              "1",
+              "--syscall-method",
+              "fast75",
+              "--cap",
+              "1",
+              "--set",
+              "1",
+              "--sockfd",
+              "1",
+              "--sockfd-port",
+              "17772",
+              "--timeout",
+              "180s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/3a830d0e"
+            ]
+          ]
+        }
+      },
+      "native_loads": [
+        {
+          "original": {
+            "id": 117,
+            "name": "fentry_vfs_read",
+            "tag": "8aac7fd4c2e97bf7",
+            "jited": 40,
+            "xlated": 48,
+            "line": 250,
+            "text": "[832.572665 pid=2047 tid=2047] native-loader jit-info original fd=8 id=117 type=26 name=fentry_vfs_read tag=8aac7fd4c2e97bf7 jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc06021c8 ksym1=0x0"
+          },
+          "native": {
+            "id": 128,
+            "name": "fentry_vfs_read",
+            "tag": "59f4a931744dcdc6",
+            "jited": 34,
+            "xlated": 16,
+            "line": 251,
+            "text": "[832.573206 pid=2047 tid=2047] native-loader jit-info native fd=12 id=128 type=26 name=fentry_vfs_read tag=59f4a931744dcdc6 jited_len=34 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0601754 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 129,
+            "name": "fentry_vfs_writ",
+            "tag": "ce6b1d10515738d0",
+            "jited": 40,
+            "xlated": 48,
+            "line": 255,
+            "text": "[832.579450 pid=2047 tid=2047] native-loader jit-info original fd=8 id=129 type=26 name=fentry_vfs_writ tag=ce6b1d10515738d0 jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc0601654 ksym1=0x0"
+          },
+          "native": {
+            "id": 130,
+            "name": "fentry_vfs_writ",
+            "tag": "59f4a931744dcdc6",
+            "jited": 35,
+            "xlated": 16,
+            "line": 256,
+            "text": "[832.579642 pid=2047 tid=2047] native-loader jit-info native fd=14 id=130 type=26 name=fentry_vfs_writ tag=59f4a931744dcdc6 jited_len=35 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc060188c ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 131,
+            "name": "fentry_vfs_fsyn",
+            "tag": "4153521805e1f9e0",
+            "jited": 40,
+            "xlated": 48,
+            "line": 260,
+            "text": "[832.585629 pid=2047 tid=2047] native-loader jit-info original fd=8 id=131 type=26 name=fentry_vfs_fsyn tag=4153521805e1f9e0 jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc0601690 ksym1=0x0"
+          },
+          "native": {
+            "id": 132,
+            "name": "fentry_vfs_fsyn",
+            "tag": "59f4a931744dcdc6",
+            "jited": 35,
+            "xlated": 16,
+            "line": 261,
+            "text": "[832.585858 pid=2047 tid=2047] native-loader jit-info native fd=16 id=132 type=26 name=fentry_vfs_fsyn tag=59f4a931744dcdc6 jited_len=35 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06019e4 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 133,
+            "name": "fentry_vfs_open",
+            "tag": "88848b4f70304f6c",
+            "jited": 40,
+            "xlated": 48,
+            "line": 265,
+            "text": "[832.592011 pid=2047 tid=2047] native-loader jit-info original fd=8 id=133 type=26 name=fentry_vfs_open tag=88848b4f70304f6c jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc0601b14 ksym1=0x0"
+          },
+          "native": {
+            "id": 134,
+            "name": "fentry_vfs_open",
+            "tag": "59f4a931744dcdc6",
+            "jited": 35,
+            "xlated": 16,
+            "line": 266,
+            "text": "[832.592568 pid=2047 tid=2047] native-loader jit-info native fd=18 id=134 type=26 name=fentry_vfs_open tag=59f4a931744dcdc6 jited_len=35 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0601b4c ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 116,
+            "name": "tracepoint__sys",
+            "tag": "bcec44e26ffb6bdd",
+            "jited": 141,
+            "xlated": 240,
+            "line": 267,
+            "text": "[832.592771 pid=2050 tid=2050] native-loader jit-info original fd=10 id=116 type=5 name=tracepoint__sys tag=bcec44e26ffb6bdd jited_len=141 xlated_len=240 nr_jited_ksyms=1 ksym0=0xffffffffc0602124 ksym1=0x0"
+          },
+          "native": {
+            "id": 135,
+            "name": "tracepoint__sys",
+            "tag": "59f4a931744dcdc6",
+            "jited": 94,
+            "xlated": 16,
+            "line": 271,
+            "text": "[832.594730 pid=2050 tid=2050] native-loader jit-info native fd=14 id=135 type=5 name=tracepoint__sys tag=59f4a931744dcdc6 jited_len=94 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0601c90 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 136,
+            "name": "fentry_vfs_crea",
+            "tag": "31fa7fcc5d9b6166",
+            "jited": 40,
+            "xlated": 48,
+            "line": 281,
+            "text": "[832.598459 pid=2047 tid=2047] native-loader jit-info original fd=8 id=136 type=26 name=fentry_vfs_crea tag=31fa7fcc5d9b6166 jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc0601ec8 ksym1=0x0"
+          },
+          "native": {
+            "id": 139,
+            "name": "fentry_vfs_crea",
+            "tag": "59f4a931744dcdc6",
+            "jited": 35,
+            "xlated": 16,
+            "line": 282,
+            "text": "[832.598653 pid=2047 tid=2047] native-loader jit-info native fd=20 id=139 type=26 name=fentry_vfs_crea tag=59f4a931744dcdc6 jited_len=35 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0602208 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 110,
+            "name": "kprobe__cap_cap",
+            "tag": "b5856c95ecd0282a",
+            "jited": 143,
+            "xlated": 232,
+            "line": 295,
+            "text": "[832.645269 pid=2041 tid=2041] native-loader jit-info original fd=15 id=110 type=2 name=kprobe__cap_cap tag=b5856c95ecd0282a jited_len=143 xlated_len=232 nr_jited_ksyms=1 ksym0=0xffffffffc0601e18 ksym1=0x0"
+          },
+          "native": {
+            "id": 140,
+            "name": "kprobe__cap_cap",
+            "tag": "59f4a931744dcdc6",
+            "jited": 99,
+            "xlated": 16,
+            "line": 296,
+            "text": "[832.645770 pid=2041 tid=2041] native-loader jit-info native fd=22 id=140 type=2 name=kprobe__cap_cap tag=59f4a931744dcdc6 jited_len=99 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0603090 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 115,
+            "name": "tcp_v4_connect",
+            "tag": "120cbe8ad1ac7784",
+            "jited": 110,
+            "xlated": 184,
+            "line": 305,
+            "text": "[832.698472 pid=2056 tid=2056] native-loader jit-info original fd=13 id=115 type=2 name=tcp_v4_connect tag=120cbe8ad1ac7784 jited_len=110 xlated_len=184 nr_jited_ksyms=1 ksym0=0xffffffffc060204c ksym1=0x0"
+          },
+          "native": {
+            "id": 143,
+            "name": "tcp_v4_connect",
+            "tag": "59f4a931744dcdc6",
+            "jited": 78,
+            "xlated": 16,
+            "line": 306,
+            "text": "[832.698878 pid=2056 tid=2056] native-loader jit-info native fd=19 id=143 type=2 name=tcp_v4_connect tag=59f4a931744dcdc6 jited_len=78 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06033e4 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 124,
+            "name": "blk_account_io_",
+            "tag": "9793ccc672393419",
+            "jited": 121,
+            "xlated": 200,
+            "line": 315,
+            "text": "[832.749880 pid=2044 tid=2044] native-loader jit-info original fd=13 id=124 type=2 name=blk_account_io_ tag=9793ccc672393419 jited_len=121 xlated_len=200 nr_jited_ksyms=1 ksym0=0xffffffffc06024e8 ksym1=0x0"
+          },
+          "native": {
+            "id": 146,
+            "name": "blk_account_io_",
+            "tag": "59f4a931744dcdc6",
+            "jited": 110,
+            "xlated": 16,
+            "line": 316,
+            "text": "[832.750269 pid=2044 tid=2044] native-loader jit-info native fd=18 id=146 type=2 name=blk_account_io_ tag=59f4a931744dcdc6 jited_len=110 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc060378c ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 127,
+            "name": "sched_wakeup",
+            "tag": "07887b23a665c882",
+            "jited": 121,
+            "xlated": 184,
+            "line": 325,
+            "text": "[832.802402 pid=2068 tid=2068] native-loader jit-info original fd=12 id=127 type=26 name=sched_wakeup tag=07887b23a665c882 jited_len=121 xlated_len=184 nr_jited_ksyms=1 ksym0=0xffffffffc0602c2c ksym1=0x0"
+          },
+          "native": {
+            "id": 149,
+            "name": "sched_wakeup",
+            "tag": "59f4a931744dcdc6",
+            "jited": 82,
+            "xlated": 16,
+            "line": 326,
+            "text": "[832.803493 pid=2068 tid=2068] native-loader jit-info native fd=17 id=149 type=26 name=sched_wakeup tag=59f4a931744dcdc6 jited_len=82 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0603a8c ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 122,
+            "name": "sys_enter",
+            "tag": "b384d88950b7bbb9",
+            "jited": 108,
+            "xlated": 168,
+            "line": 336,
+            "text": "[832.851945 pid=2053 tid=2053] native-loader jit-info original fd=11 id=122 type=5 name=sys_enter tag=b384d88950b7bbb9 jited_len=108 xlated_len=168 nr_jited_ksyms=1 ksym0=0xffffffffc060239c ksym1=0x0"
+          },
+          "native": {
+            "id": 152,
+            "name": "sys_enter",
+            "tag": "59f4a931744dcdc6",
+            "jited": 74,
+            "xlated": 16,
+            "line": 337,
+            "text": "[832.852230 pid=2053 tid=2053] native-loader jit-info native fd=15 id=152 type=5 name=sys_enter tag=59f4a931744dcdc6 jited_len=74 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0603cd8 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 138,
+            "name": "tracepoint__sys",
+            "tag": "faeb442ee60dc635",
+            "jited": 141,
+            "xlated": 240,
+            "line": 346,
+            "text": "[832.861416 pid=2050 tid=2050] native-loader jit-info original fd=10 id=138 type=5 name=tracepoint__sys tag=faeb442ee60dc635 jited_len=141 xlated_len=240 nr_jited_ksyms=1 ksym0=0xffffffffc0601f4c ksym1=0x0"
+          },
+          "native": {
+            "id": 155,
+            "name": "tracepoint__sys",
+            "tag": "59f4a931744dcdc6",
+            "jited": 94,
+            "xlated": 16,
+            "line": 347,
+            "text": "[832.862017 pid=2050 tid=2050] native-loader jit-info native fd=16 id=155 type=5 name=tracepoint__sys tag=59f4a931744dcdc6 jited_len=94 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0604018 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 125,
+            "name": "inet_sock_set_s",
+            "tag": "7cdf701b320f8e4e",
+            "jited": 1501,
+            "xlated": 2240,
+            "line": 351,
+            "text": "[832.934306 pid=2061 tid=2061] native-loader jit-info original fd=11 id=125 type=5 name=inet_sock_set_s tag=7cdf701b320f8e4e jited_len=1501 xlated_len=2240 nr_jited_ksyms=1 ksym0=0xffffffffc060259c ksym1=0x0"
+          },
+          "native": {
+            "id": 157,
+            "name": "inet_sock_set_s",
+            "tag": "59f4a931744dcdc6",
+            "jited": 1062,
+            "xlated": 16,
+            "line": 352,
+            "text": "[832.934640 pid=2061 tid=2061] native-loader jit-info native fd=16 id=157 type=5 name=inet_sock_set_s tag=59f4a931744dcdc6 jited_len=1062 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc060441c ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 142,
+            "name": "kprobe__cap_cap",
+            "tag": "7c9faa2569d54b09",
+            "jited": 383,
+            "xlated": 616,
+            "line": 386,
+            "text": "[832.986044 pid=2041 tid=2041] native-loader jit-info original fd=15 id=142 type=2 name=kprobe__cap_cap tag=7c9faa2569d54b09 jited_len=383 xlated_len=616 nr_jited_ksyms=1 ksym0=0xffffffffc0603234 ksym1=0x0"
+          },
+          "native": {
+            "id": 160,
+            "name": "kprobe__cap_cap",
+            "tag": "59f4a931744dcdc6",
+            "jited": 281,
+            "xlated": 16,
+            "line": 387,
+            "text": "[832.986669 pid=2041 tid=2041] native-loader jit-info native fd=23 id=160 type=2 name=kprobe__cap_cap tag=59f4a931744dcdc6 jited_len=281 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0604aec ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 145,
+            "name": "tcp_v4_connect_",
+            "tag": "fc9b115ea84ee0a5",
+            "jited": 493,
+            "xlated": 752,
+            "line": 390,
+            "text": "[833.043436 pid=2056 tid=2056] native-loader jit-info original fd=13 id=145 type=2 name=tcp_v4_connect_ tag=fc9b115ea84ee0a5 jited_len=493 xlated_len=752 nr_jited_ksyms=1 ksym0=0xffffffffc0603564 ksym1=0x0"
+          },
+          "native": {
+            "id": 161,
+            "name": "tcp_v4_connect_",
+            "tag": "59f4a931744dcdc6",
+            "jited": 362,
+            "xlated": 16,
+            "line": 391,
+            "text": "[833.043848 pid=2056 tid=2056] native-loader jit-info native fd=20 id=161 type=2 name=tcp_v4_connect_ tag=59f4a931744dcdc6 jited_len=362 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0604d48 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 148,
+            "name": "block_rq_insert",
+            "tag": "05b8822023cd42b7",
+            "jited": 354,
+            "xlated": 648,
+            "line": 426,
+            "text": "[833.102368 pid=2044 tid=2044] native-loader jit-info original fd=13 id=148 type=26 name=block_rq_insert tag=05b8822023cd42b7 jited_len=354 xlated_len=648 nr_jited_ksyms=1 ksym0=0xffffffffc0603908 ksym1=0x0"
+          },
+          "native": {
+            "id": 164,
+            "name": "block_rq_insert",
+            "tag": "59f4a931744dcdc6",
+            "jited": 390,
+            "xlated": 16,
+            "line": 427,
+            "text": "[833.102612 pid=2044 tid=2044] native-loader jit-info native fd=22 id=164 type=26 name=block_rq_insert tag=59f4a931744dcdc6 jited_len=390 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06050d8 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 151,
+            "name": "sched_wakeup_ne",
+            "tag": "07887b23a665c882",
+            "jited": 121,
+            "xlated": 184,
+            "line": 431,
+            "text": "[833.154401 pid=2068 tid=2068] native-loader jit-info original fd=12 id=151 type=26 name=sched_wakeup_ne tag=07887b23a665c882 jited_len=121 xlated_len=184 nr_jited_ksyms=1 ksym0=0xffffffffc0603c10 ksym1=0x0"
+          },
+          "native": {
+            "id": 166,
+            "name": "sched_wakeup_ne",
+            "tag": "59f4a931744dcdc6",
+            "jited": 82,
+            "xlated": 16,
+            "line": 432,
+            "text": "[833.154924 pid=2068 tid=2068] native-loader jit-info native fd=19 id=166 type=26 name=sched_wakeup_ne tag=59f4a931744dcdc6 jited_len=82 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0605608 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 154,
+            "name": "sys_exit",
+            "tag": "9a38fb8da7b8b8f7",
+            "jited": 406,
+            "xlated": 656,
+            "line": 437,
+            "text": "[833.207336 pid=2053 tid=2053] native-loader jit-info original fd=11 id=154 type=5 name=sys_exit tag=9a38fb8da7b8b8f7 jited_len=406 xlated_len=656 nr_jited_ksyms=1 ksym0=0xffffffffc0603e5c ksym1=0x0"
+          },
+          "native": {
+            "id": 168,
+            "name": "sys_exit",
+            "tag": "59f4a931744dcdc6",
+            "jited": 272,
+            "xlated": 16,
+            "line": 438,
+            "text": "[833.207595 pid=2053 tid=2053] native-loader jit-info native fd=17 id=168 type=5 name=sys_exit tag=59f4a931744dcdc6 jited_len=272 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0605b68 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 156,
+            "name": "tracepoint__sys",
+            "tag": "ae739a47b4daed15",
+            "jited": 602,
+            "xlated": 792,
+            "line": 456,
+            "text": "[833.219638 pid=2050 tid=2050] native-loader jit-info original fd=10 id=156 type=5 name=tracepoint__sys tag=ae739a47b4daed15 jited_len=602 xlated_len=792 nr_jited_ksyms=1 ksym0=0xffffffffc060418c ksym1=0x0"
+          },
+          "native": {
+            "id": 170,
+            "name": "tracepoint__sys",
+            "tag": "59f4a931744dcdc6",
+            "jited": 283,
+            "xlated": 16,
+            "line": 457,
+            "text": "[833.220037 pid=2050 tid=2050] native-loader jit-info native fd=18 id=170 type=5 name=tracepoint__sys tag=59f4a931744dcdc6 jited_len=283 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0605d90 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 162,
+            "name": "tcp_v6_connect",
+            "tag": "120cbe8ad1ac7784",
+            "jited": 110,
+            "xlated": 184,
+            "line": 461,
+            "text": "[833.272555 pid=2056 tid=2056] native-loader jit-info original fd=13 id=162 type=2 name=tcp_v6_connect tag=120cbe8ad1ac7784 jited_len=110 xlated_len=184 nr_jited_ksyms=1 ksym0=0xffffffffc060500c ksym1=0x0"
+          },
+          "native": {
+            "id": 172,
+            "name": "tcp_v6_connect",
+            "tag": "59f4a931744dcdc6",
+            "jited": 78,
+            "xlated": 16,
+            "line": 462,
+            "text": "[833.272838 pid=2056 tid=2056] native-loader jit-info native fd=23 id=172 type=2 name=tcp_v6_connect tag=59f4a931744dcdc6 jited_len=78 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06062b0 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 165,
+            "name": "block_rq_issue",
+            "tag": "89355e738c3e8a16",
+            "jited": 440,
+            "xlated": 824,
+            "line": 466,
+            "text": "[833.329480 pid=2044 tid=2044] native-loader jit-info original fd=13 id=165 type=26 name=block_rq_issue tag=89355e738c3e8a16 jited_len=440 xlated_len=824 nr_jited_ksyms=1 ksym0=0xffffffffc0605430 ksym1=0x0"
+          },
+          "native": {
+            "id": 174,
+            "name": "block_rq_issue",
+            "tag": "59f4a931744dcdc6",
+            "jited": 316,
+            "xlated": 16,
+            "line": 467,
+            "text": "[833.329730 pid=2044 tid=2044] native-loader jit-info native fd=24 id=174 type=26 name=block_rq_issue tag=59f4a931744dcdc6 jited_len=316 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc060664c ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 167,
+            "name": "sched_switch",
+            "tag": "f872909b2c4482c9",
+            "jited": 935,
+            "xlated": 1632,
+            "line": 472,
+            "text": "[833.400927 pid=2068 tid=2068] native-loader jit-info original fd=12 id=167 type=26 name=sched_switch tag=f872909b2c4482c9 jited_len=935 xlated_len=1632 nr_jited_ksyms=2 ksym0=0xffffffffc0602010 ksym1=0xffffffffc060579c"
+          },
+          "native": {
+            "id": 176,
+            "name": "sched_switch",
+            "tag": "59f4a931744dcdc6",
+            "jited": 995,
+            "xlated": 16,
+            "line": 473,
+            "text": "[833.401179 pid=2068 tid=2068] native-loader jit-info native fd=21 id=176 type=26 name=sched_switch tag=59f4a931744dcdc6 jited_len=995 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0606acc ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 171,
+            "name": "tracepoint__sys",
+            "tag": "ae739a47b4daed15",
+            "jited": 602,
+            "xlated": 792,
+            "line": 482,
+            "text": "[833.411958 pid=2050 tid=2050] native-loader jit-info original fd=10 id=171 type=5 name=tracepoint__sys tag=ae739a47b4daed15 jited_len=602 xlated_len=792 nr_jited_ksyms=1 ksym0=0xffffffffc0606008 ksym1=0x0"
+          },
+          "native": {
+            "id": 177,
+            "name": "tracepoint__sys",
+            "tag": "59f4a931744dcdc6",
+            "jited": 283,
+            "xlated": 16,
+            "line": 483,
+            "text": "[833.412182 pid=2050 tid=2050] native-loader jit-info native fd=20 id=177 type=5 name=tracepoint__sys tag=59f4a931744dcdc6 jited_len=283 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06070cc ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 173,
+            "name": "tcp_v6_connect_",
+            "tag": "e66c43a4971e2c50",
+            "jited": 496,
+            "xlated": 752,
+            "line": 527,
+            "text": "[833.471561 pid=2056 tid=2056] native-loader jit-info original fd=13 id=173 type=2 name=tcp_v6_connect_ tag=e66c43a4971e2c50 jited_len=496 xlated_len=752 nr_jited_ksyms=1 ksym0=0xffffffffc0606428 ksym1=0x0"
+          },
+          "native": {
+            "id": 179,
+            "name": "tcp_v6_connect_",
+            "tag": "59f4a931744dcdc6",
+            "jited": 456,
+            "xlated": 16,
+            "line": 528,
+            "text": "[833.471913 pid=2056 tid=2056] native-loader jit-info native fd=24 id=179 type=2 name=tcp_v6_connect_ tag=59f4a931744dcdc6 jited_len=456 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0607364 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 175,
+            "name": "block_rq_comple",
+            "tag": "94563ffd43a60f7b",
+            "jited": 437,
+            "xlated": 712,
+            "line": 572,
+            "text": "[833.528167 pid=2044 tid=2044] native-loader jit-info original fd=13 id=175 type=26 name=block_rq_comple tag=94563ffd43a60f7b jited_len=437 xlated_len=712 nr_jited_ksyms=1 ksym0=0xffffffffc06068c8 ksym1=0x0"
+          },
+          "native": {
+            "id": 181,
+            "name": "block_rq_comple",
+            "tag": "59f4a931744dcdc6",
+            "jited": 365,
+            "xlated": 16,
+            "line": 573,
+            "text": "[833.528576 pid=2044 tid=2044] native-loader jit-info native fd=25 id=181 type=26 name=block_rq_comple tag=59f4a931744dcdc6 jited_len=365 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06076a8 ksym1=0x0"
+          }
+        }
+      ],
+      "throughput_ratio": 0.8772482128336425
+    },
+    "on": {
+      "run": "corpus/results/x86_kvm_corpus_20261128_085002_496250",
+      "inputs": [
+        {
+          "path": "corpus/results/x86_kvm_corpus_20261128_085002_496250/details/apps/bcc__set.json",
+          "bytes": 31191,
+          "sha256": "956783b99cd7eb4dc06737d72c6529ac1caaca7da729c87400fa37f9cfefcd45"
+        },
+        {
+          "path": "corpus/results/x86_kvm_corpus_20261128_085002_496250/metadata.json",
+          "bytes": 987,
+          "sha256": "c3681a03436a6135f073dab509acadf02ff225cce88ec1967ea790d742de3f6a"
+        },
+        {
+          "path": "corpus/results/x86_kvm_corpus_20261128_085002_496250/details/shim-logs/bcc__set.baseline.log",
+          "bytes": 63549,
+          "sha256": "c0d07fd2b92e1916cd7290cd654fdb90c14b5ab16fca2c82b6d22ee041cc08a6"
+        },
+        {
+          "path": "corpus/results/x86_kvm_corpus_20261128_085002_496250/details/shim-logs/bcc__set.post_rejit.log",
+          "bytes": 83750,
+          "sha256": "83a7c22c1e34bf9eae1e456573ef2ff89d5a58689a02e960c72d04cea2b3fd07"
+        }
+      ],
+      "phases": {
+        "baseline": {
+          "samples": [
+            {
+              "total": 519145.82999999996,
+              "by_stressor": {
+                "syscall": 2.86,
+                "cap": 284538.11,
+                "set": 22130.1,
+                "sockfd": 212474.76
+              },
+              "errors": 0
+            },
+            {
+              "total": 519974.02999999997,
+              "by_stressor": {
+                "syscall": 46.86,
+                "cap": 285217.06,
+                "set": 22088.73,
+                "sockfd": 212621.38
+              },
+              "errors": 0
+            },
+            {
+              "total": 519434.75,
+              "by_stressor": {
+                "syscall": 2.86,
+                "cap": 284707.44,
+                "set": 22130.24,
+                "sockfd": 212594.21
+              },
+              "errors": 0
+            }
+          ],
+          "median_total": 519434.75,
+          "by_stressor_medians": {
+            "cap": 284707.44,
+            "set": 22130.1,
+            "sockfd": 212594.21,
+            "syscall": 2.86
+          },
+          "bpf_records": {
+            "20": {
+              "bytes_jited": 141,
+              "bytes_xlated": 240,
+              "id": 20,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "22": {
+              "bytes_jited": 141,
+              "bytes_xlated": 240,
+              "id": 22,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 115855200,
+              "run_time_ns_delta": 7502812367,
+              "type": "tracepoint"
+            },
+            "23": {
+              "bytes_jited": 602,
+              "bytes_xlated": 792,
+              "id": 23,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "25": {
+              "bytes_jited": 602,
+              "bytes_xlated": 792,
+              "id": 25,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 115855200,
+              "run_time_ns_delta": 145909326940,
+              "type": "tracepoint"
+            },
+            "29": {
+              "bytes_jited": 143,
+              "bytes_xlated": 232,
+              "id": 29,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 132450882,
+              "run_time_ns_delta": 9858382549,
+              "type": "kprobe"
+            },
+            "34": {
+              "bytes_jited": 383,
+              "bytes_xlated": 616,
+              "id": 34,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 132450879,
+              "run_time_ns_delta": 43201542268,
+              "type": "kprobe"
+            },
+            "43": {
+              "bytes_jited": 110,
+              "bytes_xlated": 184,
+              "id": 43,
+              "name": "tcp_v4_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "44": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 44,
+              "name": "fentry_vfs_read",
+              "run_cnt_delta": 2198944,
+              "run_time_ns_delta": 178605463,
+              "type": "tracing"
+            },
+            "46": {
+              "bytes_jited": 108,
+              "bytes_xlated": 168,
+              "id": 46,
+              "name": "sys_enter",
+              "run_cnt_delta": 3314996315,
+              "run_time_ns_delta": 263080107494,
+              "type": "tracepoint"
+            },
+            "49": {
+              "bytes_jited": 493,
+              "bytes_xlated": 752,
+              "id": 49,
+              "name": "tcp_v4_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "51": {
+              "bytes_jited": 110,
+              "bytes_xlated": 184,
+              "id": 51,
+              "name": "tcp_v6_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "52": {
+              "bytes_jited": 406,
+              "bytes_xlated": 656,
+              "id": 52,
+              "name": "sys_exit",
+              "run_cnt_delta": 3314996317,
+              "run_time_ns_delta": 278261264986,
+              "type": "tracepoint"
+            },
+            "53": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 53,
+              "name": "fentry_vfs_writ",
+              "run_cnt_delta": 2232814,
+              "run_time_ns_delta": 174364188,
+              "type": "tracing"
+            },
+            "54": {
+              "bytes_jited": 496,
+              "bytes_xlated": 752,
+              "id": 54,
+              "name": "tcp_v6_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "57": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 57,
+              "name": "fentry_vfs_fsyn",
+              "run_cnt_delta": 42,
+              "run_time_ns_delta": 3684,
+              "type": "tracing"
+            },
+            "59": {
+              "bytes_jited": 121,
+              "bytes_xlated": 200,
+              "id": 59,
+              "name": "blk_account_io_",
+              "run_cnt_delta": 150,
+              "run_time_ns_delta": 31219,
+              "type": "kprobe"
+            },
+            "60": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 60,
+              "name": "fentry_vfs_open",
+              "run_cnt_delta": 115856010,
+              "run_time_ns_delta": 4285457160,
+              "type": "tracing"
+            },
+            "62": {
+              "bytes_jited": 354,
+              "bytes_xlated": 648,
+              "id": 62,
+              "name": "block_rq_insert",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "63": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 63,
+              "name": "fentry_vfs_crea",
+              "run_cnt_delta": 185,
+              "run_time_ns_delta": 13334,
+              "type": "tracing"
+            },
+            "64": {
+              "bytes_jited": 440,
+              "bytes_xlated": 824,
+              "id": 64,
+              "name": "block_rq_issue",
+              "run_cnt_delta": 415,
+              "run_time_ns_delta": 579645,
+              "type": "tracing"
+            },
+            "65": {
+              "bytes_jited": 437,
+              "bytes_xlated": 712,
+              "id": 65,
+              "name": "block_rq_comple",
+              "run_cnt_delta": 439,
+              "run_time_ns_delta": 2416565,
+              "type": "tracing"
+            },
+            "71": {
+              "bytes_jited": 1501,
+              "bytes_xlated": 2240,
+              "id": 71,
+              "name": "inet_sock_set_s",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "75": {
+              "bytes_jited": 121,
+              "bytes_xlated": 184,
+              "id": 75,
+              "name": "sched_wakeup",
+              "run_cnt_delta": 108138866,
+              "run_time_ns_delta": 9793999089,
+              "type": "tracing"
+            },
+            "77": {
+              "bytes_jited": 121,
+              "bytes_xlated": 184,
+              "id": 77,
+              "name": "sched_wakeup_ne",
+              "run_cnt_delta": 125,
+              "run_time_ns_delta": 39951,
+              "type": "tracing"
+            },
+            "78": {
+              "bytes_jited": 935,
+              "bytes_xlated": 1632,
+              "id": 78,
+              "name": "sched_switch",
+              "run_cnt_delta": 216070570,
+              "run_time_ns_delta": 24212313437,
+              "type": "tracing"
+            }
+          },
+          "workload_commands": [
+            [
+              "/usr/bin/stress-ng",
+              "--syscall",
+              "1",
+              "--syscall-method",
+              "fast75",
+              "--cap",
+              "1",
+              "--set",
+              "1",
+              "--sockfd",
+              "1",
+              "--sockfd-port",
+              "14719",
+              "--timeout",
+              "180s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/586d91e0"
+            ],
+            [
+              "/usr/bin/stress-ng",
+              "--syscall",
+              "1",
+              "--syscall-method",
+              "fast75",
+              "--cap",
+              "1",
+              "--set",
+              "1",
+              "--sockfd",
+              "1",
+              "--sockfd-port",
+              "15231",
+              "--timeout",
+              "180s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/586d91e0"
+            ],
+            [
+              "/usr/bin/stress-ng",
+              "--syscall",
+              "1",
+              "--syscall-method",
+              "fast75",
+              "--cap",
+              "1",
+              "--set",
+              "1",
+              "--sockfd",
+              "1",
+              "--sockfd-port",
+              "15743",
+              "--timeout",
+              "180s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/586d91e0"
+            ]
+          ]
+        },
+        "post_rejit": {
+          "samples": [
+            {
+              "total": 530014.61,
+              "by_stressor": {
+                "syscall": 2.86,
+                "cap": 289694.46,
+                "set": 22560.02,
+                "sockfd": 217757.27
+              },
+              "errors": 0
+            },
+            {
+              "total": 527761.0,
+              "by_stressor": {
+                "syscall": 2.86,
+                "cap": 289041.73,
+                "set": 22560.9,
+                "sockfd": 216155.51
+              },
+              "errors": 0
+            },
+            {
+              "total": 530995.48,
+              "by_stressor": {
+                "syscall": 2.84,
+                "cap": 291159.78,
+                "set": 22606.16,
+                "sockfd": 217226.7
+              },
+              "errors": 0
+            }
+          ],
+          "median_total": 530014.61,
+          "by_stressor_medians": {
+            "cap": 289694.46,
+            "set": 22560.9,
+            "sockfd": 217226.7,
+            "syscall": 2.86
+          },
+          "bpf_records": {
+            "128": {
+              "bytes_jited": 34,
+              "bytes_xlated": 16,
+              "id": 128,
+              "name": "fentry_vfs_read",
+              "run_cnt_delta": 2224517,
+              "run_time_ns_delta": 179819733,
+              "type": "tracing"
+            },
+            "130": {
+              "bytes_jited": 35,
+              "bytes_xlated": 16,
+              "id": 130,
+              "name": "fentry_vfs_writ",
+              "run_cnt_delta": 2258474,
+              "run_time_ns_delta": 179037147,
+              "type": "tracing"
+            },
+            "132": {
+              "bytes_jited": 35,
+              "bytes_xlated": 16,
+              "id": 132,
+              "name": "fentry_vfs_fsyn",
+              "run_cnt_delta": 42,
+              "run_time_ns_delta": 3720,
+              "type": "tracing"
+            },
+            "134": {
+              "bytes_jited": 94,
+              "bytes_xlated": 16,
+              "id": 134,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "137": {
+              "bytes_jited": 35,
+              "bytes_xlated": 16,
+              "id": 137,
+              "name": "fentry_vfs_open",
+              "run_cnt_delta": 118290197,
+              "run_time_ns_delta": 4378915906,
+              "type": "tracing"
+            },
+            "139": {
+              "bytes_jited": 35,
+              "bytes_xlated": 16,
+              "id": 139,
+              "name": "fentry_vfs_crea",
+              "run_cnt_delta": 42,
+              "run_time_ns_delta": 3574,
+              "type": "tracing"
+            },
+            "140": {
+              "bytes_jited": 1062,
+              "bytes_xlated": 16,
+              "id": 140,
+              "name": "inet_sock_set_s",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "143": {
+              "bytes_jited": 99,
+              "bytes_xlated": 16,
+              "id": 143,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 135191444,
+              "run_time_ns_delta": 8513951037,
+              "type": "kprobe"
+            },
+            "146": {
+              "bytes_jited": 110,
+              "bytes_xlated": 16,
+              "id": 146,
+              "name": "blk_account_io_",
+              "run_cnt_delta": 153,
+              "run_time_ns_delta": 34914,
+              "type": "kprobe"
+            },
+            "149": {
+              "bytes_jited": 78,
+              "bytes_xlated": 16,
+              "id": 149,
+              "name": "tcp_v4_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "152": {
+              "bytes_jited": 82,
+              "bytes_xlated": 16,
+              "id": 152,
+              "name": "sched_wakeup",
+              "run_cnt_delta": 109459139,
+              "run_time_ns_delta": 8620803163,
+              "type": "tracing"
+            },
+            "155": {
+              "bytes_jited": 74,
+              "bytes_xlated": 16,
+              "id": 155,
+              "name": "sys_enter",
+              "run_cnt_delta": 3378219147,
+              "run_time_ns_delta": 265162628302,
+              "type": "tracepoint"
+            },
+            "158": {
+              "bytes_jited": 94,
+              "bytes_xlated": 16,
+              "id": 158,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 118289746,
+              "run_time_ns_delta": 7103631370,
+              "type": "tracepoint"
+            },
+            "160": {
+              "bytes_jited": 281,
+              "bytes_xlated": 16,
+              "id": 160,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 135191440,
+              "run_time_ns_delta": 42596858396,
+              "type": "kprobe"
+            },
+            "161": {
+              "bytes_jited": 390,
+              "bytes_xlated": 16,
+              "id": 161,
+              "name": "block_rq_insert",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "164": {
+              "bytes_jited": 362,
+              "bytes_xlated": 16,
+              "id": 164,
+              "name": "tcp_v4_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "166": {
+              "bytes_jited": 82,
+              "bytes_xlated": 16,
+              "id": 166,
+              "name": "sched_wakeup_ne",
+              "run_cnt_delta": 124,
+              "run_time_ns_delta": 38460,
+              "type": "tracing"
+            },
+            "168": {
+              "bytes_jited": 272,
+              "bytes_xlated": 16,
+              "id": 168,
+              "name": "sys_exit",
+              "run_cnt_delta": 3378219152,
+              "run_time_ns_delta": 262662796705,
+              "type": "tracepoint"
+            },
+            "170": {
+              "bytes_jited": 283,
+              "bytes_xlated": 16,
+              "id": 170,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "172": {
+              "bytes_jited": 316,
+              "bytes_xlated": 16,
+              "id": 172,
+              "name": "block_rq_issue",
+              "run_cnt_delta": 413,
+              "run_time_ns_delta": 564247,
+              "type": "tracing"
+            },
+            "174": {
+              "bytes_jited": 78,
+              "bytes_xlated": 16,
+              "id": 174,
+              "name": "tcp_v6_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "176": {
+              "bytes_jited": 995,
+              "bytes_xlated": 16,
+              "id": 176,
+              "name": "sched_switch",
+              "run_cnt_delta": 218709924,
+              "run_time_ns_delta": 27607971084,
+              "type": "tracing"
+            },
+            "177": {
+              "bytes_jited": 283,
+              "bytes_xlated": 16,
+              "id": 177,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 118289746,
+              "run_time_ns_delta": 142822574372,
+              "type": "tracepoint"
+            },
+            "179": {
+              "bytes_jited": 365,
+              "bytes_xlated": 16,
+              "id": 179,
+              "name": "block_rq_comple",
+              "run_cnt_delta": 437,
+              "run_time_ns_delta": 2012904,
+              "type": "tracing"
+            },
+            "180": {
+              "bytes_jited": 456,
+              "bytes_xlated": 16,
+              "id": 180,
+              "name": "tcp_v6_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            }
+          },
+          "workload_commands": [
+            [
+              "/usr/bin/stress-ng",
+              "--syscall",
+              "1",
+              "--syscall-method",
+              "fast75",
+              "--cap",
+              "1",
+              "--set",
+              "1",
+              "--sockfd",
+              "1",
+              "--sockfd-port",
+              "16767",
+              "--timeout",
+              "180s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/586d91e0"
+            ],
+            [
+              "/usr/bin/stress-ng",
+              "--syscall",
+              "1",
+              "--syscall-method",
+              "fast75",
+              "--cap",
+              "1",
+              "--set",
+              "1",
+              "--sockfd",
+              "1",
+              "--sockfd-port",
+              "17279",
+              "--timeout",
+              "180s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/586d91e0"
+            ],
+            [
+              "/usr/bin/stress-ng",
+              "--syscall",
+              "1",
+              "--syscall-method",
+              "fast75",
+              "--cap",
+              "1",
+              "--set",
+              "1",
+              "--sockfd",
+              "1",
+              "--sockfd-port",
+              "17791",
+              "--timeout",
+              "180s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/586d91e0"
+            ]
+          ]
+        }
+      },
+      "native_loads": [
+        {
+          "original": {
+            "id": 118,
+            "name": "fentry_vfs_read",
+            "tag": "8aac7fd4c2e97bf7",
+            "jited": 40,
+            "xlated": 48,
+            "line": 250,
+            "text": "[853.551814 pid=2068 tid=2068] native-loader jit-info original fd=8 id=118 type=26 name=fentry_vfs_read tag=8aac7fd4c2e97bf7 jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc0602814 ksym1=0x0"
+          },
+          "native": {
+            "id": 128,
+            "name": "fentry_vfs_read",
+            "tag": "59f4a931744dcdc6",
+            "jited": 34,
+            "xlated": 16,
+            "line": 251,
+            "text": "[853.553060 pid=2068 tid=2068] native-loader jit-info native fd=12 id=128 type=26 name=fentry_vfs_read tag=59f4a931744dcdc6 jited_len=34 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0601748 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 129,
+            "name": "fentry_vfs_writ",
+            "tag": "ce6b1d10515738d0",
+            "jited": 40,
+            "xlated": 48,
+            "line": 255,
+            "text": "[853.559476 pid=2068 tid=2068] native-loader jit-info original fd=8 id=129 type=26 name=fentry_vfs_writ tag=ce6b1d10515738d0 jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc060164c ksym1=0x0"
+          },
+          "native": {
+            "id": 130,
+            "name": "fentry_vfs_writ",
+            "tag": "59f4a931744dcdc6",
+            "jited": 35,
+            "xlated": 16,
+            "line": 256,
+            "text": "[853.559693 pid=2068 tid=2068] native-loader jit-info native fd=14 id=130 type=26 name=fentry_vfs_writ tag=59f4a931744dcdc6 jited_len=35 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06018a4 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 131,
+            "name": "fentry_vfs_fsyn",
+            "tag": "4153521805e1f9e0",
+            "jited": 40,
+            "xlated": 48,
+            "line": 260,
+            "text": "[853.565160 pid=2068 tid=2068] native-loader jit-info original fd=8 id=131 type=26 name=fentry_vfs_fsyn tag=4153521805e1f9e0 jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc0601690 ksym1=0x0"
+          },
+          "native": {
+            "id": 132,
+            "name": "fentry_vfs_fsyn",
+            "tag": "59f4a931744dcdc6",
+            "jited": 35,
+            "xlated": 16,
+            "line": 261,
+            "text": "[853.565372 pid=2068 tid=2068] native-loader jit-info native fd=16 id=132 type=26 name=fentry_vfs_fsyn tag=59f4a931744dcdc6 jited_len=35 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06019d8 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 113,
+            "name": "tracepoint__sys",
+            "tag": "bcec44e26ffb6bdd",
+            "jited": 141,
+            "xlated": 240,
+            "line": 265,
+            "text": "[853.567020 pid=2071 tid=2071] native-loader jit-info original fd=10 id=113 type=5 name=tracepoint__sys tag=bcec44e26ffb6bdd jited_len=141 xlated_len=240 nr_jited_ksyms=1 ksym0=0xffffffffc0601fa4 ksym1=0x0"
+          },
+          "native": {
+            "id": 134,
+            "name": "tracepoint__sys",
+            "tag": "59f4a931744dcdc6",
+            "jited": 94,
+            "xlated": 16,
+            "line": 266,
+            "text": "[853.567152 pid=2071 tid=2071] native-loader jit-info native fd=14 id=134 type=5 name=tracepoint__sys tag=59f4a931744dcdc6 jited_len=94 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0601b58 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 133,
+            "name": "fentry_vfs_open",
+            "tag": "88848b4f70304f6c",
+            "jited": 40,
+            "xlated": 48,
+            "line": 275,
+            "text": "[853.570681 pid=2068 tid=2068] native-loader jit-info original fd=8 id=133 type=26 name=fentry_vfs_open tag=88848b4f70304f6c jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc0601b10 ksym1=0x0"
+          },
+          "native": {
+            "id": 137,
+            "name": "fentry_vfs_open",
+            "tag": "59f4a931744dcdc6",
+            "jited": 35,
+            "xlated": 16,
+            "line": 276,
+            "text": "[853.570820 pid=2068 tid=2068] native-loader jit-info native fd=18 id=137 type=26 name=fentry_vfs_open tag=59f4a931744dcdc6 jited_len=35 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0601de0 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 138,
+            "name": "fentry_vfs_crea",
+            "tag": "31fa7fcc5d9b6166",
+            "jited": 40,
+            "xlated": 48,
+            "line": 281,
+            "text": "[853.576771 pid=2068 tid=2068] native-loader jit-info original fd=8 id=138 type=26 name=fentry_vfs_crea tag=31fa7fcc5d9b6166 jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc0601f08 ksym1=0x0"
+          },
+          "native": {
+            "id": 139,
+            "name": "fentry_vfs_crea",
+            "tag": "59f4a931744dcdc6",
+            "jited": 35,
+            "xlated": 16,
+            "line": 282,
+            "text": "[853.577169 pid=2068 tid=2068] native-loader jit-info native fd=20 id=139 type=26 name=fentry_vfs_crea tag=59f4a931744dcdc6 jited_len=35 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06029a0 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 116,
+            "name": "inet_sock_set_s",
+            "tag": "7cdf701b320f8e4e",
+            "jited": 1501,
+            "xlated": 2240,
+            "line": 295,
+            "text": "[853.636139 pid=2080 tid=2080] native-loader jit-info original fd=11 id=116 type=5 name=inet_sock_set_s tag=7cdf701b320f8e4e jited_len=1501 xlated_len=2240 nr_jited_ksyms=1 ksym0=0xffffffffc0602150 ksym1=0x0"
+          },
+          "native": {
+            "id": 140,
+            "name": "inet_sock_set_s",
+            "tag": "59f4a931744dcdc6",
+            "jited": 1062,
+            "xlated": 16,
+            "line": 296,
+            "text": "[853.636553 pid=2080 tid=2080] native-loader jit-info native fd=16 id=140 type=5 name=inet_sock_set_s tag=59f4a931744dcdc6 jited_len=1062 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc060308c ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 117,
+            "name": "kprobe__cap_cap",
+            "tag": "b5856c95ecd0282a",
+            "jited": 143,
+            "xlated": 232,
+            "line": 330,
+            "text": "[853.682192 pid=2062 tid=2062] native-loader jit-info original fd=15 id=117 type=2 name=kprobe__cap_cap tag=b5856c95ecd0282a jited_len=143 xlated_len=232 nr_jited_ksyms=1 ksym0=0xffffffffc0602758 ksym1=0x0"
+          },
+          "native": {
+            "id": 143,
+            "name": "kprobe__cap_cap",
+            "tag": "59f4a931744dcdc6",
+            "jited": 99,
+            "xlated": 16,
+            "line": 331,
+            "text": "[853.682525 pid=2062 tid=2062] native-loader jit-info native fd=22 id=143 type=2 name=kprobe__cap_cap tag=59f4a931744dcdc6 jited_len=99 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0603758 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 120,
+            "name": "blk_account_io_",
+            "tag": "9793ccc672393419",
+            "jited": 121,
+            "xlated": 200,
+            "line": 340,
+            "text": "[853.731218 pid=2065 tid=2065] native-loader jit-info original fd=13 id=120 type=2 name=blk_account_io_ tag=9793ccc672393419 jited_len=121 xlated_len=200 nr_jited_ksyms=1 ksym0=0xffffffffc06028d4 ksym1=0x0"
+          },
+          "native": {
+            "id": 146,
+            "name": "blk_account_io_",
+            "tag": "59f4a931744dcdc6",
+            "jited": 110,
+            "xlated": 16,
+            "line": 341,
+            "text": "[853.731789 pid=2065 tid=2065] native-loader jit-info native fd=18 id=146 type=2 name=blk_account_io_ tag=59f4a931744dcdc6 jited_len=110 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0603a94 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 114,
+            "name": "tcp_v4_connect",
+            "tag": "120cbe8ad1ac7784",
+            "jited": 110,
+            "xlated": 184,
+            "line": 350,
+            "text": "[853.779111 pid=2077 tid=2077] native-loader jit-info original fd=13 id=114 type=2 name=tcp_v4_connect tag=120cbe8ad1ac7784 jited_len=110 xlated_len=184 nr_jited_ksyms=1 ksym0=0xffffffffc0602048 ksym1=0x0"
+          },
+          "native": {
+            "id": 149,
+            "name": "tcp_v4_connect",
+            "tag": "59f4a931744dcdc6",
+            "jited": 78,
+            "xlated": 16,
+            "line": 351,
+            "text": "[853.779671 pid=2077 tid=2077] native-loader jit-info native fd=19 id=149 type=2 name=tcp_v4_connect tag=59f4a931744dcdc6 jited_len=78 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0603d90 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 125,
+            "name": "sched_wakeup",
+            "tag": "07887b23a665c882",
+            "jited": 121,
+            "xlated": 184,
+            "line": 360,
+            "text": "[853.827278 pid=2083 tid=2083] native-loader jit-info original fd=12 id=125 type=26 name=sched_wakeup tag=07887b23a665c882 jited_len=121 xlated_len=184 nr_jited_ksyms=1 ksym0=0xffffffffc0602ae4 ksym1=0x0"
+          },
+          "native": {
+            "id": 152,
+            "name": "sched_wakeup",
+            "tag": "59f4a931744dcdc6",
+            "jited": 82,
+            "xlated": 16,
+            "line": 361,
+            "text": "[853.828302 pid=2083 tid=2083] native-loader jit-info native fd=17 id=152 type=26 name=sched_wakeup tag=59f4a931744dcdc6 jited_len=82 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0604158 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 127,
+            "name": "sys_enter",
+            "tag": "b384d88950b7bbb9",
+            "jited": 108,
+            "xlated": 168,
+            "line": 370,
+            "text": "[853.873916 pid=2074 tid=2074] native-loader jit-info original fd=11 id=127 type=5 name=sys_enter tag=b384d88950b7bbb9 jited_len=108 xlated_len=168 nr_jited_ksyms=1 ksym0=0xffffffffc0602c30 ksym1=0x0"
+          },
+          "native": {
+            "id": 155,
+            "name": "sys_enter",
+            "tag": "59f4a931744dcdc6",
+            "jited": 74,
+            "xlated": 16,
+            "line": 371,
+            "text": "[853.874315 pid=2074 tid=2074] native-loader jit-info native fd=15 id=155 type=5 name=sys_enter tag=59f4a931744dcdc6 jited_len=74 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0604388 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 136,
+            "name": "tracepoint__sys",
+            "tag": "faeb442ee60dc635",
+            "jited": 141,
+            "xlated": 240,
+            "line": 380,
+            "text": "[853.882719 pid=2071 tid=2071] native-loader jit-info original fd=10 id=136 type=5 name=tracepoint__sys tag=faeb442ee60dc635 jited_len=141 xlated_len=240 nr_jited_ksyms=1 ksym0=0xffffffffc0601d08 ksym1=0x0"
+          },
+          "native": {
+            "id": 158,
+            "name": "tracepoint__sys",
+            "tag": "59f4a931744dcdc6",
+            "jited": 94,
+            "xlated": 16,
+            "line": 381,
+            "text": "[853.883026 pid=2071 tid=2071] native-loader jit-info native fd=16 id=158 type=5 name=tracepoint__sys tag=59f4a931744dcdc6 jited_len=94 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06046d0 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 145,
+            "name": "kprobe__cap_cap",
+            "tag": "7c9faa2569d54b09",
+            "jited": 383,
+            "xlated": 616,
+            "line": 386,
+            "text": "[853.933198 pid=2062 tid=2062] native-loader jit-info original fd=15 id=145 type=2 name=kprobe__cap_cap tag=7c9faa2569d54b09 jited_len=383 xlated_len=616 nr_jited_ksyms=1 ksym0=0xffffffffc06038e0 ksym1=0x0"
+          },
+          "native": {
+            "id": 160,
+            "name": "kprobe__cap_cap",
+            "tag": "59f4a931744dcdc6",
+            "jited": 281,
+            "xlated": 16,
+            "line": 387,
+            "text": "[853.933531 pid=2062 tid=2062] native-loader jit-info native fd=23 id=160 type=2 name=kprobe__cap_cap tag=59f4a931744dcdc6 jited_len=281 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0604acc ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 148,
+            "name": "block_rq_insert",
+            "tag": "05b8822023cd42b7",
+            "jited": 354,
+            "xlated": 648,
+            "line": 390,
+            "text": "[853.991167 pid=2065 tid=2065] native-loader jit-info original fd=13 id=148 type=26 name=block_rq_insert tag=05b8822023cd42b7 jited_len=354 xlated_len=648 nr_jited_ksyms=1 ksym0=0xffffffffc0603c08 ksym1=0x0"
+          },
+          "native": {
+            "id": 161,
+            "name": "block_rq_insert",
+            "tag": "59f4a931744dcdc6",
+            "jited": 390,
+            "xlated": 16,
+            "line": 391,
+            "text": "[853.991525 pid=2065 tid=2065] native-loader jit-info native fd=22 id=161 type=26 name=block_rq_insert tag=59f4a931744dcdc6 jited_len=390 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0604d58 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 151,
+            "name": "tcp_v4_connect_",
+            "tag": "fc9b115ea84ee0a5",
+            "jited": 493,
+            "xlated": 752,
+            "line": 426,
+            "text": "[854.045517 pid=2077 tid=2077] native-loader jit-info original fd=13 id=151 type=2 name=tcp_v4_connect_ tag=fc9b115ea84ee0a5 jited_len=493 xlated_len=752 nr_jited_ksyms=1 ksym0=0xffffffffc0603f10 ksym1=0x0"
+          },
+          "native": {
+            "id": 164,
+            "name": "tcp_v4_connect_",
+            "tag": "59f4a931744dcdc6",
+            "jited": 362,
+            "xlated": 16,
+            "line": 427,
+            "text": "[854.045853 pid=2077 tid=2077] native-loader jit-info native fd=20 id=164 type=2 name=tcp_v4_connect_ tag=59f4a931744dcdc6 jited_len=362 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06052a4 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 154,
+            "name": "sched_wakeup_ne",
+            "tag": "07887b23a665c882",
+            "jited": 121,
+            "xlated": 184,
+            "line": 431,
+            "text": "[854.094934 pid=2083 tid=2083] native-loader jit-info original fd=12 id=154 type=26 name=sched_wakeup_ne tag=07887b23a665c882 jited_len=121 xlated_len=184 nr_jited_ksyms=1 ksym0=0xffffffffc06042dc ksym1=0x0"
+          },
+          "native": {
+            "id": 166,
+            "name": "sched_wakeup_ne",
+            "tag": "59f4a931744dcdc6",
+            "jited": 82,
+            "xlated": 16,
+            "line": 432,
+            "text": "[854.095322 pid=2083 tid=2083] native-loader jit-info native fd=19 id=166 type=26 name=sched_wakeup_ne tag=59f4a931744dcdc6 jited_len=82 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0605620 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 157,
+            "name": "sys_exit",
+            "tag": "9a38fb8da7b8b8f7",
+            "jited": 406,
+            "xlated": 656,
+            "line": 437,
+            "text": "[854.145712 pid=2074 tid=2074] native-loader jit-info original fd=11 id=157 type=5 name=sys_exit tag=9a38fb8da7b8b8f7 jited_len=406 xlated_len=656 nr_jited_ksyms=1 ksym0=0xffffffffc0604520 ksym1=0x0"
+          },
+          "native": {
+            "id": 168,
+            "name": "sys_exit",
+            "tag": "59f4a931744dcdc6",
+            "jited": 272,
+            "xlated": 16,
+            "line": 438,
+            "text": "[854.146130 pid=2074 tid=2074] native-loader jit-info native fd=17 id=168 type=5 name=sys_exit tag=59f4a931744dcdc6 jited_len=272 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0605b54 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 159,
+            "name": "tracepoint__sys",
+            "tag": "ae739a47b4daed15",
+            "jited": 602,
+            "xlated": 792,
+            "line": 456,
+            "text": "[854.157276 pid=2071 tid=2071] native-loader jit-info original fd=10 id=159 type=5 name=tracepoint__sys tag=ae739a47b4daed15 jited_len=602 xlated_len=792 nr_jited_ksyms=1 ksym0=0xffffffffc0604858 ksym1=0x0"
+          },
+          "native": {
+            "id": 170,
+            "name": "tracepoint__sys",
+            "tag": "59f4a931744dcdc6",
+            "jited": 283,
+            "xlated": 16,
+            "line": 457,
+            "text": "[854.157500 pid=2071 tid=2071] native-loader jit-info native fd=18 id=170 type=5 name=tracepoint__sys tag=59f4a931744dcdc6 jited_len=283 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0605db0 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 162,
+            "name": "block_rq_issue",
+            "tag": "89355e738c3e8a16",
+            "jited": 440,
+            "xlated": 824,
+            "line": 461,
+            "text": "[854.213188 pid=2065 tid=2065] native-loader jit-info original fd=13 id=162 type=26 name=block_rq_issue tag=89355e738c3e8a16 jited_len=440 xlated_len=824 nr_jited_ksyms=1 ksym0=0xffffffffc06050bc ksym1=0x0"
+          },
+          "native": {
+            "id": 172,
+            "name": "block_rq_issue",
+            "tag": "59f4a931744dcdc6",
+            "jited": 316,
+            "xlated": 16,
+            "line": 462,
+            "text": "[854.213673 pid=2065 tid=2065] native-loader jit-info native fd=24 id=172 type=26 name=block_rq_issue tag=59f4a931744dcdc6 jited_len=316 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc060628c ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 165,
+            "name": "tcp_v6_connect",
+            "tag": "120cbe8ad1ac7784",
+            "jited": 110,
+            "xlated": 184,
+            "line": 466,
+            "text": "[854.261892 pid=2077 tid=2077] native-loader jit-info original fd=13 id=165 type=2 name=tcp_v6_connect tag=120cbe8ad1ac7784 jited_len=110 xlated_len=184 nr_jited_ksyms=1 ksym0=0xffffffffc0605570 ksym1=0x0"
+          },
+          "native": {
+            "id": 174,
+            "name": "tcp_v6_connect",
+            "tag": "59f4a931744dcdc6",
+            "jited": 78,
+            "xlated": 16,
+            "line": 467,
+            "text": "[854.262190 pid=2077 tid=2077] native-loader jit-info native fd=23 id=174 type=2 name=tcp_v6_connect tag=59f4a931744dcdc6 jited_len=78 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0606724 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 167,
+            "name": "sched_switch",
+            "tag": "f872909b2c4482c9",
+            "jited": 935,
+            "xlated": 1632,
+            "line": 471,
+            "text": "[854.330847 pid=2083 tid=2083] native-loader jit-info original fd=12 id=167 type=26 name=sched_switch tag=f872909b2c4482c9 jited_len=935 xlated_len=1632 nr_jited_ksyms=2 ksym0=0xffffffffc0601cd4 ksym1=0xffffffffc060579c"
+          },
+          "native": {
+            "id": 176,
+            "name": "sched_switch",
+            "tag": "59f4a931744dcdc6",
+            "jited": 995,
+            "xlated": 16,
+            "line": 472,
+            "text": "[854.331270 pid=2083 tid=2083] native-loader jit-info native fd=21 id=176 type=26 name=sched_switch tag=59f4a931744dcdc6 jited_len=995 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0606ac8 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 171,
+            "name": "tracepoint__sys",
+            "tag": "ae739a47b4daed15",
+            "jited": 602,
+            "xlated": 792,
+            "line": 482,
+            "text": "[854.341136 pid=2071 tid=2071] native-loader jit-info original fd=10 id=171 type=5 name=tracepoint__sys tag=ae739a47b4daed15 jited_len=602 xlated_len=792 nr_jited_ksyms=1 ksym0=0xffffffffc0606008 ksym1=0x0"
+          },
+          "native": {
+            "id": 177,
+            "name": "tracepoint__sys",
+            "tag": "59f4a931744dcdc6",
+            "jited": 283,
+            "xlated": 16,
+            "line": 483,
+            "text": "[854.341362 pid=2071 tid=2071] native-loader jit-info native fd=20 id=177 type=5 name=tracepoint__sys tag=59f4a931744dcdc6 jited_len=283 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06070f8 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 173,
+            "name": "block_rq_comple",
+            "tag": "94563ffd43a60f7b",
+            "jited": 437,
+            "xlated": 712,
+            "line": 527,
+            "text": "[854.393594 pid=2065 tid=2065] native-loader jit-info original fd=13 id=173 type=26 name=block_rq_comple tag=94563ffd43a60f7b jited_len=437 xlated_len=712 nr_jited_ksyms=1 ksym0=0xffffffffc0606524 ksym1=0x0"
+          },
+          "native": {
+            "id": 179,
+            "name": "block_rq_comple",
+            "tag": "59f4a931744dcdc6",
+            "jited": 365,
+            "xlated": 16,
+            "line": 528,
+            "text": "[854.393865 pid=2065 tid=2065] native-loader jit-info native fd=25 id=179 type=26 name=block_rq_comple tag=59f4a931744dcdc6 jited_len=365 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0607370 ksym1=0x0"
+          }
+        },
+        {
+          "original": {
+            "id": 175,
+            "name": "tcp_v6_connect_",
+            "tag": "e66c43a4971e2c50",
+            "jited": 496,
+            "xlated": 752,
+            "line": 531,
+            "text": "[854.449893 pid=2077 tid=2077] native-loader jit-info original fd=13 id=175 type=2 name=tcp_v6_connect_ tag=e66c43a4971e2c50 jited_len=496 xlated_len=752 nr_jited_ksyms=1 ksym0=0xffffffffc06068ac ksym1=0x0"
+          },
+          "native": {
+            "id": 180,
+            "name": "tcp_v6_connect_",
+            "tag": "59f4a931744dcdc6",
+            "jited": 456,
+            "xlated": 16,
+            "line": 532,
+            "text": "[854.450265 pid=2077 tid=2077] native-loader jit-info native fd=24 id=180 type=2 name=tcp_v6_connect_ tag=59f4a931744dcdc6 jited_len=456 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0607670 ksym1=0x0"
+          }
+        }
+      ],
+      "throughput_ratio": 1.020368025050307
+    }
+  },
+  "native_load_fingerprint_comparison": {
+    "off_loads": 25,
+    "on_loads": 25,
+    "equal_multiset": true,
+    "off_only": [],
+    "on_only": [],
+    "scope": "name, originalBPFtag/JITlength and nativeJITlength only; not actual native-byte, frozen-global or map-binding equality."
+  },
+  "component_comparison": [
+    {
+      "stats": "off",
+      "ratio": 0.8772482128336425,
+      "stressor_ratios": {
+        "cap": 0.9685103268319165,
+        "set": 0.9875057888237111,
+        "sockfd": 0.7279613341666843,
+        "syscall": 1.0
+      },
+      "component_medians": {
+        "ebpf": {
+          "cap": 381586.05,
+          "set": 29021.44,
+          "sockfd": 248266.73,
+          "syscall": 2.84
+        },
+        "native": {
+          "cap": 369570.03,
+          "set": 28658.84,
+          "sockfd": 180728.58,
+          "syscall": 2.84
+        }
+      }
+    },
+    {
+      "stats": "on",
+      "ratio": 1.020368025050307,
+      "stressor_ratios": {
+        "cap": 1.0175162967290212,
+        "set": 1.0194666992015402,
+        "sockfd": 1.021790292407305,
+        "syscall": 1.0
+      },
+      "component_medians": {
+        "ebpf": {
+          "cap": 284707.44,
+          "set": 22130.1,
+          "sockfd": 212594.21,
+          "syscall": 2.86
+        },
+        "native": {
+          "cap": 289694.46,
+          "set": 22560.9,
+          "sockfd": 217226.7,
+          "syscall": 2.86
+        }
+      }
+    }
+  ]
+}
