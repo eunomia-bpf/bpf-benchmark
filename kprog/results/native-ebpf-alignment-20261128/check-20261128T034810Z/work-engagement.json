@@ -1,0 +1,858 @@
+{
+  "bcc/set": {
+    "app": "bcc/set",
+    "status": "ok",
+    "native_install_events": 25,
+    "native_failures": 0,
+    "phases": {
+      "baseline": {
+        "programs": 25,
+        "active_programs": 17,
+        "calls_by_kernel_name": {
+          "tracepoint__sys": 4341686,
+          "fentry_vfs_read": 83225,
+          "blk_account_io_": 51,
+          "fentry_vfs_writ": 42675,
+          "inet_sock_set_s": 0,
+          "block_rq_insert": 0,
+          "tcp_v4_connect": 0,
+          "fentry_vfs_fsyn": 14,
+          "tcp_v4_connect_": 0,
+          "tcp_v6_connect": 0,
+          "block_rq_issue": 84,
+          "fentry_vfs_open": 2171480,
+          "tcp_v6_connect_": 0,
+          "block_rq_comple": 92,
+          "kprobe__cap_cap": 4995917,
+          "fentry_vfs_crea": 15,
+          "sys_enter": 62114690,
+          "sys_exit": 62114765,
+          "sched_wakeup": 2033925,
+          "sched_wakeup_ne": 153,
+          "sched_switch": 4059449
+        },
+        "workers": [
+          {
+            "name": "stress_ng_bcc_hook_hot",
+            "config": {
+              "stressors": [
+                "syscall",
+                "cap",
+                "set",
+                "sockfd"
+              ],
+              "tool": "stress-ng"
+            },
+            "returncode": 0,
+            "duration_s": 10.016855485999997,
+            "packets": null,
+            "send_errors": null,
+            "stress_summary": [
+              "skipped: 0",
+              "passed: 4: syscall (1) cap (1) set (1) sockfd (1)",
+              "failed: 0"
+            ]
+          }
+        ]
+      },
+      "post_rejit": {
+        "programs": 25,
+        "active_programs": 17,
+        "calls_by_kernel_name": {
+          "fentry_vfs_read": 94848,
+          "fentry_vfs_writ": 54724,
+          "tracepoint__sys": 4387530,
+          "fentry_vfs_fsyn": 14,
+          "fentry_vfs_open": 2193704,
+          "fentry_vfs_crea": 14,
+          "tcp_v4_connect": 0,
+          "inet_sock_set_s": 0,
+          "blk_account_io_": 49,
+          "sys_enter": 63251024,
+          "kprobe__cap_cap": 5033233,
+          "sched_wakeup": 2025506,
+          "tcp_v4_connect_": 0,
+          "block_rq_insert": 0,
+          "sys_exit": 63251102,
+          "sched_wakeup_ne": 152,
+          "tcp_v6_connect": 0,
+          "block_rq_issue": 86,
+          "sched_switch": 4027595,
+          "tcp_v6_connect_": 0,
+          "block_rq_comple": 96
+        },
+        "workers": [
+          {
+            "name": "stress_ng_bcc_hook_hot",
+            "config": {
+              "stressors": [
+                "syscall",
+                "cap",
+                "set",
+                "sockfd"
+              ],
+              "tool": "stress-ng"
+            },
+            "returncode": 0,
+            "duration_s": 11.016404712999986,
+            "packets": null,
+            "send_errors": null,
+            "stress_summary": [
+              "skipped: 0",
+              "passed: 4: syscall (1) cap (1) set (1) sockfd (1)",
+              "failed: 0"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "cilium/agent": {
+    "app": "cilium/agent",
+    "status": "ok",
+    "native_install_events": 135,
+    "native_failures": 0,
+    "phases": {
+      "baseline": {
+        "programs": 53,
+        "active_programs": 5,
+        "calls_by_kernel_name": {
+          "cil_xdp_entry": 0,
+          "cil_to_host": 1,
+          "tail_handle_ipv": 0,
+          "cil_host_policy": 0,
+          "tail_drop_notif": 0,
+          "tail_nodeport_n": 0,
+          "cil_from_host": 1,
+          "tail_handle_sna": 0,
+          "tail_no_service": 0,
+          "cil_to_netdev": 1,
+          "cil_from_netdev": 0,
+          "tail_nodeport_r": 0,
+          "cil_from_contai": 13748620,
+          "tail_ipv4_polic": 0,
+          "tail_ipv4_to_en": 0,
+          "tail_ipv4_ct_eg": 0,
+          "tail_handle_arp": 0,
+          "cil_lxc_policy_": 0,
+          "tail_ipv4_ct_in": 0,
+          "cil_lxc_policy": 0
+        },
+        "workers": [
+          {
+            "name": "cilium_endpoint_pktgen_forward",
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.143",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepa",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.27",
+              "tool": "kernel_pktgen"
+            },
+            "returncode": 0,
+            "duration_s": 10.066458135999994,
+            "packets": 6874255,
+            "send_errors": 0,
+            "stress_summary": []
+          },
+          {
+            "name": "cilium_endpoint_pktgen_reverse",
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.27",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepb",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.143",
+              "tool": "kernel_pktgen"
+            },
+            "returncode": 0,
+            "duration_s": 10.08635365699999,
+            "packets": 6874341,
+            "send_errors": 0,
+            "stress_summary": []
+          }
+        ]
+      },
+      "post_rejit": {
+        "programs": 62,
+        "active_programs": 2,
+        "calls_by_kernel_name": {
+          "cil_xdp_entry": 0,
+          "tail_nodeport_n": 0,
+          "tail_handle_ipv": 0,
+          "cil_from_netdev": 0,
+          "tail_handle_sna": 0,
+          "cil_to_host": 0,
+          "cil_host_policy": 0,
+          "cil_from_host": 0,
+          "tail_drop_notif": 0,
+          "cil_to_netdev": 0,
+          "tail_no_service": 0,
+          "tail_ipv4_ct_eg": 0,
+          "tail_ipv4_ct_in": 0,
+          "tail_nodeport_r": 0,
+          "tail_handle_arp": 0,
+          "cil_from_contai": 14203902,
+          "tail_ipv4_polic": 0,
+          "tail_ipv4_to_en": 0,
+          "cil_lxc_policy_": 0,
+          "cil_lxc_policy": 0
+        },
+        "workers": [
+          {
+            "name": "cilium_endpoint_pktgen_forward",
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.116",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepa",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.118",
+              "tool": "kernel_pktgen"
+            },
+            "returncode": 0,
+            "duration_s": 10.087649029000005,
+            "packets": 7105001,
+            "send_errors": 0,
+            "stress_summary": []
+          },
+          {
+            "name": "cilium_endpoint_pktgen_reverse",
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.118",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepb",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.116",
+              "tool": "kernel_pktgen"
+            },
+            "returncode": 0,
+            "duration_s": 10.046308355000008,
+            "packets": 7098878,
+            "send_errors": 0,
+            "stress_summary": []
+          }
+        ]
+      }
+    }
+  },
+  "tetragon/observer": {
+    "app": "tetragon/observer",
+    "status": "ok",
+    "native_install_events": 288,
+    "native_failures": 0,
+    "phases": {
+      "baseline": {
+        "programs": 287,
+        "active_programs": 35,
+        "calls_by_kernel_name": {
+          "generic_kprobe_": 24295020,
+          "generic_retkpro": 8793415,
+          "generic_tracepo": 30380031,
+          "generic_rawtp_a": 0,
+          "generic_rawtp_p": 0,
+          "generic_rawtp_s": 0,
+          "generic_rawtp_f": 0,
+          "generic_rawtp_o": 0,
+          "generic_rawtp_e": 29,
+          "event_exit_acct": 42,
+          "event_wake_up_n": 100,
+          "execve_rate": 0,
+          "execve_send": 0,
+          "event_execve": 29,
+          "tg_kp_bprm_comm": 29,
+          "execve_map_upda": 0
+        },
+        "workers": [
+          {
+            "name": "stress_ng_tetragon_policy_hot",
+            "config": {
+              "stressors": [
+                "eventfd",
+                "mmap",
+                "udp",
+                "sock",
+                "sockfd",
+                "sockpair"
+              ],
+              "tool": "stress-ng"
+            },
+            "returncode": 0,
+            "duration_s": 10.064439053000001,
+            "packets": null,
+            "send_errors": null,
+            "stress_summary": [
+              "skipped: 0",
+              "passed: 6: eventfd (1) mmap (1) udp (1) sock (1) sockfd (1) sockpair (1)",
+              "failed: 0"
+            ]
+          }
+        ]
+      },
+      "post_rejit": {
+        "programs": 287,
+        "active_programs": 32,
+        "calls_by_kernel_name": {
+          "event_exit_acct": 24,
+          "event_wake_up_n": 42,
+          "event_execve": 11,
+          "execve_rate": 0,
+          "execve_send": 0,
+          "tg_kp_bprm_comm": 11,
+          "execve_map_upda": 0,
+          "generic_kprobe_": 26007961,
+          "generic_retkpro": 9566206,
+          "generic_tracepo": 29534096,
+          "generic_rawtp_p": 0,
+          "generic_rawtp_f": 0,
+          "generic_rawtp_a": 0,
+          "generic_rawtp_s": 0,
+          "generic_rawtp_o": 0,
+          "generic_rawtp_e": 11
+        },
+        "workers": [
+          {
+            "name": "stress_ng_tetragon_policy_hot",
+            "config": {
+              "stressors": [
+                "eventfd",
+                "mmap",
+                "udp",
+                "sock",
+                "sockfd",
+                "sockpair"
+              ],
+              "tool": "stress-ng"
+            },
+            "returncode": 0,
+            "duration_s": 10.041063409000003,
+            "packets": null,
+            "send_errors": null,
+            "stress_summary": [
+              "skipped: 0",
+              "passed: 6: eventfd (1) mmap (1) udp (1) sock (1) sockfd (1) sockpair (1)",
+              "failed: 0"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "tracee/monitor": {
+    "app": "tracee/monitor",
+    "status": "ok",
+    "native_install_events": 169,
+    "native_failures": 0,
+    "phases": {
+      "baseline": {
+        "programs": 167,
+        "active_programs": 64,
+        "calls_by_kernel_name": {
+          "trace_ret_vfs_w": 652778,
+          "trace_kernel_wr": 0,
+          "kernel_write_ma": 0,
+          "trace_ret_kerne": 0,
+          "trace_vfs_read": 2791478,
+          "trace_ret_vfs_r": 2791478,
+          "trace_vfs_readv": 0,
+          "trace_mmap_aler": 1445,
+          "trace_do_mmap": 1319,
+          "trace_ret_do_mm": 1319,
+          "trace_security_": 4748675,
+          "syscall__init_m": 0,
+          "trace_register_": 0,
+          "trace_ret_regis": 0,
+          "trace_bpf_check": 0,
+          "trace_check_map": 0,
+          "trace_check_hel": 0,
+          "trace_device_ad": 0,
+          "trace___registe": 0,
+          "trace_ret__regi": 0,
+          "trace_do_splice": 0,
+          "trace_ret_do_sp": 0,
+          "tracepoint__mod": 0,
+          "trace_do_init_m": 0,
+          "trace_ret_do_in": 0,
+          "trace_load_elf_": 62,
+          "tracepoint__tas": 2959,
+          "trace_kallsyms_": 0,
+          "trace_ret_kalls": 0,
+          "trace_do_sigact": 7080,
+          "trace_vfs_utime": 0,
+          "trace_utimes_co": 0,
+          "trace_do_trunca": 3,
+          "trace_fd_instal": 327625,
+          "trace_filp_clos": 8891,
+          "trace_file_upda": 218,
+          "trace_ret_file_": 218,
+          "trace_file_modi": 0,
+          "trace_inotify_f": 0,
+          "trace_ret_inoti": 0,
+          "process_execute": 0,
+          "trace_exec_binp": 31,
+          "trace_execute_f": 31,
+          "trace_set_fs_pw": 4,
+          "trace_chmod_com": 0,
+          "syscall_checker": 0,
+          "trace_sock_allo": 25,
+          "trace_ret_sock_": 25,
+          "cgroup_bpf_run_": 0,
+          "cgroup_skb_ingr": 0,
+          "cgroup_skb_egre": 0,
+          "cgroup_mkdir_si": 0,
+          "cgroup_rmdir_si": 0,
+          "empty_kprobe": 31,
+          "tracepoint__raw": 53006178,
+          "tracepoint__exe": 31,
+          "lsm_file_open_t": 327024,
+          "uprobe__feature": 0,
+          "sys_enter_init": 0,
+          "sys_enter_submi": 0,
+          "sys_exit_init": 0,
+          "sys_exit_submit": 0,
+          "trace_sys_enter": 26503059,
+          "trace_sys_exit": 26503094,
+          "trace_ptrace": 0,
+          "trace_ret_ptrac": 0,
+          "trace_process_v": 0,
+          "trace_ret_proce": 0,
+          "trace_arch_prct": 757997,
+          "trace_ret_arch_": 757997,
+          "trace_dup": 0,
+          "trace_ret_dup": 0,
+          "trace_dup2": 35,
+          "trace_ret_dup2": 35,
+          "trace_dup3": 0,
+          "trace_ret_dup3": 0,
+          "syscall__execve": 0,
+          "sys_dup_exit_ta": 0,
+          "tracepoint__sch": 3541834,
+          "sched_process_f": 2975,
+          "lkm_seeker_modt": 0,
+          "heartbeat_captu": 10,
+          "uprobe_lkm_seek": 0,
+          "lkm_seeker_kset": 0,
+          "lkm_seeker_mod_": 0,
+          "lkm_seeker_proc": 0,
+          "lkm_seeker_new_": 0,
+          "sched_process_e": 3005,
+          "syscall__accept": 0,
+          "trace_filldir64": 850018,
+          "trace_call_user": 0,
+          "trace_do_exit": 2974,
+          "uprobe_syscall_": 0,
+          "uprobe_seq_ops_": 0,
+          "uprobe_mem_dump": 0,
+          "trace_tracepoin": 0,
+          "tracepoint__cgr": 0,
+          "trace_commit_cr": 462639,
+          "trace_switch_ta": 2977,
+          "trace_cap_capab": 788405,
+          "trace_proc_crea": 0,
+          "trace___debugfs": 0,
+          "trace_debugfs_c": 0,
+          "send_bin": 0,
+          "send_bin_tp": 0,
+          "trace_vfs_write": 652778,
+          "vfs_write_magic": 1305556,
+          "vfs_writev_magi": 0
+        },
+        "workers": [
+          {
+            "name": "stress_ng_tracee_syscall_hot",
+            "config": {
+              "stressors": [
+                "cap",
+                "set",
+                "sigfd",
+                "eventfd",
+                "kill",
+                "futex",
+                "prctl"
+              ],
+              "tool": "stress-ng"
+            },
+            "returncode": 0,
+            "duration_s": 10.027419596999977,
+            "packets": null,
+            "send_errors": null,
+            "stress_summary": [
+              "skipped: 0",
+              "passed: 7: cap (1) set (1) sigfd (1) eventfd (1) kill (1) futex (1) prctl (1)",
+              "failed: 0"
+            ]
+          }
+        ]
+      },
+      "post_rejit": {
+        "programs": 167,
+        "active_programs": 68,
+        "calls_by_kernel_name": {
+          "tracepoint__raw": 94732375,
+          "sys_enter_init": 0,
+          "sys_enter_submi": 0,
+          "sys_exit_init": 0,
+          "sys_exit_submit": 0,
+          "trace_sys_enter": 47366177,
+          "trace_sys_exit": 47366201,
+          "trace_ptrace": 0,
+          "trace_ret_ptrac": 0,
+          "trace_process_v": 0,
+          "trace_ret_proce": 0,
+          "trace_arch_prct": 1126703,
+          "trace_ret_arch_": 1126703,
+          "trace_dup": 0,
+          "trace_ret_dup": 0,
+          "trace_dup2": 13,
+          "trace_ret_dup2": 13,
+          "trace_dup3": 0,
+          "trace_ret_dup3": 0,
+          "syscall__execve": 0,
+          "sys_dup_exit_ta": 0,
+          "tracepoint__sch": 4191148,
+          "sched_process_f": 4326,
+          "lkm_seeker_modt": 0,
+          "heartbeat_captu": 10,
+          "uprobe_lkm_seek": 1,
+          "lkm_seeker_kset": 0,
+          "lkm_seeker_mod_": 0,
+          "lkm_seeker_proc": 0,
+          "lkm_seeker_new_": 0,
+          "sched_process_e": 4336,
+          "syscall__accept": 0,
+          "trace_filldir64": 1358601,
+          "trace_call_user": 0,
+          "trace_do_exit": 4325,
+          "uprobe_syscall_": 0,
+          "uprobe_seq_ops_": 0,
+          "uprobe_mem_dump": 0,
+          "trace_security_": 8573773,
+          "trace_tracepoin": 0,
+          "tracepoint__cgr": 0,
+          "trace_commit_cr": 838235,
+          "trace_switch_ta": 4326,
+          "trace_cap_capab": 1352235,
+          "trace_proc_crea": 0,
+          "trace___debugfs": 0,
+          "trace_debugfs_c": 0,
+          "send_bin": 0,
+          "send_bin_tp": 0,
+          "trace_vfs_write": 1134358,
+          "vfs_write_magic": 2268711,
+          "trace_ret_vfs_w": 1134357,
+          "vfs_writev_magi": 0,
+          "trace_kernel_wr": 0,
+          "kernel_write_ma": 0,
+          "trace_ret_kerne": 0,
+          "trace_vfs_read": 5194752,
+          "trace_ret_vfs_r": 5194756,
+          "trace_vfs_readv": 0,
+          "trace_mmap_aler": 591,
+          "trace_do_mmap": 546,
+          "trace_ret_do_mm": 546,
+          "syscall__init_m": 0,
+          "trace_register_": 0,
+          "trace_ret_regis": 0,
+          "trace_bpf_check": 0,
+          "trace_check_map": 0,
+          "trace_check_hel": 0,
+          "trace_device_ad": 0,
+          "trace___registe": 0,
+          "trace_ret__regi": 0,
+          "trace_do_splice": 0,
+          "trace_ret_do_sp": 0,
+          "tracepoint__mod": 0,
+          "trace_do_init_m": 0,
+          "trace_ret_do_in": 0,
+          "trace_load_elf_": 22,
+          "tracepoint__tas": 4341,
+          "trace_kallsyms_": 0,
+          "trace_ret_kalls": 0,
+          "trace_do_sigact": 9080,
+          "trace_vfs_utime": 255,
+          "trace_utimes_co": 0,
+          "trace_do_trunca": 1,
+          "trace_fd_instal": 559692,
+          "trace_filp_clos": 12966,
+          "trace_file_upda": 6687,
+          "trace_ret_file_": 6687,
+          "trace_file_modi": 0,
+          "trace_inotify_f": 0,
+          "trace_ret_inoti": 0,
+          "process_execute": 0,
+          "trace_exec_binp": 11,
+          "trace_execute_f": 11,
+          "trace_set_fs_pw": 2,
+          "trace_chmod_com": 254,
+          "syscall_checker": 0,
+          "trace_sock_allo": 21,
+          "trace_ret_sock_": 21,
+          "cgroup_bpf_run_": 0,
+          "cgroup_skb_ingr": 0,
+          "cgroup_skb_egre": 0,
+          "cgroup_mkdir_si": 0,
+          "cgroup_rmdir_si": 0,
+          "empty_kprobe": 11,
+          "tracepoint__exe": 11,
+          "lsm_file_open_t": 559431,
+          "uprobe__feature": 0
+        },
+        "workers": [
+          {
+            "name": "stress_ng_tracee_syscall_hot",
+            "config": {
+              "stressors": [
+                "cap",
+                "set",
+                "sigfd",
+                "eventfd",
+                "kill",
+                "futex",
+                "prctl"
+              ],
+              "tool": "stress-ng"
+            },
+            "returncode": 0,
+            "duration_s": 10.027189181999972,
+            "packets": null,
+            "send_errors": null,
+            "stress_summary": [
+              "skipped: 0",
+              "passed: 7: cap (1) set (1) sigfd (1) eventfd (1) kill (1) futex (1) prctl (1)",
+              "failed: 0"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "katran": {
+    "app": "katran",
+    "status": "ok",
+    "native_install_events": 1,
+    "native_failures": 0,
+    "phases": {
+      "baseline": {
+        "programs": 1,
+        "active_programs": 1,
+        "calls_by_kernel_name": {
+          "balancer_ingres": 24000485
+        },
+        "workers": [
+          {
+            "name": "katran_kernel_pktgen_l2_udp_thread",
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@0",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 0,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "returncode": 0,
+            "duration_s": 10.031808706000007,
+            "packets": 7903422,
+            "send_errors": 8883335,
+            "stress_summary": []
+          },
+          {
+            "name": "katran_kernel_pktgen_l2_udp_thread",
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@1",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 1,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "returncode": 0,
+            "duration_s": 10.031808706000007,
+            "packets": 9442,
+            "send_errors": 12313,
+            "stress_summary": []
+          },
+          {
+            "name": "katran_kernel_pktgen_l2_udp_thread",
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@2",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 2,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "returncode": 0,
+            "duration_s": 10.031808706000007,
+            "packets": 7960317,
+            "send_errors": 8910229,
+            "stress_summary": []
+          },
+          {
+            "name": "katran_kernel_pktgen_l2_udp_thread",
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@3",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 3,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "returncode": 0,
+            "duration_s": 10.031808706000007,
+            "packets": 8127304,
+            "send_errors": 9095101,
+            "stress_summary": []
+          }
+        ]
+      },
+      "post_rejit": {
+        "programs": 1,
+        "active_programs": 1,
+        "calls_by_kernel_name": {
+          "balancer_ingres": 25379137
+        },
+        "workers": [
+          {
+            "name": "katran_kernel_pktgen_l2_udp_thread",
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@0",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 0,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "returncode": 0,
+            "duration_s": 10.06047207200001,
+            "packets": 4340,
+            "send_errors": 5654,
+            "stress_summary": []
+          },
+          {
+            "name": "katran_kernel_pktgen_l2_udp_thread",
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@1",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 1,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "returncode": 0,
+            "duration_s": 10.06047207200001,
+            "packets": 8364933,
+            "send_errors": 9012773,
+            "stress_summary": []
+          },
+          {
+            "name": "katran_kernel_pktgen_l2_udp_thread",
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@2",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 2,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "returncode": 0,
+            "duration_s": 10.06047207200001,
+            "packets": 8494204,
+            "send_errors": 8918459,
+            "stress_summary": []
+          },
+          {
+            "name": "katran_kernel_pktgen_l2_udp_thread",
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@3",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": false,
+              "src_ip": "10.0.0.2",
+              "thread_id": 3,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "returncode": 0,
+            "duration_s": 10.06047207200001,
+            "packets": 8515660,
+            "send_errors": 8906953,
+            "stress_summary": []
+          }
+        ]
+      }
+    }
+  }
+}

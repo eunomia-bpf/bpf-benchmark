@@ -1,0 +1,122 @@
+{
+  "corpus/results/x86_kvm_corpus_20261128_034955_642734/metadata.json": {
+    "bytes": 986,
+    "sha256": "3de6cff31918431690936538e02a8cdfa64fb7f9d01332cd381db634b2bc89d1"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_034955_642734/details/result.json": {
+    "bytes": 1758,
+    "sha256": "b3e508954fbdb79ed2c7c848c655b966e38697d00ec260f4a4e8814a2a8206a9"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_034955_642734/details/progress.json": {
+    "bytes": 103,
+    "sha256": "50ffaeb350948255ee898e1b179fb4e2b2d183629f10465b366141048c835139"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_034955_642734/details/shim-logs/bcc__set.baseline.log": {
+    "bytes": 63556,
+    "sha256": "a9e7c2fb22ab5284fb0abadd3a75f027125ad7b61f35b73a6f162377dccdd7f6"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_034955_642734/details/shim-logs/bcc__set.post_rejit.log": {
+    "bytes": 83688,
+    "sha256": "256164648e0d8650573341cee6dd34908aa2f1f3690f2dae535faeb7f17947e5"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_034955_642734/details/apps/bcc__set.json": {
+    "bytes": 18090,
+    "sha256": "533e73c47f2a39f1263aaf264f090acff7b6aa6fa7907f1b35aa70e66c416c01"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_035316_577842/metadata.json": {
+    "bytes": 986,
+    "sha256": "efad7b2ac6b9b7f04fd2e75a70edd30c2dbaf2e318c6621e714d6092efd5e783"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_035316_577842/details/result.json": {
+    "bytes": 1758,
+    "sha256": "3e83a1f427c1feeca230643a4f980fe79aa20ee2c74af3b8a5cf2cd4b7a034cb"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_035316_577842/details/progress.json": {
+    "bytes": 103,
+    "sha256": "06b297790423bc0b30ac9d4759b872cf658725ceeaa9b21254e844341baaf3bf"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_035316_577842/details/shim-logs/cilium__agent.post_rejit.log": {
+    "bytes": 246148,
+    "sha256": "be101de09a5d624cd8c01e60db3f4aa39465a915b67ebe61b72524654ac2ee6f"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_035316_577842/details/shim-logs/cilium__agent.baseline.log": {
+    "bytes": 148969,
+    "sha256": "756e9c87bde76c3557f22bf97494958646890ed0696452ec29bb4b2ab3518247"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_035316_577842/details/apps/cilium__agent.json": {
+    "bytes": 33675,
+    "sha256": "3e15889522e6c1eb55406150b337c2fe69d20ee7cbb7318468bb448d150158b6"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_035633_285463/metadata.json": {
+    "bytes": 986,
+    "sha256": "b4f2c937096db62dd6d1c0da62198a2f32a57f5f7e43e956b5f4388d47e8d469"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_035633_285463/details/result.json": {
+    "bytes": 1758,
+    "sha256": "baa0b95a81c1878693d6803aae241d0b1ebf91dca63cca1f370c8a7c09aca1a5"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_035633_285463/details/progress.json": {
+    "bytes": 103,
+    "sha256": "3bfabb51ccf147823e3f60a0f40a98ad89c67cf2a6b8f86f10be4c939c335e83"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_035633_285463/details/shim-logs/tetragon__observer.post_rejit.log": {
+    "bytes": 1325429,
+    "sha256": "464f201bba3822b6f766547bd39f5b606a7fae006a6381814135eb5aa12dc8cd"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_035633_285463/details/shim-logs/tetragon__observer.baseline.log": {
+    "bytes": 1034748,
+    "sha256": "b13c3ae5ff195f56c78e5088a5ef0f64266b5e457ba9de6cc028a7ef4aef1441"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_035633_285463/details/apps/tetragon__observer.json": {
+    "bytes": 133181,
+    "sha256": "e536b4fffafd8f2d2f1eac5e1252ad50e410473d85d40313cd71bbbd6dfd3d7d"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_040121_409440/metadata.json": {
+    "bytes": 986,
+    "sha256": "c4571591e54326b91e170a321a968462c273b1528bbea60935886dbff4076b39"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_040121_409440/details/result.json": {
+    "bytes": 1758,
+    "sha256": "3a89c2d728525200edbcd5b3aadc7ace658c76375846c5646963172ed10e68db"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_040121_409440/details/progress.json": {
+    "bytes": 103,
+    "sha256": "54aa030c4071153f1b88dc2582790c9e45ac25f37fc9258ce70bf0f7918715d1"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_040121_409440/details/shim-logs/tracee__monitor.post_rejit.log": {
+    "bytes": 327931,
+    "sha256": "480bf05ea3889d4a0c8981d9394342b0feb31358ed4c5fbaafebe526be48075e"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_040121_409440/details/shim-logs/tracee__monitor.baseline.log": {
+    "bytes": 205046,
+    "sha256": "c3e6637318f53558f013427d6966627e4cb204055f8f7cdfc9c57f01798ba15e"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_040121_409440/details/apps/tracee__monitor.json": {
+    "bytes": 80844,
+    "sha256": "191071de0aefccf379a1c54a7e37cc97789de9d5df4ccdee2abc1a3679be36f0"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_040641_814361/metadata.json": {
+    "bytes": 986,
+    "sha256": "eababee93329bd3880e6a0a4b6e88083b508bd484cb85920df28d7bb975ba17d"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_040641_814361/details/result.json": {
+    "bytes": 1758,
+    "sha256": "9d5f999f4caaf214a8093f9eae04267b85b5ac6986057aefe47ae4f3ef369b26"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_040641_814361/details/progress.json": {
+    "bytes": 103,
+    "sha256": "fba1dceb6d0997f5f12dbada6e2522d44a872abdaa1578051cfc3de634247003"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_040641_814361/details/shim-logs/katran.baseline.log": {
+    "bytes": 6400,
+    "sha256": "fa5165a52927a1e107b5bcb653099c756eb4b29ce5abd53986a5813fe1d75b8c"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_040641_814361/details/shim-logs/katran.post_rejit.log": {
+    "bytes": 7471,
+    "sha256": "bd54ed3d839f5389a05c285e86d7ca8b55d7508a4a9751aa4916338e83f3df21"
+  },
+  "corpus/results/x86_kvm_corpus_20261128_040641_814361/details/apps/katran.json": {
+    "bytes": 17141,
+    "sha256": "a8844cef8b9e4e39ffffd72d76a050c068aa5a8619b11507ef4ebb4fbcd9470d"
+  }
+}

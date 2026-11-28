@@ -1,0 +1,57 @@
+{
+  "pid": 1235912,
+  "started_utc": "2026-11-28T03:48:10Z",
+  "controller_status": 0,
+  "phase": "finished",
+  "raw": "/workspaces/kprog-raw/perf/native-ebpf-alignment-20261128/20261128T034810Z",
+  "checks": [
+    {
+      "app": "bcc/set",
+      "raw": "/workspaces/kprog-raw/perf/native-ebpf-alignment-20261128/20261128T034810Z/bcc__set",
+      "started_utc": "2026-11-28T03:48:10Z",
+      "returncode": 0,
+      "ended_utc": "2026-11-28T03:51:24Z",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_034955_642734"
+    },
+    {
+      "app": "cilium/agent",
+      "raw": "/workspaces/kprog-raw/perf/native-ebpf-alignment-20261128/20261128T034810Z/cilium__agent",
+      "started_utc": "2026-11-28T03:51:24Z",
+      "returncode": 0,
+      "ended_utc": "2026-11-28T03:54:44Z",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_035316_577842"
+    },
+    {
+      "app": "tetragon/observer",
+      "raw": "/workspaces/kprog-raw/perf/native-ebpf-alignment-20261128/20261128T034810Z/tetragon__observer",
+      "started_utc": "2026-11-28T03:54:44Z",
+      "returncode": 0,
+      "ended_utc": "2026-11-28T03:59:32Z",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_035633_285463"
+    },
+    {
+      "app": "tracee/monitor",
+      "raw": "/workspaces/kprog-raw/perf/native-ebpf-alignment-20261128/20261128T034810Z/tracee__monitor",
+      "started_utc": "2026-11-28T03:59:32Z",
+      "returncode": 0,
+      "ended_utc": "2026-11-28T04:04:54Z",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_040121_409440"
+    },
+    {
+      "app": "katran",
+      "raw": "/workspaces/kprog-raw/perf/native-ebpf-alignment-20261128/20261128T034810Z/katran",
+      "started_utc": "2026-11-28T04:04:54Z",
+      "returncode": 0,
+      "ended_utc": "2026-11-28T04:07:45Z",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_040641_814361"
+    }
+  ],
+  "reuse_otel": "kprog/results/x86-otel-perf-20261127/profile-20261128T033629Z",
+  "scope": "Coordinator03:24 bug/alignment checks. Reuse same-image OTel once; remaining5 apps once by frozen check recipe, stats1/1sample/10s/64G. No PMU, new image or full timing.",
+  "parent_address_space_limit_bytes": [
+    -1,
+    -1
+  ],
+  "image": "sha256:6b88c0ba4c2253a3eadc999048dc39789185f7516b86a70ec14d098418610e11",
+  "ended_utc": "2026-11-28T04:07:45Z"
+}
