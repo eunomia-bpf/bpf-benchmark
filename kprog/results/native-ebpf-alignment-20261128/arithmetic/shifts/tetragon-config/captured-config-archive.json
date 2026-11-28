@@ -1,0 +1,30 @@
+{
+  "path": "captured-config-records.tar.zst",
+  "bytes": 53576,
+  "sha256": "410b9d3cf185bae334e1366f9ae8fdb7a6af387a9aeb1f04bafe14620ea5a458",
+  "raw_bytes": 5664139,
+  "members": [
+    {
+      "member": "controller.json",
+      "bytes": 5663856,
+      "sha256": "64b19a0e13b089dbe40f0ac900ab4efd1aad2b7eedca14f690d696509411b26e"
+    },
+    {
+      "member": "job.log",
+      "bytes": 283,
+      "sha256": "edf18926ba9633fd52558c70b051ef601e86fbcde987474a9fc03282898f2245"
+    }
+  ],
+  "archive_command": [
+    "tar",
+    "--zstd",
+    "-cf",
+    "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/tetragon-config/captured-config-records.tar.zst",
+    "-C",
+    "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/tetragon-config",
+    "controller.json",
+    "job.log"
+  ],
+  "verified_all_members": true,
+  "raw_copies_preserved": true
+}
