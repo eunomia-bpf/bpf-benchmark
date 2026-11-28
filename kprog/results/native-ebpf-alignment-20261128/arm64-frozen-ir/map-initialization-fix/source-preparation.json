@@ -1,0 +1,11 @@
+{
+  "base_revision": "2689a430a04318cb69f79f76adcba10dd40bb218",
+  "checkout": "Existing detached HEAD retained, no branch/worktree/clone change",
+  "scope": "Only original app map initialization and analysis variable metadata; existing collection loader serializes configured values, maps detached into original ownership. No manual constants/native-only behavior/config/flags/kernel/image changes.",
+  "source_sha256": {
+    "tracer/tracer.go": "b232d7ff992c0a3a12013c679c0af8666c232adc4adf57e5d3fa58ed444a381f",
+    "tracer/systemconfig.go": "cea3a4218e0599191a8a3fce7f259390ae8f541c82ee6b41ce6924a4c9d74197",
+    "tracer/map_variables_integration_test.go": "fcef391b588d5675e8c793015f6dbac9127e96564a82cc943cf82116b7f46b33"
+  },
+  "validation": "gofmt and diff-check passed; source not yet compiled or runtime-accepted; kernel integration regression checks actual map bytes for all same-section variable widths."
+}
