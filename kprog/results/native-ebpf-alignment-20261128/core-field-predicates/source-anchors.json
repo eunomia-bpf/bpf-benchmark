@@ -1,0 +1,44 @@
+[
+  {
+    "path": "vendor/bpf/native_compat.h",
+    "sha256": "906737856b4c533575095e11e090b125ed6bc95a676bd9087411234b44d74494",
+    "line_start": 55,
+    "line_end": 72,
+    "text": "55: #endif\n56: #ifndef container_of\n57: #define container_of(ptr, type, member) \\\n58:     ((type *)((char *)(ptr) - offsetof(type, member)))\n59: #endif\n60: #ifndef bpf_for\n61: #define bpf_for(i, start, end) for ((i) = (start); (i) < (end); (i)++)\n62: #endif\n63: #ifndef bpf_repeat\n64: #define bpf_repeat(n) for (int __native_repeat_i = 0; __native_repeat_i < (n); __native_repeat_i++)\n65: #endif\n66: #ifndef __builtin_preserve_access_index\n67: #define __builtin_preserve_access_index(expr) (expr)\n68: #endif\n69: #ifndef _\n70: #define _(P) (__builtin_preserve_access_index(P))\n71: #endif\n72: "
+  },
+  {
+    "path": "vendor/bpf/native_compat.h",
+    "sha256": "906737856b4c533575095e11e090b125ed6bc95a676bd9087411234b44d74494",
+    "line_start": 305,
+    "line_end": 365,
+    "text": "305: #ifndef bpf_core_field_exists\n306: #ifdef MICRO_NATIVE_TETRAGON\n307: /*\n308:  * Native objects are compiled against the generated target vmlinux header, not\n309:  * libbpf-relocated BPF CO-RE metadata. Most field-existence probes used by the\n310:  * corpus should therefore fold to true when the expression compiles. CO-RE\n311:  * flavor structs are the exception. Their fields exist in the source C type,\n312:  * but their offsets are synthetic until libbpf CO-RE relocates them against\n313:  * the target kernel BTF. Taking those branches in native C reads the synthetic\n314:  * layout instead of the real vmlinux_generated_*.h layout.\n315:  */\n316: #define __native_bpf_core_field_exists_text(field_text) \\\n317:     (__builtin_strcmp((field_text), \"((struct kernfs_node___old *)0)->id.id\") != 0 && \\\n318:      __builtin_strcmp((field_text), \"cgrp_new->ancestors\") != 0)\n319: #define bpf_core_field_exists(field...) \\\n320:     __native_bpf_core_field_exists_text(#field)\n321: #else\n322: #define bpf_core_field_exists(field...) (1)\n323: #endif\n324: #endif\n325: #ifndef bpf_core_type_exists\n326: #define bpf_core_type_exists(type) (1)\n327: #endif\n328: #ifndef bpf_core_type_size\n329: #define bpf_core_type_size(type) sizeof(type)\n330: #endif\n331: #ifndef bpf_core_field_size\n332: #define bpf_core_field_size(field) sizeof(field)\n333: #endif\n334: #ifndef bpf_core_enum_value_exists\n335: #define bpf_core_enum_value_exists(type, value) (1)\n336: #endif\n337: #ifndef bpf_core_enum_value\n338: #define bpf_core_enum_value(type, value) (value)\n339: #endif\n340: #ifndef bpf_core_read\n341: #define bpf_core_read(dst, sz, src) bpf_probe_read_kernel((dst), (sz), (src))\n342: #endif\n343: #ifndef BPF_CORE_READ\n344: #define BPF_CORE_READ(src, args...) ({ \\\n345:     __native_core_type(src, args) __r; \\\n346:     BPF_CORE_READ_INTO(&__r, (src), args); \\\n347:     __r; \\\n348: })\n349: #endif\n350: #ifndef BPF_CORE_READ_INTO\n351: #define BPF_CORE_READ_INTO(dst, src, args...) \\\n352:     __native_core_read_into(bpf_probe_read_kernel, (dst), (src), args)\n353: #endif\n354: #ifndef BPF_CORE_READ_STR_INTO\n355: #define BPF_CORE_READ_STR_INTO(dst, src, args...) \\\n356:     __native_core_read_into(bpf_probe_read_kernel_str, (dst), (src), args)\n357: #endif\n358: #ifndef bpf_core_read_user\n359: #define bpf_core_read_user(dst, sz, src) bpf_probe_read_user((dst), (sz), (src))\n360: #endif\n361: #ifndef BPF_CORE_READ_USER\n362: #define BPF_CORE_READ_USER(src, args...) ({ \\\n363:     __native_core_type(src, args) __r; \\\n364:     __native_core_read_into(bpf_probe_read_user, &__r, (src), args); \\\n365:     __r; \\"
+  },
+  {
+    "path": "vendor/repos/bcc/libbpf-tools/core_fixes.bpf.h",
+    "sha256": "f1d643e718026ed183efa13be9aa924e141e2ec8474fe39ef835b7384179469f",
+    "line_start": 90,
+    "line_end": 112,
+    "text": "90:  * see:\n91:  *     https://github.com/torvalds/linux/commit/d152c682f03c\n92:  *     https://github.com/torvalds/linux/commit/f3fa33acca9f\n93:  */\n94: struct request_queue___x {\n95: \tstruct gendisk *disk;\n96: } __attribute__((preserve_access_index));\n97: \n98: struct request___x {\n99: \tstruct request_queue___x *q;\n100: \tstruct gendisk *rq_disk;\n101: } __attribute__((preserve_access_index));\n102: \n103: static __always_inline struct gendisk *get_disk(void *request)\n104: {\n105: \tstruct request___x *r = request;\n106: \n107: \tif (bpf_core_field_exists(r->rq_disk))\n108: \t\treturn BPF_CORE_READ(r, rq_disk);\n109: \treturn BPF_CORE_READ(r, q, disk);\n110: }\n111: \n112: /**"
+  },
+  {
+    "path": "vendor/repos/tetragon/bpf/process/bpf_process_event.h",
+    "sha256": "71400c6a6f9e210744c97c009c3b8cbdadac23b7b307a8978c8e2e2f821c82cf",
+    "line_start": 20,
+    "line_end": 45,
+    "text": "20: FUNC_INLINE __u64 __get_auid(struct task_struct *t)\n21: {\n22: \tstruct task_struct___local *task = (struct task_struct___local *)t;\n23: \n24: \t// u64 to convince compiler to do 64bit loads early kernels do not\n25: \t// support 32bit loads from stack, e.g. r1 = *(u32 *)(r10 -8).\n26: \t__u64 auid = 0;\n27: \n28: \tif (!task)\n29: \t\treturn auid;\n30: \n31: \tif (bpf_core_field_exists(task->loginuid)) {\n32: \t\tprobe_read(&auid, sizeof(auid), _(&task->loginuid.val));\n33: \t} else {\n34: \t\tstruct audit_task_info *audit;\n35: \n36: \t\tif (bpf_core_field_exists(task->audit)) {\n37: \t\t\tprobe_read(&audit, sizeof(audit), _(&task->audit));\n38: \t\t\tif (audit) {\n39: \t\t\t\tprobe_read(&auid, sizeof(__u32),\n40: \t\t\t\t\t   _(&audit->loginuid));\n41: \t\t\t}\n42: \t\t}\n43: \t}\n44: \n45: \treturn auid;"
+  },
+  {
+    "path": "vendor/repos/tetragon/bpf/lib/bpf_task.h",
+    "sha256": "d72577da6ae79a9873e0f953f71d8fb05963dec337bc24abcd215abe81655377",
+    "line_start": 48,
+    "line_end": 85,
+    "text": "48: FUNC_INLINE __u32 get_task_pid_vnr_by_task(struct task_struct *t)\n49: {\n50: \tstruct task_struct___local *task = (struct task_struct___local *)t;\n51: \tint thread_pid_exists;\n52: \tunsigned int level;\n53: \tstruct upid upid;\n54: \tstruct pid *pid;\n55: \tint upid_sz;\n56: \n57: \tthread_pid_exists = bpf_core_field_exists(task->thread_pid);\n58: \tif (thread_pid_exists) {\n59: \t\tprobe_read_kernel(&pid, sizeof(pid), _(&task->thread_pid));\n60: \t\tif (!pid)\n61: \t\t\treturn 0;\n62: \t} else {\n63: \t\tstruct pid_link link;\n64: \t\tint link_sz = bpf_core_field_size(task->pids);\n65: \n66: \t\t/* 4.14 verifier did not prune this branch even though we\n67: \t\t * have the if (0) above after BTF exists check. So it will\n68: \t\t * try to run this probe_read and throw an error. So lets\n69: \t\t * sanitize it for the verifier.\n70: \t\t */\n71: \t\tif (!thread_pid_exists)\n72: \t\t\tlink_sz =\n73: \t\t\t\t24; // voodoo magic, hard-code 24 to init stack\n74: \t\tprobe_read_kernel(&link, link_sz,\n75: \t\t\t\t  (void *)_(&task->pids) + (PIDTYPE_PID * link_sz));\n76: \t\tpid = link.pid;\n77: \t}\n78: \tupid_sz = bpf_core_field_size(pid->numbers[0]);\n79: \tprobe_read_kernel(&level, sizeof(level), _(&pid->level));\n80: \tif (level < 1)\n81: \t\treturn 0;\n82: \tprobe_read_kernel(&upid, upid_sz,\n83: \t\t\t  (void *)_(&pid->numbers) + (level * upid_sz));\n84: \treturn upid.nr;\n85: }"
+  },
+  {
+    "path": "vendor/repos/tetragon/bpf/cgroup/bpf_cgtracker.c",
+    "sha256": "439134cbd8ddb4b21dcd5dc2a1b39136a14c0974c99eae9aa581b0d23a575268",
+    "line_start": 20,
+    "line_end": 47,
+    "text": "20: \tint level;\n21: \tstruct cgroup *ancestors[];\n22: } __attribute__((preserve_access_index));\n23: \n24: FUNC_INLINE __u64 cgroup_get_parent_id(struct cgroup *cgrp)\n25: {\n26: \tstruct cgroup___new *cgrp_new = (struct cgroup___new *)cgrp;\n27: \n28: \t// for newer kernels, we can access use ->ancestors to retrieve the parent\n29: \tif (bpf_core_field_exists(cgrp_new->ancestors)) {\n30: \t\tint level = get_cgroup_level(cgrp);\n31: \n32: \t\tif (level <= 0)\n33: \t\t\treturn 0;\n34: \t\treturn BPF_CORE_READ(cgrp_new, ancestors[level - 1], kn, id);\n35: \t}\n36: \n37: \t// otherwise, go over the parent pointer\n38: \tstruct cgroup_subsys_state *parent_css = BPF_CORE_READ(cgrp, self.parent);\n39: \n40: \tif (parent_css) {\n41: \t\tstruct cgroup *parent = container_of(parent_css, struct cgroup, self);\n42: \t\t__u64 parent_cgid = get_cgroup_id(parent);\n43: \t\treturn parent_cgid;\n44: \t}\n45: \n46: \treturn 0;\n47: }"
+  }
+]

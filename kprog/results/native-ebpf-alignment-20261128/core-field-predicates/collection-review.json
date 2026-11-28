@@ -1,0 +1,104 @@
+{
+  "collected": "2026-11-28T14:24:40.493742+00:00",
+  "source_controller": {
+    "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/core-field-predicates/run/controller.json",
+    "size": 613244,
+    "sha256": "266dc4d6c40b82c3d9b0245a1470f67ddbd2b039b992586c87d7956f19db25c4"
+  },
+  "census_parent_pid": 1496738,
+  "census_process_pid": 1496739,
+  "finished": "2026-11-28T14:17:20.900374+00:00",
+  "objects": 344,
+  "counts": {
+    "x86/bcc": {
+      "objects": 8,
+      "predicate_rows": 4,
+      "resolved_false_predicates": 3,
+      "changed_byte_offsets": 24,
+      "poisoned_relocations": 4,
+      "relocation_errors": 0
+    },
+    "x86/katran": {
+      "objects": 4,
+      "predicate_rows": 0,
+      "resolved_false_predicates": 0,
+      "changed_byte_offsets": 0,
+      "poisoned_relocations": 0,
+      "relocation_errors": 0
+    },
+    "x86/tracee": {
+      "objects": 3,
+      "predicate_rows": 4717,
+      "resolved_false_predicates": 1976,
+      "changed_byte_offsets": 20031,
+      "poisoned_relocations": 3055,
+      "relocation_errors": 0
+    },
+    "x86/tetragon": {
+      "objects": 157,
+      "predicate_rows": 2714,
+      "resolved_false_predicates": 93,
+      "changed_byte_offsets": 6881,
+      "poisoned_relocations": 924,
+      "relocation_errors": 0
+    },
+    "arm64/bcc": {
+      "objects": 8,
+      "predicate_rows": 4,
+      "resolved_false_predicates": 3,
+      "changed_byte_offsets": 24,
+      "poisoned_relocations": 4,
+      "relocation_errors": 0
+    },
+    "arm64/katran": {
+      "objects": 4,
+      "predicate_rows": 0,
+      "resolved_false_predicates": 0,
+      "changed_byte_offsets": 0,
+      "poisoned_relocations": 0,
+      "relocation_errors": 0
+    },
+    "arm64/tracee": {
+      "objects": 3,
+      "predicate_rows": 4595,
+      "resolved_false_predicates": 1976,
+      "changed_byte_offsets": 19565,
+      "poisoned_relocations": 3055,
+      "relocation_errors": 0
+    },
+    "arm64/tetragon": {
+      "objects": 157,
+      "predicate_rows": 2714,
+      "resolved_false_predicates": 93,
+      "changed_byte_offsets": 6830,
+      "poisoned_relocations": 924,
+      "relocation_errors": 0
+    }
+  },
+  "missing_original_elf_groups": [
+    {
+      "arch": "x86",
+      "app": "cilium",
+      "coverage": "GAP: no retained original BPF ELF in searched roots; not zero relocations"
+    },
+    {
+      "arch": "x86",
+      "app": "otelcol-ebpf-profiler",
+      "coverage": "GAP: no retained original BPF ELF in searched roots; not zero relocations"
+    },
+    {
+      "arch": "arm64",
+      "app": "cilium",
+      "coverage": "GAP: no retained original BPF ELF in searched roots; not zero relocations"
+    },
+    {
+      "arch": "arm64",
+      "app": "otelcol-ebpf-profiler",
+      "coverage": "GAP: no retained original BPF ELF in searched roots; not zero relocations"
+    }
+  ],
+  "all_input_target_and_output_hashes_reverified": true,
+  "scope": "retained original BPF ELFs / main vmlinux BTF only; no module BTF or live installed-code equivalence",
+  "native_proof_objects": 6,
+  "unique_predicate_sites": 113
+}
