@@ -1,0 +1,13 @@
+
+/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/native-arm-scalar.o:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+0000000000000000 <entry>:
+       0: 90000008     	adrp	x8, 0x0 <entry>
+		0000000000000000:  R_AARCH64_ADR_GOT_PAGE	live
+       4: f9400108     	ldr	x8, [x8]
+		0000000000000004:  R_AARCH64_LD64_GOT_LO12_NC	live
+       8: f9400108     	ldr	x8, [x8]
+       c: 91005d00     	add	x0, x8, #0x17
+      10: d65f03c0     	ret

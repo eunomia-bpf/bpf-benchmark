@@ -36,7 +36,10 @@ try:
   r['execution_command']=command;r['fixture']=dict(path=str(fixture),sha256=sha(fixture));save()
   with (OUT/'native-arm-execution.log').open('wb') as log:r['execution_returncode']=subprocess.run(command,cwd=ROOT,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,preexec_fn=child).returncode
   assert r['execution_returncode']==0;assert int.from_bytes(native.read_bytes()[18:20],'little')==183
-  undefined=subprocess.check_output(['llvm-nm-18','--undefined-only',str(native)],text=True);(OUT/'native-arm-undefined.txt').write_text(undefined);names={s.split()[-1] for s in undefined.splitlines() if s.split()};assert 'live' in names and 'selected' not in names and 'option' not in names
+  proof=OUT/'native-arm-scalar.proof.o'
+  command=[str(ROOT/'kprog/x86/native_lab/native_link/target/release/native-link'),'--input',str(native),'--symbol','entry','--mode','proof','--output',str(proof)]
+  with (OUT/'native-arm-proof.log').open('wb') as log:subprocess.run(command,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,check=True)
+  undefined=subprocess.check_output(['llvm-nm-18','--undefined-only',str(proof)],text=True);(OUT/'native-arm-undefined.txt').write_text(undefined);names={s.split()[-1] for s in undefined.splitlines() if s.split()};assert 'live' in names and 'selected' not in names and 'option' not in names
   r['needed']=subprocess.check_output(['aarch64-linux-gnu-readelf','-d',str(output)],text=True);os.replace(output,STAGE);r['product']=dict(path=str(STAGE),bytes=STAGE.stat().st_size,sha256=sha(STAGE));r['before_archive']=dict(path=str(before),bytes=before.stat().st_size,sha256=sha(before));r.update(controller_status=0,phase='finished')
 except Exception:r.update(controller_status=1,phase='failed',exception=traceback.format_exc())
 finally:r['ended_utc']=now();save();print(json.dumps(r),flush=True)

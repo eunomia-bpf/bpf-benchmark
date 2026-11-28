@@ -1,0 +1,70 @@
+{
+  "pid": 1245267,
+  "started_utc": "2026-11-28T04:19:00Z",
+  "phase": "failed",
+  "controller_status": 1,
+  "dependency_pid": 1241962,
+  "llvm": {
+    "path": "/workspaces/repository/.cache/qemu-arm64-root/usr/lib/llvm-18/lib/libLLVM.so.1",
+    "sha256": "73ea0b844d87d6e30bc84473b319776f8d44258bf927574d2ea46557d625e4e5"
+  },
+  "before": {
+    "bytes": 53100944,
+    "sha256": "d9905543cc045e75c64772a28c8181901be670390cdce60bd2579dba1df9bde5"
+  },
+  "command": [
+    "aarch64-linux-gnu-g++",
+    "-I/usr/lib/llvm-18/include",
+    "-std=c++17",
+    "-fno-exceptions",
+    "-funwind-tables",
+    "-D_GNU_SOURCE",
+    "-D__STDC_CONSTANT_MACROS",
+    "-D__STDC_FORMAT_MACROS",
+    "-D__STDC_LIMIT_MACROS",
+    "-std=c++17",
+    "-fexceptions",
+    "-Wall",
+    "-Wextra",
+    "-Wno-unused-parameter",
+    "-I/workspaces/repository/vendor/libbpf/include/uapi",
+    "-I/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include",
+    "/workspaces/repository/kprog/x86/perf_context_lto.cpp",
+    "-o",
+    "/workspaces/repository/vendor/build/native-bpf/arm64/stage/kprog-perf-context-lto.arm64.tmp",
+    "/workspaces/repository/.cache/qemu-arm64-root/usr/lib/llvm-18/lib/libLLVM.so.1",
+    "/workspaces/repository/.cache/qemu-arm64-root/usr/lib/aarch64-linux-gnu/libbpf.so.1",
+    "-Wl,-rpath-link,/workspaces/repository/.cache/qemu-arm64-root/usr/lib/aarch64-linux-gnu",
+    "-Wl,-rpath-link,/workspaces/repository/.cache/qemu-arm64-root/lib/aarch64-linux-gnu",
+    "-lpthread",
+    "-ldl",
+    "-lz"
+  ],
+  "build_returncode": 0,
+  "file": "/workspaces/repository/vendor/build/native-bpf/arm64/stage/kprog-perf-context-lto.arm64.tmp: ELF 64-bit LSB pie executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, BuildID[sha1]=0a77fa8769424636f04e2a9df5b04a497df14107, for GNU/Linux 3.7.0, not stripped",
+  "execution_command": [
+    "qemu-aarch64-static",
+    "-L",
+    "/workspaces/repository/.cache/qemu-arm64-root",
+    "/workspaces/repository/vendor/build/native-bpf/arm64/stage/kprog-perf-context-lto.arm64.tmp",
+    "/workspaces/repository/kprog/x86/native_lab/native_link/target/frozen-ir-test-1242225/input.proof.o",
+    "--symbol",
+    "entry",
+    "--kernel-btf",
+    "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+    "--prog-type",
+    "0",
+    "--immutable-globals",
+    "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/native-arm-immutable.json",
+    "-o",
+    "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/native-arm-scalar.o"
+  ],
+  "fixture": {
+    "path": "/workspaces/repository/kprog/x86/native_lab/native_link/target/frozen-ir-test-1242225/input.proof.o",
+    "sha256": "d486f580c68ecd25422fdd072cc47909e98d5c84311fed1315be06e7c4554d0a"
+  },
+  "reused_compiled_tool_sha256": "ab936bb2edd8a4386b586c7d6f52d4d416fa2f5e37b387c29cb0b1c49c383e14",
+  "execution_returncode": 0,
+  "exception": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/execute_native_arm_tool.py\", line 24, in <module>\n    undefined=subprocess.check_output(['llvm-nm-18','--undefined-only',str(native)],text=True);(OUT/'native-arm-undefined.txt').write_text(undefined);names={s.split()[-1] for s in undefined.splitlines() if s.split()};assert 'live' in names and 'selected' not in names and 'option' not in names\n                                                                                                                                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n",
+  "ended_utc": "2026-11-28T04:19:01Z"
+}
