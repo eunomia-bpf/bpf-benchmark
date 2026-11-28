@@ -1,0 +1,120 @@
+{
+  "archive_commit": "b5514371f8e65991c8a193b61db840e5d9e27317",
+  "archive": "real-source-first-records.tar.zst",
+  "archive_sha256": "f732bc37ea62938ad53b86ce0146e15e8bd5c3ede08109696ed0c5c261411623",
+  "all_archive_members_verified": true,
+  "all_originals_verified_before_delete": true,
+  "deleted_count": 18,
+  "logical_bytes": 49742,
+  "allocated_file_bytes": 90112,
+  "members": [
+    {
+      "path": "real-source-controller.json",
+      "bytes": 23145,
+      "sha256": "32abe957e423c3862a4d8678e646e131b053e95f7431fdc3d5ac36ada53626be",
+      "allocated_bytes": 24576
+    },
+    {
+      "path": "real-source-job.log",
+      "bytes": 23145,
+      "sha256": "32abe957e423c3862a4d8678e646e131b053e95f7431fdc3d5ac36ada53626be",
+      "allocated_bytes": 24576
+    },
+    {
+      "path": "real-source/arm64-bcc-generate.stderr",
+      "bytes": 394,
+      "sha256": "59e5d5bc640187f68f11a3467c62e892561d436af35723251c51052163dc4e14",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source/arm64-bcc-generate.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "path": "real-source/arm64-bcc-tmp/core-answers-bt4uu5iy/scan.h",
+      "bytes": 260,
+      "sha256": "daccd776c7410e72185e7c7ca37d45d93914c6eacf6b37fd0549d5830f8deb59",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source/arm64-producer-flags.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "path": "real-source/arm64-producer-flags.stdout",
+      "bytes": 401,
+      "sha256": "826ba0546ef565b9d7d86163eb8755f81498341b390cd39811eee5e12148de02",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source/arm64-tetragon-generate.stderr",
+      "bytes": 409,
+      "sha256": "ba51b269862f6a1f2a6daae08a4e31b4c2301a0e234f9fd75b53b146e4915823",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source/arm64-tetragon-generate.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "path": "real-source/arm64-tetragon-tmp/core-answers-jic1n3yz/scan.h",
+      "bytes": 260,
+      "sha256": "daccd776c7410e72185e7c7ca37d45d93914c6eacf6b37fd0549d5830f8deb59",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source/x86-bcc-generate.stderr",
+      "bytes": 392,
+      "sha256": "3fc2bd27f1156dce3c1fa70b1c69e313dd3114f0cc96bc0e85fea36a68e14cb4",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source/x86-bcc-generate.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "path": "real-source/x86-bcc-tmp/core-answers-flicho9l/scan.h",
+      "bytes": 260,
+      "sha256": "daccd776c7410e72185e7c7ca37d45d93914c6eacf6b37fd0549d5830f8deb59",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source/x86-producer-flags.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "path": "real-source/x86-producer-flags.stdout",
+      "bytes": 409,
+      "sha256": "cbfbf285664e7568f1532c406d805b28d9afd4ba79781e999296f31d1e590e34",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source/x86-tetragon-generate.stderr",
+      "bytes": 407,
+      "sha256": "a8480522d1e62c9d6b83d73f38e107b61782ebe04d45cc41714cd6cfc41a31ef",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source/x86-tetragon-generate.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "path": "real-source/x86-tetragon-tmp/core-answers-vte7gqpq/scan.h",
+      "bytes": 260,
+      "sha256": "daccd776c7410e72185e7c7ca37d45d93914c6eacf6b37fd0549d5830f8deb59",
+      "allocated_bytes": 4096
+    }
+  ]
+}

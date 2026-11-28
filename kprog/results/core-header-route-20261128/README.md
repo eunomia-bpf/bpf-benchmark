@@ -33,3 +33,7 @@ check_app_sources.py reads the current unchanged Makefile's common native flags 
 ## Actual-source first attempt
 
 SAME1567836 completed17:02:17Z with all four cases failing before query resolution: the temporary scan.h could not locate core-compat.h through the unchanged producer include paths. This is a scanner path bug, not a CO-RE semantic mismatch. The scanner now includes its own sibling compatibility header by absolute path, independently of the caller's working directory. The same recipe accepts a distinct real-source result name so corrected runs preserve the complete original failure. No producer flags or source files change.
+
+The source scanner header-location correction is published in b5514371f. Four scan-mode syntax-only commands (BCC/Tetragon on x86/arm64) return0 with empty stdout/stderr; real-source-syntax-preflight/checks.json retains their exact commands and lossless empty output records. This is parser preflight only, not target-query or native-code acceptance. The full corrected recipe was launched as real-source-located (PID1573389,17:42:17Z); collect the same job next turn.
+
+After b5514371f publication, every committed archive member and original was reverified; only the18 closed first-attempt raw duplicates were deleted. real-source-first-cleanup.json records each exact file/size/SHA and allocated bytes; the complete original failures remain in real-source-first-records.tar.zst. Do not rerun the completed first-attempt collector.
