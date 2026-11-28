@@ -1,0 +1,9 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerLinkedSPCall.header_value
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerLinkedSPCall.header_value
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerLinkedSPCall.payload_value
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerLinkedSPCall.payload_value
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerLinkedSPCall.arguments_value
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerLinkedSPCall.arguments_value
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerLinkedSPCall.call_ready
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerLinkedSPCall.call_ready
