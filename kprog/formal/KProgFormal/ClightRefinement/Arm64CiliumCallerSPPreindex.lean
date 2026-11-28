@@ -53,27 +53,31 @@ theorem branch_source : branch = .Sifthenelse
       otherWidth)
     .Sskip := rfl
 
+private theorem condition_value_in (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem) :
+    CC.doEvalExpr world e le memory condition = some (.Vint (1#32)) := rfl
 theorem condition_value (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem) :
-    CC.doEvalExpr ge e le memory condition = some (.Vint (1#32)) := rfl
+    CC.doEvalExpr ge e le memory condition = some (.Vint (1#32)) :=
+  condition_value_in ge e le memory
+
 private theorem condition_type : CC.typeof condition = CC.tuint := rfl
-private theorem delta_value (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem) :
-    CC.doEvalExpr ge e le memory (.Ecast (.Econst_long delta CC.tulong) CC.tulong) =
+private theorem delta_value (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem) :
+    CC.doEvalExpr world e le memory (.Ecast (.Econst_long delta CC.tulong) CC.tulong) =
       some (.Vlong delta) := rfl
-private theorem pp_value (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
+private theorem pp_value (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
     (read : le.get _t'137 = some (.Vlong delta)) :
-    CC.doEvalExpr ge e le memory (.Ecast (.Etempvar _t'137 CC.tulong) CC.tlong) =
+    CC.doEvalExpr world e le memory (.Ecast (.Etempvar _t'137 CC.tulong) CC.tlong) =
       some (.Vlong delta) := by
   simp only [CC.doEvalExpr,read]
   rfl
-private theorem nonzero_value (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
+private theorem nonzero_value (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
     (read : le.get ___a64_l_pp = some (.Vlong delta)) :
-    CC.doEvalExpr ge e le memory
+    CC.doEvalExpr world e le memory
       (.Ebinop .One (.Etempvar ___a64_l_pp CC.tlong) (.Econst_int (0#32) CC.tint) CC.tint) =
       some (.Vint (1#32)) := by
   simp only [CC.doEvalExpr,read]
   rfl
-private theorem compare_value (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem) :
-    CC.doEvalExpr ge e le memory
+private theorem compare_value (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem) :
+    CC.doEvalExpr world e le memory
       (.Ebinop .Oeq (.Econst_int (32#32) CC.tuint) (.Econst_int (32#32) CC.tuint) CC.tint) =
       some (.Vint (1#32)) := rfl
 private theorem branch_type :
@@ -90,18 +94,33 @@ noncomputable def resultEnv (le : CC.TempEnv) : CC.TempEnv :=
   ((le.set _t'137 (.Vlong delta)).set ___a64_l_pp (.Vlong delta)).set _t'13900 (.Vlong (0#64))
 
 /-- Reach the original pointer writer call with its actual preindex and SP temporaries. -/
+theorem execute_in (world : CC.CGenv) {m memory : CC.Mem} (scalars : Locals m)
+    (reads : ∀ i : Fin 2,CC.Mem.load (chunk i) memory (scalars.block i) 0 = some (value i))
+    (le : CC.TempEnv) (k : CC.Cont) :
+    InternalRun world 13 (.State procedure Arm64CiliumCallerSPAlignment.tail k (allocation m).1 le memory)
+      (.State procedure call (.Kloop1 body .Sbreak k) (allocation m).1 (resultEnv le) memory) := by
+  have currentSP (temps : CC.TempEnv) :
+      CC.doEvalExpr world (allocation m).1 temps memory (.Evar ___a64_sp CC.tlong) =
+        some (.Vlong (0#64)) := by
+    have bound : (allocation m).1.get ___a64_sp = some (scalars.block 0,CC.tlong) := scalars.binding 0
+    have read : CC.Mem.load .Mint64 memory (scalars.block 0) 0 = some (.Vlong (0#64)) := reads 0
+    simp only [CC.doEvalExpr,CC.lvalOfVar,bound,ite_true]
+    change CC.Mem.load .Mint64 memory (scalars.block 0) 0 = some (.Vlong (0#64))
+    exact read
+  apply internalRun_of_steps
+  all_goals
+    simp only [source,body,setup_source,branch_source,steps,InternalPath,InternalState,CC.doStep,
+      condition_value_in,condition_type,delta_value,pp_value,nonzero_value,compare_value,
+      branch_type,compare_type,(bool_one memory).1,(bool_one memory).2,currentSP,
+      CC.PTree.gss,resultEnv,ite_true,ite_false,Bool.false_eq_true,true_and,and_true,
+      CC.E0,CC.Eapp,List.nil_append]
+
+/-- Preserve the original exported-world API as an instance of the same proof. -/
 theorem execute {m memory : CC.Mem} (scalars : Locals m)
     (reads : ∀ i : Fin 2,CC.Mem.load (chunk i) memory (scalars.block i) 0 = some (value i))
     (le : CC.TempEnv) (k : CC.Cont) :
     InternalRun ge 13 (.State procedure Arm64CiliumCallerSPAlignment.tail k (allocation m).1 le memory)
-      (.State procedure call (.Kloop1 body .Sbreak k) (allocation m).1 (resultEnv le) memory) := by
-  have currentSP (temps : CC.TempEnv) := Arm64CiliumCallerSPAlignment.sp_value scalars reads temps
-  apply internalRun_of_steps
-  all_goals
-    simp only [source,body,setup_source,branch_source,steps,InternalPath,InternalState,CC.doStep,
-      condition_value,condition_type,delta_value,pp_value,nonzero_value,compare_value,
-      branch_type,compare_type,(bool_one memory).1,(bool_one memory).2,currentSP,
-      CC.PTree.gss,resultEnv,ite_true,ite_false,Bool.false_eq_true,true_and,and_true,
-      CC.E0,CC.Eapp,List.nil_append]
+      (.State procedure call (.Kloop1 body .Sbreak k) (allocation m).1 (resultEnv le) memory) :=
+  execute_in ge scalars reads le k
 
 end KProgFormal.ClightRefinement.Arm64CiliumCallerSPPreindex
