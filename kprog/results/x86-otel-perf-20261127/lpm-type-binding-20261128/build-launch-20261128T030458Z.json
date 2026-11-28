@@ -1,0 +1,17 @@
+{
+  "pid": 1211850,
+  "started_utc": "2026-11-28T03:04:58Z",
+  "source_revision": "c47829f0067cc7880f1a36e7112e2db8cb818f72",
+  "source_sha256": {
+    "kprog/libnativeloader/src/native_loader_link_schema.hpp": "8ed8b287f18be964921fabde04d2deef75d7dcea40e0993d5240f34927391548",
+    "kprog/x86/perf_context_lto.cpp": "60cde900535d356107f5bc317991a05e2a848aa41f651a2788e8239f9d5cb1e0",
+    "kprog/x86/native_lab/native_link/src/main.rs": "1faf56423aa83f2d638a0534dde4064e2e98657f5e2974f44bd5a68382e4924b",
+    "kprog/x86/native_lab/native_link/src/x86.rs": "072aa4fafd051dac1f464a5d9b256418c2b777a83cfebe243fb58bf5e0721e79",
+    "kprog/x86/native_lab/native_link/src/frozen_ir.rs": "0d90095540ae8f4fe938679948042ebbd25df855b6d95665a169c66671eefe3d"
+  },
+  "result": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/lpm-type-binding-20261128",
+  "script": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/lpm-type-binding-20261128/build.sh",
+  "script_sha256": "c7d5178ae3188acc535670893b7eaace7f5026a0a866de07f86cce9f8302d151",
+  "log": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/lpm-type-binding-20261128/build.log",
+  "scope": "Fresh force-rebuild and regression validation of current LPM WIP including exact15 collision + LLVM ObjectKey fixes; attempt1 failed beforeRust, preserved. Build-only48GiB/CPU16,18/max2, no guest descendant. Imagec103 unchanged."
+}

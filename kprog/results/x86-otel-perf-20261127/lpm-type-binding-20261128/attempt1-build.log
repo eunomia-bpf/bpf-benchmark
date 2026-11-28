@@ -1,0 +1,21 @@
+make: Entering directory '/workspaces/repository/vendor/bpf'
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/stage/"
+clang++-18 $(llvm-config-18 --cxxflags) -std=c++17 -fexceptions -Wall -Wextra -Wno-unused-parameter \
+	-I/workspaces/repository/vendor/libbpf/include/uapi -I/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include "/workspaces/repository/kprog/x86/perf_context_lto.cpp" -o "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto" \
+	$(llvm-config-18 --link-static --ldflags --libs core irreader analysis support passes native object linker --system-libs) \
+	/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz
+/workspaces/repository/kprog/x86/perf_context_lto.cpp:187:31: error: no member named 'size' in 'llvm::json::ObjectKey'
+  187 |     if (!Global && Item.first.size() == BPF_OBJ_NAME_LEN - 1) {
+      |                    ~~~~~~~~~~ ^
+/workspaces/repository/kprog/x86/perf_context_lto.cpp:190:58: error: use of overloaded operator '!=' is ambiguous (with operand types 'StringRef' and 'llvm::json::ObjectKey')
+  190 |             G.getName().take_front(BPF_OBJ_NAME_LEN - 1) != Item.first) continue;
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ^  ~~~~~~~~~~
+/usr/lib/llvm-18/include/llvm/ADT/StringRef.h:881:15: note: candidate function
+  881 |   inline bool operator!=(StringRef LHS, StringRef RHS) { return !(LHS == RHS); }
+      |               ^
+/usr/lib/llvm-18/include/llvm/Support/JSON.h:624:13: note: candidate function
+  624 | inline bool operator!=(const ObjectKey &L, const ObjectKey &R) {
+      |             ^
+2 errors generated.
+make: *** [Makefile:497: /workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto] Error 1
+make: Leaving directory '/workspaces/repository/vendor/bpf'
