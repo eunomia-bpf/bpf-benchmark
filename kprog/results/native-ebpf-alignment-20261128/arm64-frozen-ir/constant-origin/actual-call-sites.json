@@ -1,0 +1,18 @@
+[
+  {
+    "architecture": "arm64",
+    "binary_sha256": "2a87ed681e7fa40a65a35d1c54da58f65630a43c7cf212d07813e4522678ad48",
+    "library_calls": [
+      "  map.go:367\t\t0xedf3c8\t\t97fc110a\t\tCALL github.com/cilium/ebpf.NewMapWithOptions(SB)\t\t\t"
+    ],
+    "disassembly_file": "arm64-actual-loadAllMaps.dis"
+  },
+  {
+    "architecture": "x86",
+    "binary_sha256": "13cf568b00004aeba22b4035dfe780656a14ef4e58f0bd6e4ecae81b5c513bd9",
+    "library_calls": [
+      "  map.go:367\t\t0x10ac782\t\te8b94beeff\t\tCALL github.com/cilium/ebpf.NewMapWithOptions(SB)\t\t\t"
+    ],
+    "disassembly_file": "x86-actual-loadAllMaps.dis"
+  }
+]

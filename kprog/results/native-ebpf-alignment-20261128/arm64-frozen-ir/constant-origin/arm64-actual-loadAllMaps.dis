@@ -1,0 +1,333 @@
+TEXT go.opentelemetry.io/ebpf-profiler/tracer.loadAllMaps(SB) go.opentelemetry.io/ebpf-profiler@v0.0.0/tracer/tracer.go
+  tracer.go:483		0xedf000		f9400b90		MOVD 16(R28), R16							
+  tracer.go:483		0xedf004		d10783f1		SUB $480, RSP, R17							
+  tracer.go:483		0xedf008		eb10023f		CMP R16, R17								
+  tracer.go:483		0xedf00c		54002809		BLS 320(PC)								
+  tracer.go:483		0xedf010		d10983f4		SUB $608, RSP, R20							
+  tracer.go:483		0xedf014		a93ffa9d		STP (R29, R30), -8(R20)							
+  tracer.go:483		0xedf018		9100029f		MOVD R20, RSP								
+  tracer.go:483		0xedf01c		d10023fd		SUB $8, RSP, R29							
+  tracer.go:483		0xedf020		f9012bff		MOVD ZR, 592(RSP)							
+  tracer.go:487		0xedf024		f90137e0		MOVD R0, 616(RSP)							
+  tracer.go:487		0xedf028		f9013be1		MOVD R1, 624(RSP)							
+  tracer.go:487		0xedf02c		f9013fe2		MOVD R2, 632(RSP)							
+  tracer.go:483		0xedf030		3900ffff		MOVB ZR, 63(RSP)							
+  tracer.go:483		0xedf034		a907ffff		STP (ZR, ZR), 120(RSP)							
+  tracer.go:486		0xedf038		97fdb35e		CALL go.opentelemetry.io/ebpf-profiler/rlimit.MaximizeMemlock(SB)	
+  tracer.go:487		0xedf03c		b5000a21		CBNZ R1, 81(PC)								
+  tracer.go:490		0xedf040		f9012be0		MOVD R0, 592(RSP)							
+  tracer.go:490		0xedf044		b24003e0		ORR $1, ZR, R0								
+  tracer.go:490		0xedf048		3900ffe0		MOVB R0, 63(RSP)							
+  tracer.go:493		0xedf04c		910603e0		ADD $384, RSP, R0							
+  tracer.go:493		0xedf050		a9007c1f		STP (ZR, ZR), (R0)							
+  tracer.go:493		0xedf054		a9017c1f		STP (ZR, ZR), 16(R0)							
+  tracer.go:493		0xedf058		a9027c1f		STP (ZR, ZR), 32(R0)							
+  tracer.go:493		0xedf05c		9102e3e0		ADD $184, RSP, R0							
+  tracer.go:493		0xedf060		b24007e1		ORR $3, ZR, R1								
+  tracer.go:493		0xedf064		a8817c1f		STP.P (ZR, ZR), 16(R0)							
+  tracer.go:493		0xedf068		a8817c1f		STP.P (ZR, ZR), 16(R0)							
+  tracer.go:493		0xedf06c		a8817c1f		STP.P (ZR, ZR), 16(R0)							
+  tracer.go:493		0xedf070		a8817c1f		STP.P (ZR, ZR), 16(R0)							
+  tracer.go:493		0xedf074		d1000421		SUB $1, R1, R1								
+  tracer.go:493		0xedf078		b5ffff61		CBNZ R1, -5(PC)								
+  tracer.go:493		0xedf07c		f900001f		MOVD ZR, (R0)								
+  tracer.go:493		0xedf080		b201c3e0		MOVD $-9187201950435737472, R0						
+  tracer.go:493		0xedf084		f9005fe0		MOVD R0, 184(RSP)							
+  tracer.go:493		0xedf088		9102e3e0		ADD $184, RSP, R0							
+  tracer.go:493		0xedf08c		f900cbe0		MOVD R0, 400(RSP)							
+  tracer.go:493		0xedf090		97d69d54		CALL runtime.rand(SB)							
+  tracer.go:493		0xedf094		f900c7e0		MOVD R0, 392(RSP)							
+  tracer.go:503		0xedf098		f9413be0		MOVD 624(RSP), R0							
+  tracer.go:503		0xedf09c		f9402000		MOVD 64(R0), R0								
+  tracer.go:503		0xedf0a0		f90033e0		MOVD R0, 96(RSP)							
+  tracer.go:503		0xedf0a4		f0000fc0		ADRP 2076672(PC), R0							
+  tracer.go:503		0xedf0a8		91240000		ADD $2304, R0, R0							
+  tracer.go:503		0xedf0ac		910603e1		ADD $384, RSP, R1							
+  tracer.go:503		0xedf0b0		b0001ec2		ADRP 4034560(PC), R2							
+  tracer.go:503		0xedf0b4		9129b442		ADD $2669, R2, R2							
+  tracer.go:503		0xedf0b8		b27d07e3		ORR $24, ZR, R3								
+  tracer.go:503		0xedf0bc		97d4d791		CALL runtime.mapassign_faststr(SB)					
+  tracer.go:503		0xedf0c0		f94033e1		MOVD 96(RSP), R1							
+  tracer.go:503		0xedf0c4		91005021		ADD $20, R1, R1								
+  tracer.go:503		0xedf0c8		b24003e2		ORR $1, ZR, R2								
+  tracer.go:503		0xedf0cc		9ac12042		LSL R1, R2, R2								
+  tracer.go:503		0xedf0d0		2a0103e1		MOVW R1, R1								
+  tracer.go:503		0xedf0d4		f101003f		CMP $64, R1								
+  tracer.go:503		0xedf0d8		9a9f3041		CSEL LO, R2, ZR, R1							
+  tracer.go:503		0xedf0dc		b9000001		MOVW R1, (R0)								
+  tracer.go:505		0xedf0e0		f9413be0		MOVD 624(RSP), R0							
+  tracer.go:505		0xedf0e4		f9402000		MOVD 64(R0), R0								
+  tracer.go:505		0xedf0e8		f90033e0		MOVD R0, 96(RSP)							
+  tracer.go:505		0xedf0ec		f0000fc0		ADRP 2076672(PC), R0							
+  tracer.go:505		0xedf0f0		91240000		ADD $2304, R0, R0							
+  tracer.go:505		0xedf0f4		910603e1		ADD $384, RSP, R1							
+  tracer.go:505		0xedf0f8		b0001ec2		ADRP 4034560(PC), R2							
+  tracer.go:505		0xedf0fc		912a1442		ADD $2693, R2, R2							
+  tracer.go:505		0xedf100		b27d07e3		ORR $24, ZR, R3								
+  tracer.go:505		0xedf104		97d4d77f		CALL runtime.mapassign_faststr(SB)					
+  tracer.go:505		0xedf108		f94033e1		MOVD 96(RSP), R1							
+  tracer.go:505		0xedf10c		91004021		ADD $16, R1, R1								
+  tracer.go:505		0xedf110		b24003e2		ORR $1, ZR, R2								
+  tracer.go:505		0xedf114		9ac12042		LSL R1, R2, R2								
+  tracer.go:505		0xedf118		2a0103e1		MOVW R1, R1								
+  tracer.go:505		0xedf11c		f101003f		CMP $64, R1								
+  tracer.go:505		0xedf120		9a9f3041		CSEL LO, R2, ZR, R1							
+  tracer.go:505		0xedf124		b9000001		MOVW R1, (R0)								
+  tracer.go:507		0xedf128		f9413be0		MOVD 624(RSP), R0							
+  tracer.go:507		0xedf12c		b9406001		MOVWU 96(R0), R1							
+  tracer.go:540		0xedf130		d3747c21		UBFIZ $12, R1, $32, R1							
+  tracer.go:540		0xedf134		b20103e2		MOVD $-9223372034707292160, R2						
+  tracer.go:540		0xedf138		f2800022		MOVK $1, R2								
+  tracer.go:540		0xedf13c		9bc27c21		UMULH R2, R1, R1							
+  tracer.go:540		0xedf140		d35ffc21		LSR $31, R1, R1								
+  tracer.go:541		0xedf144		7100403f		CMPW $16, R1								
+  tracer.go:541		0xedf148		54000042		BCS 2(PC)								
+  tracer.go:541		0xedf14c		b27c03e1		ORR $16, ZR, R1								
+  tracer.go:507		0xedf150		b90043e1		MOVW R1, 64(RSP)							
+  tracer.go:507		0xedf154		f0000fc0		ADRP 2076672(PC), R0							
+  tracer.go:507		0xedf158		91240000		ADD $2304, R0, R0							
+  tracer.go:507		0xedf15c		910603e1		ADD $384, RSP, R1							
+  tracer.go:507		0xedf160		90001e42		ADRP 3964928(PC), R2							
+  tracer.go:507		0xedf164		9108e042		ADD $568, R2, R2							
+  tracer.go:507		0xedf168		d2800163		MOVD $11, R3								
+  tracer.go:507		0xedf16c		97d4d765		CALL runtime.mapassign_faststr(SB)					
+  tracer.go:507		0xedf170		b94043e4		MOVWU 64(RSP), R4							
+  tracer.go:507		0xedf174		b9000004		MOVW R4, (R0)								
+  tracer.go:507		0xedf178		b27d03e0		ORR $8, ZR, R0								
+  tracer.go:509		0xedf17c		1400003f		JMP 63(PC)								
+  tracer.go:488		0xedf180		a91b7fff		STP (ZR, ZR), 432(RSP)							
+  tracer.go:488		0xedf184		b4000041		CBZ R1, 2(PC)								
+  tracer.go:488		0xedf188		f9400421		MOVD 8(R1), R1								
+  tracer.go:488		0xedf18c		a91b0be1		STP (R1, R2), 432(RSP)							
+  errors.go:26		0xedf190		d0001ee0		ADRP 4055040(PC), R0							
+  errors.go:26		0xedf194		91160000		ADD $1408, R0, R0							
+  errors.go:26		0xedf198		d2800361		MOVD $27, R1								
+  errors.go:26		0xedf19c		9106c3e2		ADD $432, RSP, R2							
+  errors.go:26		0xedf1a0		b24003e3		ORR $1, ZR, R3								
+  errors.go:26		0xedf1a4		aa0303e4		MOVD R3, R4								
+  errors.go:26		0xedf1a8		97d899d6		CALL fmt.errorf(SB)							
+  errors.go:26		0xedf1ac		b5000180		CBNZ R0, 12(PC)								
+  errors.go:31		0xedf1b0		d503201f		NOOP									
+  errors.go:65		0xedf1b4		d0001020		ADRP 2121728(PC), R0							
+  errors.go:65		0xedf1b8		913c0000		ADD $3840, R0, R0							
+  errors.go:65		0xedf1bc		97d50f91		CALL runtime.newobject(SB)						
+  errors.go:65		0xedf1c0		d0001ee1		ADRP 4055040(PC), R1							
+  errors.go:65		0xedf1c4		91160021		ADD $1408, R1, R1							
+  errors.go:65		0xedf1c8		d2800362		MOVD $27, R2								
+  errors.go:65		0xedf1cc		a9000801		STP (R1, R2), (R0)							
+  tracer.go:488		0xedf1d0		aa0003e1		MOVD R0, R1								
+  tracer.go:488		0xedf1d4		90002200		ADRP 4456448(PC), R0							
+  tracer.go:488		0xedf1d8		911a2000		ADD $1672, R0, R0							
+  tracer.go:488		0xedf1dc		a90787e0		STP (R0, R1), 120(RSP)							
+  tracer.go:488		0xedf1e0		a97ffbfd		LDP -8(RSP), (R29, R30)							
+  tracer.go:488		0xedf1e4		910983ff		ADD $608, RSP, RSP							
+  tracer.go:488		0xedf1e8		d65f03c0		RET									
+  tracer.go:509		0xedf1ec		f9002fe0		MOVD R0, 88(RSP)							
+  tracer.go:510		0xedf1f0		910903fb		ADD $576, RSP, R27							
+  tracer.go:510		0xedf1f4		a9007f7f		STP (ZR, ZR), (R27)							
+  tracer.go:510		0xedf1f8		97d68f9a		CALL runtime.convT64(SB)						
+  tracer.go:510		0xedf1fc		b0000901		ADRP 1183744(PC), R1							
+  tracer.go:510		0xedf200		91250021		ADD $2368, R1, R1							
+  tracer.go:510		0xedf204		910903fb		ADD $576, RSP, R27							
+  tracer.go:510		0xedf208		a9000361		STP (R1, R0), (R27)							
+  tracer.go:510		0xedf20c		f0001ec0		ADRP 4042752(PC), R0							
+  tracer.go:510		0xedf210		91060800		ADD $386, R0, R0							
+  tracer.go:510		0xedf214		d2800321		MOVD $25, R1								
+  tracer.go:510		0xedf218		910903e2		ADD $576, RSP, R2							
+  tracer.go:510		0xedf21c		b24003e3		ORR $1, ZR, R3								
+  tracer.go:510		0xedf220		aa0303e4		MOVD R3, R4								
+  tracer.go:510		0xedf224		97d8a47f		CALL fmt.Sprintf(SB)							
+  tracer.go:511		0xedf228		f9413be2		MOVD 624(RSP), R2							
+  tracer.go:511		0xedf22c		f9402042		MOVD 64(R2), R2								
+  tracer.go:511		0xedf230		f90033e2		MOVD R2, 96(RSP)							
+  tracer.go:511		0xedf234		aa0003e2		MOVD R0, R2								
+  tracer.go:511		0xedf238		aa0103e3		MOVD R1, R3								
+  tracer.go:511		0xedf23c		f0000fc0		ADRP 2076672(PC), R0							
+  tracer.go:511		0xedf240		91240000		ADD $2304, R0, R0							
+  tracer.go:511		0xedf244		910603e1		ADD $384, RSP, R1							
+  tracer.go:511		0xedf248		97d4d72e		CALL runtime.mapassign_faststr(SB)					
+  tracer.go:511		0xedf24c		f94033e1		MOVD 96(RSP), R1							
+  tracer.go:511		0xedf250		91004021		ADD $16, R1, R1								
+  tracer.go:511		0xedf254		b24003e2		ORR $1, ZR, R2								
+  tracer.go:511		0xedf258		9ac12042		LSL R1, R2, R2								
+  tracer.go:511		0xedf25c		2a0103e1		MOVW R1, R1								
+  tracer.go:509		0xedf260		f9402fe3		MOVD 88(RSP), R3							
+  tracer.go:509		0xedf264		91000463		ADD $1, R3, R3								
+  tracer.go:511		0xedf268		f101003f		CMP $64, R1								
+  tracer.go:511		0xedf26c		9a9f3041		CSEL LO, R2, ZR, R1							
+  tracer.go:511		0xedf270		b9000001		MOVW R1, (R0)								
+  tracer.go:509		0xedf274		aa0303e0		MOVD R3, R0								
+  tracer.go:509		0xedf278		f1005c1f		CMP $23, R0								
+  tracer.go:509		0xedf27c		54fffb8d		BLE -36(PC)								
+  tracer.go:514		0xedf280		f94137e3		MOVD 616(RSP), R3							
+  tracer.go:514		0xedf284		f9400061		MOVD (R3), R1								
+  tracer.go:514		0xedf288		910783e2		ADD $480, RSP, R2							
+  tracer.go:514		0xedf28c		a9007c5f		STP (ZR, ZR), (R2)							
+  tracer.go:514		0xedf290		a9017c5f		STP (ZR, ZR), 16(R2)							
+  tracer.go:514		0xedf294		a9027c5f		STP (ZR, ZR), 32(R2)							
+  tracer.go:514		0xedf298		a9037c5f		STP (ZR, ZR), 48(R2)							
+  tracer.go:514		0xedf29c		a9047c5f		STP (ZR, ZR), 64(R2)							
+  tracer.go:514		0xedf2a0		a9057c5f		STP (ZR, ZR), 80(R2)							
+  tracer.go:514		0xedf2a4		f0000fc0		ADRP 2076672(PC), R0							
+  tracer.go:514		0xedf2a8		911c0000		ADD $1792, R0, R0							
+  tracer.go:514		0xedf2ac		97d51119		CALL runtime.mapIterStart(SB)						
+  tracer.go:514		0xedf2b0		14000003		JMP 3(PC)								
+  tracer.go:514		0xedf2b4		910783e0		ADD $480, RSP, R0							
+  tracer.go:514		0xedf2b8		97d51132		CALL runtime.mapIterNext(SB)						
+  tracer.go:514		0xedf2bc		f940f3e4		MOVD 480(RSP), R4							
+  tracer.go:514		0xedf2c0		b4001084		CBZ R4, 132(PC)								
+  tracer.go:514		0xedf2c4		a9400c82		LDP (R4), (R2, R3)							
+  tracer.go:514		0xedf2c8		f940f7e4		MOVD 488(RSP), R4							
+  tracer.go:514		0xedf2cc		3980009b		MOVB (R4), R27								
+  tracer.go:515		0xedf2d0		f1002c7f		CMP $11, R3								
+  tracer.go:515		0xedf2d4		54000241		BNE 18(PC)								
+  tracer.go:515		0xedf2d8		f9400045		MOVD (R2), R5								
+  tracer.go:515		0xedf2dc		d28c6e66		MOVD $25459, R6								
+  tracer.go:515		0xedf2e0		f2acad06		MOVK $(25960<<16), R6							
+  tracer.go:515		0xedf2e4		f2cbec86		MOVK $(24420<<32), R6							
+  tracer.go:515		0xedf2e8		f2ed2e86		MOVK $(26996<<48), R6							
+  tracer.go:515		0xedf2ec		eb0600bf		CMP R6, R5								
+  tracer.go:515		0xedf2f0		54000161		BNE 11(PC)								
+  tracer.go:515		0xedf2f4		79401045		MOVHU 8(R2), R5								
+  tracer.go:515		0xedf2f8		d28cada6		MOVD $25965, R6								
+  tracer.go:515		0xedf2fc		6b0600bf		CMPW R6, R5								
+  tracer.go:515		0xedf300		540000e1		BNE 7(PC)								
+  tracer.go:515		0xedf304		39402845		MOVBU 10(R2), R5							
+  tracer.go:515		0xedf308		7101ccbf		CMPW $115, R5								
+  tracer.go:515		0xedf30c		54000081		BNE 4(PC)								
+  tracer.go:515		0xedf310		f9413be5		MOVD 624(RSP), R5							
+  tracer.go:515		0xedf314		b94060a6		MOVWU 96(R5), R6							
+  tracer.go:515		0xedf318		34fffce6		CBZW R6, -25(PC)							
+  tracer.go:514		0xedf31c		f9004be2		MOVD R2, 144(RSP)							
+  tracer.go:514		0xedf320		f9002be3		MOVD R3, 80(RSP)							
+  tracer.go:514		0xedf324		f9400084		MOVD (R4), R4								
+  tracer.go:514		0xedf328		f90047e4		MOVD R4, 136(RSP)							
+  tracer.go:519		0xedf32c		f0000fc0		ADRP 2076672(PC), R0							
+  tracer.go:519		0xedf330		91240000		ADD $2304, R0, R0							
+  tracer.go:519		0xedf334		910603e1		ADD $384, RSP, R1							
+  tracer.go:519		0xedf338		97d4d64e		CALL runtime.mapaccess2_faststr(SB)					
+  tracer.go:519		0xedf33c		37000061		TBNZ $0, R1, 3(PC)							
+  map.go:367		0xedf340		f94047e0		MOVD 136(RSP), R0							
+  tracer.go:519		0xedf344		1400001b		JMP 27(PC)								
+  tracer.go:519		0xedf348		b9400002		MOVWU (R0), R2								
+  tracer.go:519		0xedf34c		b90047e2		MOVW R2, 68(RSP)							
+  tracer.go:520		0xedf350		910703e2		ADD $448, RSP, R2							
+  tracer.go:520		0xedf354		a9007c5f		STP (ZR, ZR), (R2)							
+  tracer.go:520		0xedf358		a9017c5f		STP (ZR, ZR), 16(R2)							
+  tracer.go:520		0xedf35c		f9404be0		MOVD 144(RSP), R0							
+  tracer.go:520		0xedf360		f9402be1		MOVD 80(RSP), R1							
+  tracer.go:520		0xedf364		97d68f5f		CALL runtime.convTstring(SB)						
+  tracer.go:520		0xedf368		b0000902		ADRP 1183744(PC), R2							
+  tracer.go:520		0xedf36c		911c0042		ADD $1792, R2, R2							
+  tracer.go:520		0xedf370		a91c03e2		STP (R2, R0), 448(RSP)							
+  tracer.go:520		0xedf374		b94047e0		MOVWU 68(RSP), R0							
+  tracer.go:520		0xedf378		97d4ffde		CALL runtime.convT32(SB)						
+  tracer.go:520		0xedf37c		b0000902		ADRP 1183744(PC), R2							
+  tracer.go:520		0xedf380		91220042		ADD $2176, R2, R2							
+  tracer.go:520		0xedf384		a91d03e2		STP (R2, R0), 464(RSP)							
+  tracer.go:520		0xedf388		90001ec0		ADRP 4030464(PC), R0							
+  tracer.go:520		0xedf38c		9106dc00		ADD $439, R0, R0							
+  tracer.go:520		0xedf390		d28002e1		MOVD $23, R1								
+  tracer.go:520		0xedf394		910703e2		ADD $448, RSP, R2							
+  tracer.go:520		0xedf398		b27f03e3		ORR $2, ZR, R3								
+  tracer.go:520		0xedf39c		aa0303e4		MOVD R3, R4								
+  tracer.go:520		0xedf3a0		97f9e710		CALL go.opentelemetry.io/ebpf-profiler/internal/log.Debugf(SB)		
+  tracer.go:521		0xedf3a4		b94047e2		MOVWU 68(RSP), R2							
+  tracer.go:521		0xedf3a8		f94047e0		MOVD 136(RSP), R0							
+  tracer.go:521		0xedf3ac		b9001c02		MOVW R2, 28(R0)								
+  tracer.go:523		0xedf3b0		d503201f		NOOP									
+  map.go:367		0xedf3b4		aa1f03e1		MOVD ZR, R1								
+  map.go:367		0xedf3b8		aa1f03e2		MOVD ZR, R2								
+  map.go:367		0xedf3bc		aa1f03e3		MOVD ZR, R3								
+  map.go:367		0xedf3c0		aa1f03e4		MOVD ZR, R4								
+  map.go:367		0xedf3c4		aa1f03e5		MOVD ZR, R5								
+  map.go:367		0xedf3c8		97fc110a		CALL github.com/cilium/ebpf.NewMapWithOptions(SB)			
+  tracer.go:524		0xedf3cc		b5000261		CBNZ R1, 19(PC)								
+  map.go:367		0xedf3d0		f9003be0		MOVD R0, 112(RSP)							
+  tracer.go:527		0xedf3d4		f0000fc0		ADRP 2076672(PC), R0							
+  tracer.go:527		0xedf3d8		911a0000		ADD $1664, R0, R0							
+  tracer.go:527		0xedf3dc		f9413fe1		MOVD 632(RSP), R1							
+  tracer.go:527		0xedf3e0		f9404be2		MOVD 144(RSP), R2							
+  tracer.go:527		0xedf3e4		f9402be3		MOVD 80(RSP), R3							
+  tracer.go:527		0xedf3e8		97d4d6c6		CALL runtime.mapassign_faststr(SB)					
+  tracer.go:527		0xedf3ec		d00090bb		ADRP 18964480(PC), R27							
+  tracer.go:527		0xedf3f0		b9485364		MOVWU 2128(R27), R4							
+  tracer.go:527		0xedf3f4		35000064		CBNZW R4, 3(PC)								
+  tracer.go:527		0xedf3f8		f9403be2		MOVD 112(RSP), R2							
+  tracer.go:527		0xedf3fc		14000005		JMP 5(PC)								
+  tracer.go:527		0xedf400		f9400001		MOVD (R0), R1								
+  tracer.go:527		0xedf404		97d6b877		CALL runtime.gcWriteBarrier2(SB)					
+  tracer.go:527		0xedf408		f9403be2		MOVD 112(RSP), R2							
+  tracer.go:527		0xedf40c		a9000722		STP (R2, R1), (R25)							
+  tracer.go:527		0xedf410		f9000002		MOVD R2, (R0)								
+  tracer.go:527		0xedf414		17ffffa8		JMP -88(PC)								
+  map.go:367		0xedf418		f90037e2		MOVD R2, 104(RSP)							
+  map.go:367		0xedf41c		f90027e1		MOVD R1, 72(RSP)							
+  tracer.go:525		0xedf420		910263e2		ADD $152, RSP, R2							
+  tracer.go:525		0xedf424		a9007c5f		STP (ZR, ZR), (R2)							
+  tracer.go:525		0xedf428		a9017c5f		STP (ZR, ZR), 16(R2)							
+  tracer.go:525		0xedf42c		f9404be0		MOVD 144(RSP), R0							
+  tracer.go:525		0xedf430		f9402be1		MOVD 80(RSP), R1							
+  tracer.go:525		0xedf434		97d68f2b		CALL runtime.convTstring(SB)						
+  tracer.go:525		0xedf438		b0000902		ADRP 1183744(PC), R2							
+  tracer.go:525		0xedf43c		911c0042		ADD $1792, R2, R2							
+  tracer.go:525		0xedf440		a90983e2		STP (R2, R0), 152(RSP)							
+  tracer.go:525		0xedf444		f94027e0		MOVD 72(RSP), R0							
+  tracer.go:525		0xedf448		b4000060		CBZ R0, 3(PC)								
+  tracer.go:525		0xedf44c		f9400401		MOVD 8(R0), R1								
+  tracer.go:525		0xedf450		14000002		JMP 2(PC)								
+  tracer.go:525		0xedf454		aa0003e1		MOVD R0, R1								
+  tracer.go:525		0xedf458		f94037e5		MOVD 104(RSP), R5							
+  tracer.go:525		0xedf45c		a90a97e1		STP (R1, R5), 168(RSP)							
+  errors.go:26		0xedf460		b0001ea0		ADRP 4018176(PC), R0							
+  errors.go:26		0xedf464		91050000		ADD $320, R0, R0							
+  errors.go:26		0xedf468		d28002a1		MOVD $21, R1								
+  errors.go:26		0xedf46c		910263e2		ADD $152, RSP, R2							
+  errors.go:26		0xedf470		b27f03e3		ORR $2, ZR, R3								
+  errors.go:26		0xedf474		aa0303e4		MOVD R3, R4								
+  errors.go:26		0xedf478		97d89922		CALL fmt.errorf(SB)							
+  errors.go:26		0xedf47c		b5000180		CBNZ R0, 12(PC)								
+  errors.go:31		0xedf480		d503201f		NOOP									
+  errors.go:65		0xedf484		d0001020		ADRP 2121728(PC), R0							
+  errors.go:65		0xedf488		913c0000		ADD $3840, R0, R0							
+  errors.go:65		0xedf48c		97d50edd		CALL runtime.newobject(SB)						
+  errors.go:65		0xedf490		b0001ea1		ADRP 4018176(PC), R1							
+  errors.go:65		0xedf494		91050021		ADD $320, R1, R1							
+  errors.go:65		0xedf498		d28002a2		MOVD $21, R2								
+  errors.go:65		0xedf49c		a9000801		STP (R1, R2), (R0)							
+  tracer.go:525		0xedf4a0		aa0003e1		MOVD R0, R1								
+  tracer.go:525		0xedf4a4		90002200		ADRP 4456448(PC), R0							
+  tracer.go:525		0xedf4a8		911a2000		ADD $1672, R0, R0							
+  tracer.go:525		0xedf4ac		a90787e0		STP (R0, R1), 120(RSP)							
+  tracer.go:525		0xedf4b0		3900ffff		MOVB ZR, 63(RSP)							
+  tracer.go:525		0xedf4b4		f9412bfa		MOVD 592(RSP), R26							
+  tracer.go:525		0xedf4b8		f9400340		MOVD (R26), R0								
+  tracer.go:525		0xedf4bc		d63f0000		CALL (R0)								
+  tracer.go:525		0xedf4c0		a94787e0		LDP 120(RSP), (R0, R1)							
+  tracer.go:525		0xedf4c4		a97ffbfd		LDP -8(RSP), (R29, R30)							
+  tracer.go:525		0xedf4c8		910983ff		ADD $608, RSP, RSP							
+  tracer.go:525		0xedf4cc		d65f03c0		RET									
+  tracer.go:530		0xedf4d0		a907ffff		STP (ZR, ZR), 120(RSP)							
+  tracer.go:530		0xedf4d4		3900ffff		MOVB ZR, 63(RSP)							
+  tracer.go:530		0xedf4d8		f9412bfa		MOVD 592(RSP), R26							
+  tracer.go:530		0xedf4dc		f9400340		MOVD (R26), R0								
+  tracer.go:530		0xedf4e0		d63f0000		CALL (R0)								
+  tracer.go:530		0xedf4e4		a94787e0		LDP 120(RSP), (R0, R1)							
+  tracer.go:530		0xedf4e8		a97ffbfd		LDP -8(RSP), (R29, R30)							
+  tracer.go:530		0xedf4ec		910983ff		ADD $608, RSP, RSP							
+  tracer.go:530		0xedf4f0		d65f03c0		RET									
+  tracer.go:530		0xedf4f4		97d5b7ff		CALL runtime.deferreturn(SB)						
+  tracer.go:530		0xedf4f8		f9403fe0		MOVD 120(RSP), R0							
+  tracer.go:530		0xedf4fc		f94043e1		MOVD 128(RSP), R1							
+  tracer.go:530		0xedf500		a97ffbfd		LDP -8(RSP), (R29, R30)							
+  tracer.go:530		0xedf504		910983ff		ADD $608, RSP, RSP							
+  tracer.go:530		0xedf508		d65f03c0		RET									
+  tracer.go:483		0xedf50c		a90087e0		STP (R0, R1), 8(RSP)							
+  tracer.go:483		0xedf510		f9000fe2		MOVD R2, 24(RSP)							
+  tracer.go:483		0xedf514		aa1e03e3		MOVD R30, R3								
+  tracer.go:483		0xedf518		97d6b01a		CALL runtime.morestack_noctxt.abi0(SB)					
+  tracer.go:483		0xedf51c		a94087e0		LDP 8(RSP), (R0, R1)							
+  tracer.go:483		0xedf520		f9400fe2		MOVD 24(RSP), R2							
+  tracer.go:483		0xedf524		17fffeb7		JMP go.opentelemetry.io/ebpf-profiler/tracer.loadAllMaps(SB)		
+  tracer.go:483		0xedf528		00000000		?									
+  tracer.go:483		0xedf52c		00000000		?									

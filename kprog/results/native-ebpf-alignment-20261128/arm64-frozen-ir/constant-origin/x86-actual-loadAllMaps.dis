@@ -1,0 +1,318 @@
+TEXT go.opentelemetry.io/ebpf-profiler/tracer.loadAllMaps(SB) go.opentelemetry.io/ebpf-profiler@v0.0.0/tracer/tracer.go
+  tracer.go:483		0x10ac320		4c8da42430feffff	LEAQ 0xfffffe30(SP), R12						
+  tracer.go:483		0x10ac328		4d3b6610		CMPQ R12, 0x10(R14)							
+  tracer.go:483		0x10ac32c		0f86db050000		JBE 0x10ac90d								
+  tracer.go:483		0x10ac332		55			PUSHQ BP								
+  tracer.go:483		0x10ac333		4889e5			MOVQ SP, BP								
+  tracer.go:483		0x10ac336		4881ec48020000		SUBQ $0x248, SP								
+  tracer.go:483		0x10ac33d		66440fd6bc2440020000	MOVQ X15, 0x240(SP)							
+  tracer.go:487		0x10ac347		4889842458020000	MOVQ AX, 0x258(SP)							
+  tracer.go:487		0x10ac34f		48899c2460020000	MOVQ BX, 0x260(SP)							
+  tracer.go:487		0x10ac357		48898c2468020000	MOVQ CX, 0x268(SP)							
+  tracer.go:483		0x10ac35f		c644242f00		MOVB $0x0, 0x2f(SP)							
+  tracer.go:483		0x10ac364		440f117c2468		MOVUPS X15, 0x68(SP)							
+  tracer.go:486		0x10ac36a		e89191f4ff		CALL go.opentelemetry.io/ebpf-profiler/rlimit.MaximizeMemlock(SB)	
+  tracer.go:487		0x10ac36f		4885db			TESTQ BX, BX								
+  tracer.go:487		0x10ac372		0f8572010000		JNE 0x10ac4ea								
+  tracer.go:490		0x10ac378		4889842440020000	MOVQ AX, 0x240(SP)							
+  tracer.go:490		0x10ac380		c644242f01		MOVB $0x1, 0x2f(SP)							
+  tracer.go:493		0x10ac385		488d842470010000	LEAQ 0x170(SP), AX							
+  tracer.go:493		0x10ac38d		440f1138		MOVUPS X15, 0(AX)							
+  tracer.go:493		0x10ac391		440f117810		MOVUPS X15, 0x10(AX)							
+  tracer.go:493		0x10ac396		440f117820		MOVUPS X15, 0x20(AX)							
+  tracer.go:493		0x10ac39b		488d8424a8000000	LEAQ 0xa8(SP), AX							
+  tracer.go:493		0x10ac3a3		b903000000		MOVL $0x3, CX								
+  tracer.go:493		0x10ac3a8		440f1138		MOVUPS X15, 0(AX)							
+  tracer.go:493		0x10ac3ac		440f117810		MOVUPS X15, 0x10(AX)							
+  tracer.go:493		0x10ac3b1		440f117820		MOVUPS X15, 0x20(AX)							
+  tracer.go:493		0x10ac3b6		440f117830		MOVUPS X15, 0x30(AX)							
+  tracer.go:493		0x10ac3bb		4883c040		ADDQ $0x40, AX								
+  tracer.go:493		0x10ac3bf		90			NOPL									
+  tracer.go:493		0x10ac3c0		ffc9			DECL CX									
+  tracer.go:493		0x10ac3c2		75e4			JNE 0x10ac3a8								
+  tracer.go:493		0x10ac3c4		440f1178f8		MOVUPS X15, -0x8(AX)							
+  tracer.go:493		0x10ac3c9		48b88080808080808080	MOVQ $0x8080808080808080, AX						
+  tracer.go:493		0x10ac3d3		48898424a8000000	MOVQ AX, 0xa8(SP)							
+  tracer.go:493		0x10ac3db		488d8424a8000000	LEAQ 0xa8(SP), AX							
+  tracer.go:493		0x10ac3e3		4889842480010000	MOVQ AX, 0x180(SP)							
+  tracer.go:493		0x10ac3eb		e8b0143eff		CALL runtime.rand(SB)							
+  tracer.go:493		0x10ac3f0		4889842478010000	MOVQ AX, 0x178(SP)							
+  tracer.go:503		0x10ac3f8		488b842460020000	MOVQ 0x260(SP), AX							
+  tracer.go:503		0x10ac400		488b4040		MOVQ 0x40(AX), AX							
+  tracer.go:503		0x10ac404		4889442450		MOVQ AX, 0x50(SP)							
+  tracer.go:503		0x10ac409		488d05d09c2100		LEAQ 0x219cd0(IP), AX							
+  tracer.go:503		0x10ac410		488d9c2470010000	LEAQ 0x170(SP), BX							
+  tracer.go:503		0x10ac418		488d0d39833f00		LEAQ 0x3f8339(IP), CX							
+  tracer.go:503		0x10ac41f		bf18000000		MOVL $0x18, DI								
+  tracer.go:503		0x10ac424		e8d7bd36ff		CALL runtime.mapassign_faststr(SB)					
+  tracer.go:503		0x10ac429		488b4c2450		MOVQ 0x50(SP), CX							
+  tracer.go:503		0x10ac42e		4883c114		ADDQ $0x14, CX								
+  tracer.go:503		0x10ac432		ba01000000		MOVL $0x1, DX								
+  tracer.go:503		0x10ac437		d3e2			SHLL CL, DX								
+  tracer.go:503		0x10ac439		83f920			CMPL CX, $0x20								
+  tracer.go:503		0x10ac43c		19c9			SBBL CX, CX								
+  tracer.go:503		0x10ac43e		21ca			ANDL CX, DX								
+  tracer.go:503		0x10ac440		8910			MOVL DX, 0(AX)								
+  tracer.go:505		0x10ac442		488b842460020000	MOVQ 0x260(SP), AX							
+  tracer.go:505		0x10ac44a		488b4040		MOVQ 0x40(AX), AX							
+  tracer.go:505		0x10ac44e		4889442450		MOVQ AX, 0x50(SP)							
+  tracer.go:505		0x10ac453		488d05869c2100		LEAQ 0x219c86(IP), AX							
+  tracer.go:505		0x10ac45a		488d9c2470010000	LEAQ 0x170(SP), BX							
+  tracer.go:505		0x10ac462		488d0d07833f00		LEAQ 0x3f8307(IP), CX							
+  tracer.go:505		0x10ac469		bf18000000		MOVL $0x18, DI								
+  tracer.go:505		0x10ac46e		e88dbd36ff		CALL runtime.mapassign_faststr(SB)					
+  tracer.go:505		0x10ac473		488b4c2450		MOVQ 0x50(SP), CX							
+  tracer.go:505		0x10ac478		4883c110		ADDQ $0x10, CX								
+  tracer.go:505		0x10ac47c		ba01000000		MOVL $0x1, DX								
+  tracer.go:505		0x10ac481		d3e2			SHLL CL, DX								
+  tracer.go:505		0x10ac483		83f920			CMPL CX, $0x20								
+  tracer.go:505		0x10ac486		19c9			SBBL CX, CX								
+  tracer.go:505		0x10ac488		21ca			ANDL CX, DX								
+  tracer.go:505		0x10ac48a		8910			MOVL DX, 0(AX)								
+  tracer.go:507		0x10ac48c		488b842460020000	MOVQ 0x260(SP), AX							
+  tracer.go:507		0x10ac494		8b4860			MOVL 0x60(AX), CX							
+  tracer.go:540		0x10ac497		48c1e10c		SHLQ $0xc, CX								
+  tracer.go:540		0x10ac49b		48b80100008000000080	MOVQ $0x8000000080000001, AX						
+  tracer.go:540		0x10ac4a5		48f7e1			MULQ CX									
+  tracer.go:540		0x10ac4a8		48c1ea1f		SHRQ $0x1f, DX								
+  tracer.go:541		0x10ac4ac		83fa10			CMPL DX, $0x10								
+  tracer.go:541		0x10ac4af		7305			JAE 0x10ac4b6								
+  tracer.go:541		0x10ac4b1		ba10000000		MOVL $0x10, DX								
+  tracer.go:507		0x10ac4b6		89542430		MOVL DX, 0x30(SP)							
+  tracer.go:507		0x10ac4ba		488d051f9c2100		LEAQ 0x219c1f(IP), AX							
+  tracer.go:507		0x10ac4c1		488d9c2470010000	LEAQ 0x170(SP), BX							
+  tracer.go:507		0x10ac4c9		488d0d286a3e00		LEAQ 0x3e6a28(IP), CX							
+  tracer.go:507		0x10ac4d0		bf0b000000		MOVL $0xb, DI								
+  tracer.go:507		0x10ac4d5		e826bd36ff		CALL runtime.mapassign_faststr(SB)					
+  tracer.go:507		0x10ac4da		8b542430		MOVL 0x30(SP), DX							
+  tracer.go:507		0x10ac4de		8910			MOVL DX, 0(AX)								
+  tracer.go:507		0x10ac4e0		b808000000		MOVL $0x8, AX								
+  tracer.go:509		0x10ac4e5		e91f010000		JMP 0x10ac609								
+  tracer.go:488		0x10ac4ea		440f11bc24a0010000	MOVUPS X15, 0x1a0(SP)							
+  tracer.go:488		0x10ac4f3		7404			JE 0x10ac4f9								
+  tracer.go:488		0x10ac4f5		488b5b08		MOVQ 0x8(BX), BX							
+  tracer.go:488		0x10ac4f9		48899c24a0010000	MOVQ BX, 0x1a0(SP)							
+  tracer.go:488		0x10ac501		48898c24a8010000	MOVQ CX, 0x1a8(SP)							
+  errors.go:26		0x10ac509		488d050ecd3f00		LEAQ 0x3fcd0e(IP), AX							
+  errors.go:26		0x10ac510		bb1b000000		MOVL $0x1b, BX								
+  errors.go:26		0x10ac515		488d8c24a0010000	LEAQ 0x1a0(SP), CX							
+  errors.go:26		0x10ac51d		bf01000000		MOVL $0x1, DI								
+  errors.go:26		0x10ac522		4889fe			MOVQ DI, SI								
+  errors.go:26		0x10ac525		e836af46ff		CALL fmt.errorf(SB)							
+  errors.go:26		0x10ac52a		4885c0			TESTQ AX, AX								
+  errors.go:26		0x10ac52d		7529			JNE 0x10ac558								
+  errors.go:31		0x10ac52f		90			NOPL									
+  errors.go:65		0x10ac530		488d0529522200		LEAQ 0x225229(IP), AX							
+  errors.go:65		0x10ac537		e864bf37ff		CALL runtime.newobject(SB)						
+  errors.go:65		0x10ac53c		48c740081b000000	MOVQ $0x1b, 0x8(AX)							
+  errors.go:65		0x10ac544		488d0dd3cc3f00		LEAQ 0x3fccd3(IP), CX							
+  errors.go:65		0x10ac54b		488908			MOVQ CX, 0(AX)								
+  tracer.go:488		0x10ac54e		4889c3			MOVQ AX, BX								
+  tracer.go:488		0x10ac551		488d0528ef4500		LEAQ go:itab.*errors.errorString,error(SB), AX				
+  tracer.go:488		0x10ac558		4889442468		MOVQ AX, 0x68(SP)							
+  tracer.go:488		0x10ac55d		48895c2470		MOVQ BX, 0x70(SP)							
+  tracer.go:488		0x10ac562		4881c448020000		ADDQ $0x248, SP								
+  tracer.go:488		0x10ac569		5d			POPQ BP									
+  tracer.go:488		0x10ac56a		c3			RET									
+  tracer.go:509		0x10ac56b		4889442448		MOVQ AX, 0x48(SP)							
+  tracer.go:510		0x10ac570		440f11bc2430020000	MOVUPS X15, 0x230(SP)							
+  tracer.go:510		0x10ac579		e8c2dd3dff		CALL runtime.convT64(SB)						
+  tracer.go:510		0x10ac57e		488d0d9bf81300		LEAQ 0x13f89b(IP), CX							
+  tracer.go:510		0x10ac585		48898c2430020000	MOVQ CX, 0x230(SP)							
+  tracer.go:510		0x10ac58d		4889842438020000	MOVQ AX, 0x238(SP)							
+  tracer.go:510		0x10ac595		488d05d1983f00		LEAQ 0x3f98d1(IP), AX							
+  tracer.go:510		0x10ac59c		bb19000000		MOVL $0x19, BX								
+  tracer.go:510		0x10ac5a1		488d8c2430020000	LEAQ 0x230(SP), CX							
+  tracer.go:510		0x10ac5a9		bf01000000		MOVL $0x1, DI								
+  tracer.go:510		0x10ac5ae		4889fe			MOVQ DI, SI								
+  tracer.go:510		0x10ac5b1		e82adf46ff		CALL fmt.Sprintf(SB)							
+  tracer.go:511		0x10ac5b6		488b8c2460020000	MOVQ 0x260(SP), CX							
+  tracer.go:511		0x10ac5be		488b4940		MOVQ 0x40(CX), CX							
+  tracer.go:511		0x10ac5c2		48894c2450		MOVQ CX, 0x50(SP)							
+  tracer.go:511		0x10ac5c7		4889c1			MOVQ AX, CX								
+  tracer.go:511		0x10ac5ca		4889df			MOVQ BX, DI								
+  tracer.go:511		0x10ac5cd		488d050c9b2100		LEAQ 0x219b0c(IP), AX							
+  tracer.go:511		0x10ac5d4		488d9c2470010000	LEAQ 0x170(SP), BX							
+  tracer.go:511		0x10ac5dc		0f1f4000		NOPL 0(AX)								
+  tracer.go:511		0x10ac5e0		e81bbc36ff		CALL runtime.mapassign_faststr(SB)					
+  tracer.go:511		0x10ac5e5		488b4c2450		MOVQ 0x50(SP), CX							
+  tracer.go:511		0x10ac5ea		4883c110		ADDQ $0x10, CX								
+  tracer.go:511		0x10ac5ee		ba01000000		MOVL $0x1, DX								
+  tracer.go:511		0x10ac5f3		d3e2			SHLL CL, DX								
+  tracer.go:509		0x10ac5f5		488b5c2448		MOVQ 0x48(SP), BX							
+  tracer.go:509		0x10ac5fa		48ffc3			INCQ BX									
+  tracer.go:511		0x10ac5fd		83f920			CMPL CX, $0x20								
+  tracer.go:511		0x10ac600		19c9			SBBL CX, CX								
+  tracer.go:511		0x10ac602		21d1			ANDL DX, CX								
+  tracer.go:511		0x10ac604		8908			MOVL CX, 0(AX)								
+  tracer.go:509		0x10ac606		4889d8			MOVQ BX, AX								
+  tracer.go:509		0x10ac609		4883f817		CMPQ AX, $0x17								
+  tracer.go:509		0x10ac60d		0f8e58ffffff		JLE 0x10ac56b								
+  tracer.go:514		0x10ac613		488b942458020000	MOVQ 0x258(SP), DX							
+  tracer.go:514		0x10ac61b		488b1a			MOVQ 0(DX), BX								
+  tracer.go:514		0x10ac61e		488d8c24d0010000	LEAQ 0x1d0(SP), CX							
+  tracer.go:514		0x10ac626		440f1139		MOVUPS X15, 0(CX)							
+  tracer.go:514		0x10ac62a		440f117910		MOVUPS X15, 0x10(CX)							
+  tracer.go:514		0x10ac62f		440f117920		MOVUPS X15, 0x20(CX)							
+  tracer.go:514		0x10ac634		440f117930		MOVUPS X15, 0x30(CX)							
+  tracer.go:514		0x10ac639		440f117940		MOVUPS X15, 0x40(CX)							
+  tracer.go:514		0x10ac63e		440f117950		MOVUPS X15, 0x50(CX)							
+  tracer.go:514		0x10ac643		488d0596982100		LEAQ 0x219896(IP), AX							
+  tracer.go:514		0x10ac64a		e831c537ff		CALL runtime.mapIterStart(SB)						
+  tracer.go:514		0x10ac64f		eb0d			JMP 0x10ac65e								
+  tracer.go:514		0x10ac651		488d8424d0010000	LEAQ 0x1d0(SP), AX							
+  tracer.go:514		0x10ac659		e882c537ff		CALL runtime.mapIterNext(SB)						
+  tracer.go:514		0x10ac65e		488bb424d0010000	MOVQ 0x1d0(SP), SI							
+  tracer.go:514		0x10ac666		4885f6			TESTQ SI, SI								
+  tracer.go:514		0x10ac669		0f8459020000		JE 0x10ac8c8								
+  tracer.go:514		0x10ac66f		488b7e08		MOVQ 0x8(SI), DI							
+  tracer.go:514		0x10ac673		488b9424d8010000	MOVQ 0x1d8(SP), DX							
+  tracer.go:514		0x10ac67b		8402			TESTB AL, 0(DX)								
+  tracer.go:514		0x10ac67d		488b0e			MOVQ 0(SI), CX								
+  tracer.go:515		0x10ac680		4883ff0b		CMPQ DI, $0xb								
+  tracer.go:515		0x10ac684		752c			JNE 0x10ac6b2								
+  tracer.go:515		0x10ac686		48be73636865645f7469	MOVQ $0x69745f6465686373, SI						
+  tracer.go:515		0x10ac690		483931			CMPQ 0(CX), SI								
+  tracer.go:515		0x10ac693		751d			JNE 0x10ac6b2								
+  tracer.go:515		0x10ac695		668179086d65		CMPW 0x8(CX), $0x656d							
+  tracer.go:515		0x10ac69b		7515			JNE 0x10ac6b2								
+  tracer.go:515		0x10ac69d		80790a73		CMPB 0xa(CX), $0x73							
+  tracer.go:515		0x10ac6a1		750f			JNE 0x10ac6b2								
+  tracer.go:515		0x10ac6a3		4c8b842460020000	MOVQ 0x260(SP), R8							
+  tracer.go:515		0x10ac6ab		4183786000		CMPL 0x60(R8), $0x0							
+  tracer.go:515		0x10ac6b0		749f			JE 0x10ac651								
+  tracer.go:514		0x10ac6b2		48898c2480000000	MOVQ CX, 0x80(SP)							
+  tracer.go:514		0x10ac6ba		48897c2440		MOVQ DI, 0x40(SP)							
+  tracer.go:514		0x10ac6bf		488b12			MOVQ 0(DX), DX								
+  tracer.go:514		0x10ac6c2		4889542478		MOVQ DX, 0x78(SP)							
+  tracer.go:519		0x10ac6c7		488d05129a2100		LEAQ 0x219a12(IP), AX							
+  tracer.go:519		0x10ac6ce		488d9c2470010000	LEAQ 0x170(SP), BX							
+  tracer.go:519		0x10ac6d6		e865b836ff		CALL runtime.mapaccess2_faststr(SB)					
+  tracer.go:519		0x10ac6db		84db			TESTL BL, BL								
+  tracer.go:519		0x10ac6dd		750a			JNE 0x10ac6e9								
+  map.go:367		0x10ac6df		488b442478		MOVQ 0x78(SP), AX							
+  tracer.go:519		0x10ac6e4		e98d000000		JMP 0x10ac776								
+  tracer.go:519		0x10ac6e9		8b08			MOVL 0(AX), CX								
+  tracer.go:519		0x10ac6eb		894c2434		MOVL CX, 0x34(SP)							
+  tracer.go:520		0x10ac6ef		488d8c24b0010000	LEAQ 0x1b0(SP), CX							
+  tracer.go:520		0x10ac6f7		440f1139		MOVUPS X15, 0(CX)							
+  tracer.go:520		0x10ac6fb		440f117910		MOVUPS X15, 0x10(CX)							
+  tracer.go:520		0x10ac700		488b842480000000	MOVQ 0x80(SP), AX							
+  tracer.go:520		0x10ac708		488b5c2440		MOVQ 0x40(SP), BX							
+  tracer.go:520		0x10ac70d		e8aedc3dff		CALL runtime.convTstring(SB)						
+  tracer.go:520		0x10ac712		488d0dc7f41300		LEAQ 0x13f4c7(IP), CX							
+  tracer.go:520		0x10ac719		48898c24b0010000	MOVQ CX, 0x1b0(SP)							
+  tracer.go:520		0x10ac721		48898424b8010000	MOVQ AX, 0x1b8(SP)							
+  tracer.go:520		0x10ac729		8b442434		MOVL 0x34(SP), AX							
+  tracer.go:520		0x10ac72d		e8ce8037ff		CALL runtime.convT32(SB)						
+  tracer.go:520		0x10ac732		488d0d27f61300		LEAQ 0x13f627(IP), CX							
+  tracer.go:520		0x10ac739		48898c24c0010000	MOVQ CX, 0x1c0(SP)							
+  tracer.go:520		0x10ac741		48898424c8010000	MOVQ AX, 0x1c8(SP)							
+  tracer.go:520		0x10ac749		488d0552673f00		LEAQ 0x3f6752(IP), AX							
+  tracer.go:520		0x10ac750		bb17000000		MOVL $0x17, BX								
+  tracer.go:520		0x10ac755		488d8c24b0010000	LEAQ 0x1b0(SP), CX							
+  tracer.go:520		0x10ac75d		bf02000000		MOVL $0x2, DI								
+  tracer.go:520		0x10ac762		4889fe			MOVQ DI, SI								
+  tracer.go:520		0x10ac765		e896f5e3ff		CALL go.opentelemetry.io/ebpf-profiler/internal/log.Debugf(SB)		
+  tracer.go:521		0x10ac76a		8b4c2434		MOVL 0x34(SP), CX							
+  tracer.go:521		0x10ac76e		488b442478		MOVQ 0x78(SP), AX							
+  tracer.go:521		0x10ac773		89481c			MOVL CX, 0x1c(AX)							
+  tracer.go:523		0x10ac776		90			NOPL									
+  map.go:367		0x10ac777		31db			XORL BX, BX								
+  map.go:367		0x10ac779		31c9			XORL CX, CX								
+  map.go:367		0x10ac77b		31ff			XORL DI, DI								
+  map.go:367		0x10ac77d		89fe			MOVL DI, SI								
+  map.go:367		0x10ac77f		4531c0			XORL R8, R8								
+  map.go:367		0x10ac782		e8b94beeff		CALL github.com/cilium/ebpf.NewMapWithOptions(SB)			
+  tracer.go:524		0x10ac787		4885db			TESTQ BX, BX								
+  tracer.go:524		0x10ac78a		7552			JNE 0x10ac7de								
+  map.go:367		0x10ac78c		4889442460		MOVQ AX, 0x60(SP)							
+  tracer.go:527		0x10ac791		488d05c8962100		LEAQ 0x2196c8(IP), AX							
+  tracer.go:527		0x10ac798		488b9c2468020000	MOVQ 0x268(SP), BX							
+  tracer.go:527		0x10ac7a0		488b8c2480000000	MOVQ 0x80(SP), CX							
+  tracer.go:527		0x10ac7a8		488b7c2440		MOVQ 0x40(SP), DI							
+  tracer.go:527		0x10ac7ad		e84eba36ff		CALL runtime.mapassign_faststr(SB)					
+  tracer.go:527		0x10ac7b2		833df7ba280100		CMPL runtime.writeBarrier(SB), $0x0					
+  tracer.go:527		0x10ac7b9		7507			JNE 0x10ac7c2								
+  tracer.go:527		0x10ac7bb		488b542460		MOVQ 0x60(SP), DX							
+  tracer.go:527		0x10ac7c0		eb14			JMP 0x10ac7d6								
+  tracer.go:527		0x10ac7c2		488b08			MOVQ 0(AX), CX								
+  tracer.go:527		0x10ac7c5		e816823eff		CALL runtime.gcWriteBarrier2(SB)					
+  tracer.go:527		0x10ac7ca		488b542460		MOVQ 0x60(SP), DX							
+  tracer.go:527		0x10ac7cf		498913			MOVQ DX, 0(R11)								
+  tracer.go:527		0x10ac7d2		49894b08		MOVQ CX, 0x8(R11)							
+  tracer.go:527		0x10ac7d6		488910			MOVQ DX, 0(AX)								
+  tracer.go:527		0x10ac7d9		e973feffff		JMP 0x10ac651								
+  map.go:367		0x10ac7de		48894c2458		MOVQ CX, 0x58(SP)							
+  map.go:367		0x10ac7e3		48895c2438		MOVQ BX, 0x38(SP)							
+  tracer.go:525		0x10ac7e8		488d8c2488000000	LEAQ 0x88(SP), CX							
+  tracer.go:525		0x10ac7f0		440f1139		MOVUPS X15, 0(CX)							
+  tracer.go:525		0x10ac7f4		440f117910		MOVUPS X15, 0x10(CX)							
+  tracer.go:525		0x10ac7f9		488b842480000000	MOVQ 0x80(SP), AX							
+  tracer.go:525		0x10ac801		488b5c2440		MOVQ 0x40(SP), BX							
+  tracer.go:525		0x10ac806		e8b5db3dff		CALL runtime.convTstring(SB)						
+  tracer.go:525		0x10ac80b		488d0dcef31300		LEAQ 0x13f3ce(IP), CX							
+  tracer.go:525		0x10ac812		48898c2488000000	MOVQ CX, 0x88(SP)							
+  tracer.go:525		0x10ac81a		4889842490000000	MOVQ AX, 0x90(SP)							
+  tracer.go:524		0x10ac822		488b4c2438		MOVQ 0x38(SP), CX							
+  tracer.go:524		0x10ac827		4885c9			TESTQ CX, CX								
+  tracer.go:525		0x10ac82a		7406			JE 0x10ac832								
+  tracer.go:525		0x10ac82c		488b5908		MOVQ 0x8(CX), BX							
+  tracer.go:525		0x10ac830		eb03			JMP 0x10ac835								
+  tracer.go:525		0x10ac832		4889cb			MOVQ CX, BX								
+  tracer.go:525		0x10ac835		48899c2498000000	MOVQ BX, 0x98(SP)							
+  tracer.go:525		0x10ac83d		488b542458		MOVQ 0x58(SP), DX							
+  tracer.go:525		0x10ac842		48899424a0000000	MOVQ DX, 0xa0(SP)							
+  errors.go:26		0x10ac84a		488d05f0353f00		LEAQ 0x3f35f0(IP), AX							
+  errors.go:26		0x10ac851		bb15000000		MOVL $0x15, BX								
+  errors.go:26		0x10ac856		488d8c2488000000	LEAQ 0x88(SP), CX							
+  errors.go:26		0x10ac85e		bf02000000		MOVL $0x2, DI								
+  errors.go:26		0x10ac863		4889fe			MOVQ DI, SI								
+  errors.go:26		0x10ac866		e8f5ab46ff		CALL fmt.errorf(SB)							
+  errors.go:26		0x10ac86b		4885c0			TESTQ AX, AX								
+  errors.go:26		0x10ac86e		7529			JNE 0x10ac899								
+  errors.go:31		0x10ac870		90			NOPL									
+  errors.go:65		0x10ac871		488d05e84e2200		LEAQ 0x224ee8(IP), AX							
+  errors.go:65		0x10ac878		e823bc37ff		CALL runtime.newobject(SB)						
+  errors.go:65		0x10ac87d		48c7400815000000	MOVQ $0x15, 0x8(AX)							
+  errors.go:65		0x10ac885		488d0db5353f00		LEAQ 0x3f35b5(IP), CX							
+  errors.go:65		0x10ac88c		488908			MOVQ CX, 0(AX)								
+  tracer.go:525		0x10ac88f		4889c3			MOVQ AX, BX								
+  tracer.go:525		0x10ac892		488d05e7eb4500		LEAQ go:itab.*errors.errorString,error(SB), AX				
+  tracer.go:525		0x10ac899		4889442468		MOVQ AX, 0x68(SP)							
+  tracer.go:525		0x10ac89e		48895c2470		MOVQ BX, 0x70(SP)							
+  tracer.go:525		0x10ac8a3		c644242f00		MOVB $0x0, 0x2f(SP)							
+  tracer.go:525		0x10ac8a8		488b942440020000	MOVQ 0x240(SP), DX							
+  tracer.go:525		0x10ac8b0		488b02			MOVQ 0(DX), AX								
+  tracer.go:525		0x10ac8b3		ffd0			CALL AX									
+  tracer.go:525		0x10ac8b5		488b442468		MOVQ 0x68(SP), AX							
+  tracer.go:525		0x10ac8ba		488b5c2470		MOVQ 0x70(SP), BX							
+  tracer.go:525		0x10ac8bf		4881c448020000		ADDQ $0x248, SP								
+  tracer.go:525		0x10ac8c6		5d			POPQ BP									
+  tracer.go:525		0x10ac8c7		c3			RET									
+  tracer.go:530		0x10ac8c8		440f117c2468		MOVUPS X15, 0x68(SP)							
+  tracer.go:530		0x10ac8ce		c644242f00		MOVB $0x0, 0x2f(SP)							
+  tracer.go:530		0x10ac8d3		488b942440020000	MOVQ 0x240(SP), DX							
+  tracer.go:530		0x10ac8db		488b02			MOVQ 0(DX), AX								
+  tracer.go:530		0x10ac8de		6690			NOPW									
+  tracer.go:530		0x10ac8e0		ffd0			CALL AX									
+  tracer.go:530		0x10ac8e2		488b5c2470		MOVQ 0x70(SP), BX							
+  tracer.go:530		0x10ac8e7		488b442468		MOVQ 0x68(SP), AX							
+  tracer.go:530		0x10ac8ec		4881c448020000		ADDQ $0x248, SP								
+  tracer.go:530		0x10ac8f3		5d			POPQ BP									
+  tracer.go:530		0x10ac8f4		c3			RET									
+  tracer.go:530		0x10ac8f5		e806673aff		CALL runtime.deferreturn(SB)						
+  tracer.go:530		0x10ac8fa		488b442468		MOVQ 0x68(SP), AX							
+  tracer.go:530		0x10ac8ff		488b5c2470		MOVQ 0x70(SP), BX							
+  tracer.go:530		0x10ac904		4881c448020000		ADDQ $0x248, SP								
+  tracer.go:530		0x10ac90b		5d			POPQ BP									
+  tracer.go:530		0x10ac90c		c3			RET									
+  tracer.go:483		0x10ac90d		4889442408		MOVQ AX, 0x8(SP)							
+  tracer.go:483		0x10ac912		48895c2410		MOVQ BX, 0x10(SP)							
+  tracer.go:483		0x10ac917		48894c2418		MOVQ CX, 0x18(SP)							
+  tracer.go:483		0x10ac91c		0f1f4000		NOPL 0(AX)								
+  tracer.go:483		0x10ac920		e8bb653eff		CALL runtime.morestack_noctxt.abi0(SB)					
+  tracer.go:483		0x10ac925		488b442408		MOVQ 0x8(SP), AX							
+  tracer.go:483		0x10ac92a		488b5c2410		MOVQ 0x10(SP), BX							
+  tracer.go:483		0x10ac92f		488b4c2418		MOVQ 0x18(SP), CX							
+  tracer.go:483		0x10ac934		e9e7f9ffff		JMP go.opentelemetry.io/ebpf-profiler/tracer.loadAllMaps(SB)		

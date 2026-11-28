@@ -1,0 +1,54 @@
+--- a/tracer/tracer.go
++++ b/tracer/tracer.go
+@@ -511,6 +511,7 @@
+ 		adaption[mapName] = 1 << uint32(exeIDToStackDeltasSize+cfg.MapScaleFactor)
+ 	}
+ 
++	mapsToLoad := make(map[string]*cebpf.MapSpec, len(coll.Maps))
+ 	for mapName, mapSpec := range coll.Maps {
+ 		if mapName == "sched_times" && cfg.OffCPUThreshold == 0 {
+ 			// Off CPU Profiling is disabled. So do not load this map.
+@@ -520,13 +521,26 @@
+ 			log.Debugf("Size of eBPF map %s: %v", mapName, newSize)
+ 			mapSpec.MaxEntries = newSize
+ 		}
+-		ebpfMap, err := cebpf.NewMap(mapSpec)
+-		if err != nil {
+-			return fmt.Errorf("failed to load %s: %v", mapName, err)
+-		}
+-		ebpfMaps[mapName] = ebpfMap
+-	}
+-
++		mapsToLoad[mapName] = mapSpec
++	}
++
++	// Variables are serialized into data-section maps by the collection loader.
++	mapsOnly := coll.Copy()
++	mapsOnly.Programs = nil
++	mapsOnly.Maps = mapsToLoad
++	for name, variable := range mapsOnly.Variables {
++		if mapsToLoad[variable.SectionName] == nil {
++			delete(mapsOnly.Variables, name)
++		}
++	}
++	loaded, err := cebpf.NewCollection(mapsOnly)
++	if err != nil {
++		return fmt.Errorf("failed to load maps: %v", err)
++	}
++	defer loaded.Close()
++	for mapName := range loaded.Maps {
++		ebpfMaps[mapName] = loaded.DetachMap(mapName)
++	}
+ 	return nil
+ }
+ 
+--- a/tracer/systemconfig.go
++++ b/tracer/systemconfig.go
+@@ -239,6 +239,7 @@
+ 	new := &cebpf.CollectionSpec{
+ 		Maps:     make(map[string]*cebpf.MapSpec),
+ 		Programs: make(map[string]*cebpf.ProgramSpec),
++		Variables: orig.Variables,
+ 	}
+ 	new.Maps["system_analysis"] = orig.Maps["system_analysis"].Copy()
+ 	new.Maps[".rodata.var"] = orig.Maps[".rodata.var"].Copy()

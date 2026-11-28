@@ -1,0 +1,43 @@
+{
+  "binaries": [
+    {
+      "architecture": "arm64",
+      "binary": "/workspaces/repository/vendor/build/arm64/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler",
+      "binary_bytes": 41836040,
+      "binary_sha256": "2a87ed681e7fa40a65a35d1c54da58f65630a43c7cf212d07813e4522678ad48",
+      "input_bpf_elf": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.arm64",
+      "input_bpf_elf_bytes": 2386696,
+      "input_bpf_elf_sha256": "fe17ac5a0f0f59135de15e6f7b3313f83c8ec7fd50319e646d4bbc9b9c173f96",
+      "embedded_elf_exact_offset": 27570176,
+      "embedded_elf_exact_match": true,
+      "exported_image_binary": "/workspaces/repository/.cache/qemu-arm64-root/usr/local/bin/otelcol-ebpf-profiler",
+      "exported_image_binary_sha256": "2a87ed681e7fa40a65a35d1c54da58f65630a43c7cf212d07813e4522678ad48",
+      "build_info_file": "arm64-go-build-info.txt"
+    },
+    {
+      "architecture": "x86",
+      "binary": "/workspaces/repository/vendor/build/x86/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler",
+      "binary_bytes": 45051440,
+      "binary_sha256": "13cf568b00004aeba22b4035dfe780656a14ef4e58f0bd6e4ecae81b5c513bd9",
+      "input_bpf_elf": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.amd64",
+      "input_bpf_elf_bytes": 2419520,
+      "input_bpf_elf_sha256": "8e9a95e69b663b96050c39f77c96e02c6b2f3bdbd1b38987d7b56039e09dba85",
+      "embedded_elf_exact_offset": 29995136,
+      "embedded_elf_exact_match": true,
+      "build_info_file": "x86-go-build-info.txt"
+    }
+  ],
+  "dependencies": {
+    "opentelemetry-ebpf-profiler": "2689a430a04318cb69f79f76adcba10dd40bb218",
+    "cilium-ebpf": "88256f7afc6f895e6396d0b85e6e9c4e2e1d2cf0"
+  },
+  "source_sha256": {
+    "vendor/repos/opentelemetry-ebpf-profiler/tracer/tracer.go": "997d132bf74dbf08957cf274f26a6605a46a3cf0e500b5b7347cc4a6dc504d7a",
+    "vendor/repos/opentelemetry-ebpf-profiler/tracer/systemconfig.go": "ba84e405b9b0698305fb5883866618863353321936a7a0310cc86f4c722623df",
+    "vendor/repos/cilium-ebpf/variable.go": "ee9e7cd706cde3bddefab2c8dc4395ed1dc3c128583344d542949321a888a3c2",
+    "vendor/repos/cilium-ebpf/map.go": "8fbf28d04d850fd02b26f05ec95150eef82841666661d4d237f2c34f9d139990",
+    "vendor/repos/cilium-ebpf/collection.go": "378aea29f70139f0afd40d74e8dd3f3ddda07f86ca65e2999b56a5a6c3ca92e5",
+    "vendor/repos/cilium-ebpf/elf_reader.go": "19e5a49d07ebcdad5590b894dafe9ba32760826a2c5e7f8bd16c3d918899fda2"
+  },
+  "scope": "Read-only actual canonical app binaries and their exact embedded original eBPF ELF. No app, image, program or setting changed."
+}
