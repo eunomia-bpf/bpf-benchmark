@@ -1,0 +1,25 @@
+{
+  "launcher_pid": 1363721,
+  "started_utc": "2026-11-28T07:48:30Z",
+  "recipe_publication": {
+    "commit": "eab46c27ec18b7c709e95e766e0b6c7f45664dfc",
+    "remote": "eab46c27ec18b7c709e95e766e0b6c7f45664dfc\trefs/heads/master"
+  },
+  "source_sha256": "079f930e84aeeb096226c36eb02cfa1ef3badfb57de9c86ae692f5ed46b2ec6b",
+  "production_source_uncommitted": true,
+  "command": [
+    "setsid",
+    "nohup",
+    "taskset",
+    "-c",
+    "19",
+    "make",
+    "-C",
+    "kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts",
+    "fix-check"
+  ],
+  "controller": "kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/fix-controller.json",
+  "log": "kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/fix-job.log",
+  "collection": "Collect SAME full stages/logs/after/controller.json and canonical products next turn. Launcher make PID differs from controller Python PID. Do not commit source on process completion alone.",
+  "resource_policy": "Sequential canonical builds/existing tests under48GiB onCPU16, one test thread; metadataCPU19; no timing/image lock or guest/image mutation."
+}
