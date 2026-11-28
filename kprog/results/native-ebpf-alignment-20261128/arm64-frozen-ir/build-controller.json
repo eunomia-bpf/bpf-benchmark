@@ -1,0 +1,30 @@
+{
+  "pid": 1241962,
+  "started_utc": "2026-11-28T04:11:35Z",
+  "controller_status": 0,
+  "phase": "finished",
+  "dependency": {
+    "pid": 1235912,
+    "result": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/check-20261128T034810Z",
+    "raw": "/workspaces/kprog-raw/perf/native-ebpf-alignment-20261128/20261128T034810Z"
+  },
+  "source_sha256": {
+    "kprog/x86/perf_context_lto.cpp": "9f3750399215f1626024694f7ead27d3e130c43f166a4cd7ea5f448d0008cefb",
+    "vendor/bpf/Makefile": "c7cc1e3a6a9541d5977fa15d168d16274527bd536d9eefec9b3a21449e8d305e",
+    "kprog/x86/native_lab/native_link/src/main.rs": "c08e017cc069322d1c7665adcc2a85bfa4c50c089e8da032e19161e01f3b249b",
+    "kprog/x86/native_lab/native_link/src/frozen_ir.rs": "4ed02ca4227964e8ce08ed504657aac13dcbc258b69385ee175b93311f564a3c"
+  },
+  "dependency_controller_status": 0,
+  "build_returncode": 0,
+  "products": {
+    "vendor/build/native-bpf/x86/stage/kprog-perf-context-lto": {
+      "bytes": 63076320,
+      "sha256": "48d092f5d37cb4b461377e7aa8e43501de8848603422426a2c66fd59c05d83c8"
+    },
+    "kprog/x86/native_lab/native_link/target/release/native-link": {
+      "bytes": 2762216,
+      "sha256": "7f985471c59853860e9b7a762074a6db26fb76d7f64f2d2ee5fd2a060e89707f"
+    }
+  },
+  "ended_utc": "2026-11-28T04:11:36Z"
+}

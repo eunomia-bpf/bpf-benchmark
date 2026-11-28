@@ -1,0 +1,5 @@
+/workspaces/repository/kprog/x86/perf_context_lto.cpp: In function ‘llvm::Expected<llvm::Function*> importLpmLookup(llvm::Module&, llvm::Function&, btf*, uint64_t, unsigned int)’:
+/workspaces/repository/kprog/x86/perf_context_lto.cpp:82:71: warning: redundant move in return statement [-Wredundant-move]
+   82 |   if (auto E = importC(M, Entry, Prefix, Code.str())) return std::move(E);
+      |                                                              ~~~~~~~~~^~~
+/workspaces/repository/kprog/x86/perf_context_lto.cpp:82:71: note: remove ‘std::move’ call

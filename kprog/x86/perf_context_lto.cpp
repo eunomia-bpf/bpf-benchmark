@@ -98,9 +98,13 @@ static Error importC(Module &M, Function &Entry, const std::string &Prefix, cons
   }
   auto Compiler = sys::findProgramByName("clang-18");
   if (!Compiler) return errorCodeToError(Compiler.getError());
-  const std::vector<std::string> Args = {*Compiler, "-O3", "-march=native", "-mgeneral-regs-only",
-      "-mno-red-zone", "-fPIC", "-fomit-frame-pointer", "-fno-stack-protector",
+  std::vector<std::string> Args = {*Compiler, "--target=" + M.getTargetTriple(), "-O3",
+      "-mgeneral-regs-only", "-fPIC", "-fomit-frame-pointer", "-fno-stack-protector",
       "-fno-asynchronous-unwind-tables", "-fno-unwind-tables", "-S", "-emit-llvm", Source, "-o", IR};
+  if (Triple(M.getTargetTriple()).isAArch64())
+    Args.insert(Args.end(), {"-mtune=neoverse-n1", "-mno-outline-atomics", "-ffixed-x26"});
+  else
+    Args.insert(Args.end(), {"-march=native", "-mno-red-zone"});
   const int Status = native_loader_detail::run_subprocess(Args, Log);
   if (Status) {
     const auto Saved = errno;
@@ -438,12 +442,15 @@ int main(int argc, char **argv) {
     if (G.hasSection() && G.getSection() == ".maps" && G.hasInitializer())
       G.setInitializer(Constant::getNullValue(G.getValueType()));
   InitializeNativeTarget(); InitializeNativeTargetAsmPrinter(); InitializeNativeTargetAsmParser();
+  LLVMInitializeAArch64TargetInfo(); LLVMInitializeAArch64Target();
+  LLVMInitializeAArch64TargetMC(); LLVMInitializeAArch64AsmPrinter(); LLVMInitializeAArch64AsmParser();
   std::string TargetError;
   auto *Target = TargetRegistry::lookupTarget(M->getTargetTriple(), TargetError);
   if (!Target) { errs() << TargetError << '\n'; return 1; }
   TargetOptions Options;
   std::unique_ptr<TargetMachine> Machine(Target->createTargetMachine(
-      M->getTargetTriple(), sys::getHostCPUName(), "", Options,
+      M->getTargetTriple(), F->getFnAttribute("target-cpu").isValid()
+          ? F->getFnAttribute("target-cpu").getValueAsString() : sys::getHostCPUName(), "", Options,
       Reloc::PIC_, std::nullopt, NativeCodegenLevel));
   M->setDataLayout(Machine->createDataLayout());
   auto Folded = foldImmutableGlobals(*M, ImmutableGlobals);

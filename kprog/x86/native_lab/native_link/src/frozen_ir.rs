@@ -16,7 +16,7 @@ pub(super) fn specialize(
         .filter(|(_, site)| matches!(site.kind, LookupKind::LpmTrie))
         .map(|(name, _)| (name, serde_json::json!({"type": 11, "inner_type": 0})))
         .collect(); // BPF_MAP_TYPE_LPM_TRIE; shape is read from the live map.
-    if args.mode != LinkMode::Kernel || elf.architecture() != object::Architecture::X86_64
+    if args.mode != LinkMode::Kernel
         || (values.is_empty() && map_types.is_empty())
     {
         return Ok(None);
@@ -40,7 +40,11 @@ pub(super) fn specialize(
     let mut command = Command::new("flock");
     command.args(["--exclusive", "/tmp/kprog-native-frozen-ir.compile"])
         .args(["prlimit", "--as=51539607552", "--"])
-        .arg(compiler).arg("--x86-cmov-converter-force-all").arg(&ir)
+        .arg(compiler);
+    if elf.architecture() == object::Architecture::X86_64 {
+        command.arg("--x86-cmov-converter-force-all");
+    }
+    command.arg(&ir)
         .arg("--symbol").arg(&args.symbol)
         .args(["--kernel-btf", "/sys/kernel/btf/vmlinux", "--prog-type", "0"])
         .arg("--immutable-globals").arg(&facts).arg("-o").arg(&native);
@@ -95,9 +99,10 @@ mod tests {
         let native = dir.join("input.o");
         let proof = dir.join("input.proof.o");
         let linker = here.join("target/release/native-link");
+        for target in ["x86_64-linux-gnu", "aarch64-linux-gnu"] {
         fs::write(&source, "const volatile int option=0; volatile long live; extern long selected(void); long entry(void *ctx) { return live + (option ? selected() : 23); }")?;
         let status = Command::new("clang-18").args(["-O3", "-fPIC", "-fembed-bitcode=all", "-c"])
-            .arg(&source).arg("-o").arg(&native).status()?;
+            .arg(format!("--target={target}")).arg(&source).arg("-o").arg(&native).status()?;
         assert!(status.success());
         let status = Command::new(&linker).arg("--input").arg(&native)
             .args(["--symbol", "entry", "--mode", "proof", "--output"]).arg(&proof).status()?;
@@ -108,7 +113,7 @@ mod tests {
         let elf = object::File::parse(&*bytes)?;
         assert_eq!(elf.section_by_name(".llvmbc").unwrap().data()?,
             original.section_by_name(".llvmbc").unwrap().data()?);
-        let mut args = Args { input: proof, symbol: "entry".into(), output: dir.join("out.bin"),
+        let mut args = Args { input: proof.clone(), symbol: "entry".into(), output: dir.join("out.bin"),
             output_relocs: None, output_map_patches: None, output_abi: None,
             link_plan: None, show: false, preserve_entry_abi: false, mode: LinkMode::Kernel };
         let compiler = root.join("vendor/build/native-bpf/x86/stage/kprog-perf-context-lto");
@@ -125,6 +130,7 @@ mod tests {
             assert!(!undefined.iter().any(|n| n == "option"));
             assert!(read_proof_abi(&specialized)?.is_some());
             assert!(specialized.section_by_name(".llvmbc").is_none());
+        }
         }
         Ok(())
     }

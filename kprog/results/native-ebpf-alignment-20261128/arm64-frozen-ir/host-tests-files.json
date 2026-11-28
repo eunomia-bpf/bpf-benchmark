@@ -1,0 +1,47 @@
+{
+  "files": {
+    "frozen-ir-test-1242225/out-0.frozen.proof.o": {
+      "bytes": 928,
+      "sha256": "bbaa696fe341ab331b67b973916b412668ffa0159a31e12e7c34d183d0cccab6"
+    },
+    "frozen-ir-test-1242225/input.o": {
+      "bytes": 4776,
+      "sha256": "8c340f0521127d383024eb426e748cdfe39b8d3558ea4acdba7c204791438e18"
+    },
+    "frozen-ir-test-1242225/input.proof.o": {
+      "bytes": 4024,
+      "sha256": "d486f580c68ecd25422fdd072cc47909e98d5c84311fed1315be06e7c4554d0a"
+    },
+    "frozen-ir-test-1242225/input.c": {
+      "bytes": 144,
+      "sha256": "ee9af2d80e14f0896129c091ba349916af2dcd8d32bf438f3487514b02eda1c8"
+    },
+    "frozen-ir-test-1242225/out-1.frozen.proof.o": {
+      "bytes": 1008,
+      "sha256": "2a3f3bbd19ff7a553463ac3108664379ecaa7b844ef7ff6a8a3ba86bfe98705d"
+    },
+    "frozen-lpm-test-1242225/input.o": {
+      "bytes": 4472,
+      "sha256": "859d105fddc3b558d8173b88d115d84e576fc838ea72e93ef928cf78178b3cb0"
+    },
+    "frozen-lpm-test-1242225/link-plan.json": {
+      "bytes": 65,
+      "sha256": "c6a94d49e8b0e9e50f41696309c2139cf66d4238a19f5a67d160bfd5b4ff1ed2"
+    },
+    "frozen-lpm-test-1242225/input.proof.o": {
+      "bytes": 5896,
+      "sha256": "fcda47b92b33dfd188d3e2ce550e8353c0f0279eff79cc8aa8331fd721b01c71"
+    },
+    "frozen-lpm-test-1242225/out.frozen.proof.o": {
+      "bytes": 3096,
+      "sha256": "05cf172be659e352d1a771d59c96b98dd23e3749dca9822fa0977557ee9d041a"
+    },
+    "frozen-lpm-test-1242225/input.c": {
+      "bytes": 363,
+      "sha256": "65e6bc8b4d3afd5675b24214cafb00a8d2090078063f6f35e8c84e45f7cd9677"
+    }
+  },
+  "archive_bytes": 6126,
+  "archive_sha256": "31aa1b26adf72c84c04544e9ef0346252c0330ca0d63b7393312483468622c08",
+  "scope": "Retained final scalar ARM and typed-LPM x86 fixture products from the existing14-test run; x86 scalar iteration assertions are logged, its reused intermediate filenames were overwritten by the ARM loop. Original fixture inputs remain protected for the active ARM executor."
+}

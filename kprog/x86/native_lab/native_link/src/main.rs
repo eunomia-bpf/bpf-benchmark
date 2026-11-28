@@ -436,7 +436,10 @@ fn main() -> Result<()> {
     // bytes are available only now, at the normal structured link boundary.
     let specialized = frozen_ir::specialize(
         &args, &elf, &const_values, &lookup_maps,
-        std::path::Path::new("/opt/bpf-benchmark/native-bpf/x86_64/kprog-perf-context-lto"),
+        &PathBuf::from("/opt/bpf-benchmark/native-bpf").join(match elf.architecture() {
+            object::Architecture::Aarch64 => "arm64",
+            _ => "x86_64",
+        }).join("kprog-perf-context-lto"),
         &std::env::current_exe()?,
     )?;
     let elf = match specialized.as_ref() {
@@ -545,10 +548,8 @@ fn main() -> Result<()> {
             &proof_relocs,
             &proof_data_relocs,
             callee_saved_mask,
-            if elf.architecture() == object::Architecture::X86_64 {
-                elf.section_by_name(".llvmbc").map(|section| section.data()).transpose()
-                    .context("read proof frontend IR")?
-            } else { None },
+            elf.section_by_name(".llvmbc").map(|section| section.data()).transpose()
+                .context("read proof frontend IR")?,
         )?;
         eprintln!(
             "native-link: wrote proof object {} bytes, {} reloc(s) -> {}",

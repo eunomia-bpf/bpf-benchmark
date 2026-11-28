@@ -496,7 +496,7 @@ $(PERF_CONTEXT_LTO): $(ROOT)/kprog/x86/perf_context_lto.cpp $(ROOT)/kprog/libnat
 	install -d "$(dir $@)"
 	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -fexceptions -Wall -Wextra -Wno-unused-parameter \
 		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include "$<" -o "$@" \
-		$$(llvm-config-18 --link-static --ldflags --libs core irreader analysis support passes native object linker --system-libs) \
+		$$(llvm-config-18 --link-static --ldflags --libs core irreader analysis support passes native aarch64 object linker --system-libs) \
 		$(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz
 
 

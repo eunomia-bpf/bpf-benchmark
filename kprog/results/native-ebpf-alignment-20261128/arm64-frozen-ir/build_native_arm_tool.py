@@ -32,7 +32,7 @@ try:
   cases=sorted((ROOT/'kprog/x86/native_lab/native_link/target').glob('frozen-ir-test-*/input.proof.o'),key=lambda p:p.stat().st_mtime)
   assert cases;fixture=cases[-1];assert int.from_bytes(fixture.read_bytes()[18:20],'little')==183
   facts=OUT/'native-arm-immutable.json';facts.write_text('{"option":"00000000"}\n');native=OUT/'native-arm-scalar.o'
-  command=['qemu-aarch64','-L',str(BASE),str(output),str(fixture),'--symbol','entry','--kernel-btf','/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux','--prog-type','0','--immutable-globals',str(facts),'-o',str(native)]
+  command=['qemu-aarch64-static','-L',str(BASE),str(output),str(fixture),'--symbol','entry','--kernel-btf','/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux','--prog-type','0','--immutable-globals',str(facts),'-o',str(native)]
   r['execution_command']=command;r['fixture']=dict(path=str(fixture),sha256=sha(fixture));save()
   with (OUT/'native-arm-execution.log').open('wb') as log:r['execution_returncode']=subprocess.run(command,cwd=ROOT,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,preexec_fn=child).returncode
   assert r['execution_returncode']==0;assert int.from_bytes(native.read_bytes()[18:20],'little')==183
