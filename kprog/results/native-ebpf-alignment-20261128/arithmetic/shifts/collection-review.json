@@ -1,0 +1,202 @@
+{
+  "reviewed_utc": "2026-11-28T10:21:41Z",
+  "job": {
+    "launcher_pid": 1417228,
+    "controller_pid": 1417229,
+    "started_utc": "2026-11-28T10:15:25Z",
+    "ended_utc": "2026-11-28T10:15:48Z",
+    "controller_status": 0
+  },
+  "objects": 114,
+  "llvm_decoder_commands": 114,
+  "all_commands_exit_zero": true,
+  "program_rows": 698,
+  "missing_candidate_roots": 0,
+  "shift_sites": 4300,
+  "bounded_below_width": 3116,
+  "review_required": 1184,
+  "unparsed": 0,
+  "width_counts": {
+    "64": 1318,
+    "32": 2594,
+    "16": 354,
+    "8": 34
+  },
+  "counts": [
+    {
+      "architecture": "x86",
+      "app": "bcc",
+      "classification": "bounded-below-width",
+      "sites": 20
+    },
+    {
+      "architecture": "x86",
+      "app": "bcc",
+      "classification": "review-required",
+      "sites": 4
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "classification": "bounded-below-width",
+      "sites": 1201
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "classification": "review-required",
+      "sites": 146
+    },
+    {
+      "architecture": "x86",
+      "app": "katran",
+      "classification": "bounded-below-width",
+      "sites": 44
+    },
+    {
+      "architecture": "x86",
+      "app": "katran",
+      "classification": "review-required",
+      "sites": 1
+    },
+    {
+      "architecture": "x86",
+      "app": "otelcol-ebpf-profiler",
+      "classification": "bounded-below-width",
+      "sites": 48
+    },
+    {
+      "architecture": "x86",
+      "app": "otelcol-ebpf-profiler",
+      "classification": "review-required",
+      "sites": 21
+    },
+    {
+      "architecture": "x86",
+      "app": "tetragon",
+      "classification": "bounded-below-width",
+      "sites": 190
+    },
+    {
+      "architecture": "x86",
+      "app": "tetragon",
+      "classification": "review-required",
+      "sites": 298
+    },
+    {
+      "architecture": "x86",
+      "app": "tracee",
+      "classification": "bounded-below-width",
+      "sites": 54
+    },
+    {
+      "architecture": "x86",
+      "app": "tracee",
+      "classification": "review-required",
+      "sites": 10
+    },
+    {
+      "architecture": "arm64",
+      "app": "bcc",
+      "classification": "bounded-below-width",
+      "sites": 20
+    },
+    {
+      "architecture": "arm64",
+      "app": "bcc",
+      "classification": "review-required",
+      "sites": 4
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "classification": "bounded-below-width",
+      "sites": 1201
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "classification": "review-required",
+      "sites": 146
+    },
+    {
+      "architecture": "arm64",
+      "app": "katran",
+      "classification": "bounded-below-width",
+      "sites": 44
+    },
+    {
+      "architecture": "arm64",
+      "app": "katran",
+      "classification": "review-required",
+      "sites": 1
+    },
+    {
+      "architecture": "arm64",
+      "app": "otelcol-ebpf-profiler",
+      "classification": "bounded-below-width",
+      "sites": 50
+    },
+    {
+      "architecture": "arm64",
+      "app": "otelcol-ebpf-profiler",
+      "classification": "review-required",
+      "sites": 21
+    },
+    {
+      "architecture": "arm64",
+      "app": "tetragon",
+      "classification": "bounded-below-width",
+      "sites": 190
+    },
+    {
+      "architecture": "arm64",
+      "app": "tetragon",
+      "classification": "review-required",
+      "sites": 522
+    },
+    {
+      "architecture": "arm64",
+      "app": "tracee",
+      "classification": "bounded-below-width",
+      "sites": 54
+    },
+    {
+      "architecture": "arm64",
+      "app": "tracee",
+      "classification": "review-required",
+      "sites": 10
+    }
+  ],
+  "outside_manifest_candidate_reachability": {
+    "bounded-below-width": 68,
+    "review-required": 128
+  },
+  "known_finite_amounts_at_or_above_width": [],
+  "source_group_count": 118,
+  "source_md5_matches": 118,
+  "bounded_family_sites": 12,
+  "bounded_family_ir_commands": 6,
+  "bounded_family_direct_rol_calls": 54,
+  "raw_archive": {
+    "path": "census-records.tar.zst",
+    "bytes": 427790,
+    "sha256": "66e32d70ee087465a395be9fbac0bff72fc61699fc9cd77611de08a88b9d91a5",
+    "raw_bytes": 8415319,
+    "verified_every_member": true,
+    "raw_copies_preserved": true
+  },
+  "input_source_sha256_reverified": {
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/objects.json": "88fb43dfc6238b7b2e0fc8c157d620982126c24f57472232b71df46ba24e85f3",
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/programs.json": "6a23a92783d8195bc5f43cc9f9a845ebbc298ca1eeec9e72e7da0fe58995bdc7",
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/manifests.json": "45d3ca238a54b12e545dc8962600aa57e5a952045cb91ad51c4fabb316a10193",
+    "vendor/linux-framework/kernel/bpf/verifier.c": "ea961b4809639863b30aada6502d053c7e1062e64b26f854fa011e7610df1f48",
+    "vendor/linux-framework/Documentation/bpf/standardization/instruction-set.rst": "b54e055155ef0daed8351b15d121d61805ddf973f9fe7b2ea6adda32c9d5f1fe",
+    "vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c": "e8eaefafcebc59f969747d03b13bfb78d041565ab2c365dc98abbbd5ff5f1dab",
+    "vendor/linux-framework/arch/x86/net/bpf_jit_comp.c": "abc8d2496c3559a0a081475b9480ed323f3daf9d587185bd036b77dccd80d6f1"
+  },
+  "source_review_sha256": "1e48b0c2d1592da8dbee1cc6b734b635b1b8ad8817a794b7df1790c6379a0b2a",
+  "bounded_family_review_sha256": "208e662b0d8a266ac0cb6052f0c3851b42f0a05817b6e5f2611b8a50c191c19e",
+  "conclusion": "No new confirmed shift defect.1184original unknown-bound sites are review candidates,128outside manifest candidate reachability;12 cleared by targeted IR/source/caller evidence. No semantic/native-installed/workload equality claim.",
+  "next": "Review remaining source/producer and actual selected-entry shift values: Tetragon reg-size/caller gates, Cilium feature/prefix constants, OTel VM shift-field producers, Tracee index controls. Reuse completed114object census; no generic mask or extra app configuration without actual evidence."
+}

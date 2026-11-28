@@ -1,0 +1,1404 @@
+{
+  "path": "census-records.tar.zst",
+  "bytes": 427790,
+  "sha256": "66e32d70ee087465a395be9fbac0bff72fc61699fc9cd77611de08a88b9d91a5",
+  "raw_bytes": 8415319,
+  "members": [
+    {
+      "member": "arm64-bcc-biosnoop.native.json",
+      "bytes": 4666,
+      "sha256": "5d8e70a93ff652737d34feff861883b6a1669aa0f4623b3085e44b8f71b268bf"
+    },
+    {
+      "member": "arm64-bcc-biosnoop.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-bcc-capable.native.json",
+      "bytes": 3244,
+      "sha256": "f3e996bac7e280d3765c0e50210dd8763654d4144a8479acc5d964adff8ee015"
+    },
+    {
+      "member": "arm64-bcc-capable.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-bcc-opensnoop.native.json",
+      "bytes": 3669,
+      "sha256": "236b300cdead6af164686b94e12dc274665eabf80ec412d8714b4e4df990d2cb"
+    },
+    {
+      "member": "arm64-bcc-opensnoop.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-bcc-runqlat.native.json",
+      "bytes": 13286,
+      "sha256": "99ff82d51c36046a0951999a5088cf30b2bc6666450be8e5a2dc89a06f39e1e2"
+    },
+    {
+      "member": "arm64-bcc-runqlat.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-bcc-syscount.native.json",
+      "bytes": 4058,
+      "sha256": "e78d367e9ec9424dd599a5386a624ab6bb8fd1a2b1c661e18dd06544e7881d92"
+    },
+    {
+      "member": "arm64-bcc-syscount.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-bcc-tcpconnect.native.json",
+      "bytes": 5507,
+      "sha256": "7be4748cb54bd17f0db8edc2dfc23bc8430c632237975ab931bc28d2a3a4825e"
+    },
+    {
+      "member": "arm64-bcc-tcpconnect.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-bcc-tcplife.native.json",
+      "bytes": 3148,
+      "sha256": "c726606f6687b5ae699e73a6314c790eb42d3f18bc94a7a585a3420b08f05fdf"
+    },
+    {
+      "member": "arm64-bcc-tcplife.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-bcc-vfsstat.native.json",
+      "bytes": 3814,
+      "sha256": "b78ee58e5b61338203bdf99bf7e44dea86d774bd55066790a174125a31210d5b"
+    },
+    {
+      "member": "arm64-bcc-vfsstat.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-cilium-bpf_host.native.json",
+      "bytes": 233235,
+      "sha256": "a9e5273ceef2ce788f1d344bbcffba7f54bc2752df6e8aefc55bd336682ea15e"
+    },
+    {
+      "member": "arm64-cilium-bpf_host.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-cilium-bpf_lxc.native.json",
+      "bytes": 276288,
+      "sha256": "ec37e1541db88a524056a824448853ee17f2acb1bf79d8b2ad0199c8c682056c"
+    },
+    {
+      "member": "arm64-cilium-bpf_lxc.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-cilium-bpf_overlay.native.json",
+      "bytes": 225814,
+      "sha256": "25d6c93159be0c9599bfe25a779c5a6b98c62e8e98363fc42e4642da3edb3019"
+    },
+    {
+      "member": "arm64-cilium-bpf_overlay.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-cilium-bpf_sock.native.json",
+      "bytes": 200542,
+      "sha256": "f60a839cfdc9a93e5fa7590c034145732fa4634770ff9b392a3bde646ff5e14c"
+    },
+    {
+      "member": "arm64-cilium-bpf_sock.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-cilium-bpf_wireguard.native.json",
+      "bytes": 239850,
+      "sha256": "db4ca6ba5c4200a2510b913a5c09cbb084f9c35ea9fd15d15e6fcba7b7d1c48f"
+    },
+    {
+      "member": "arm64-cilium-bpf_wireguard.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-cilium-bpf_xdp.native.json",
+      "bytes": 93273,
+      "sha256": "2d4dc9558c177755a8d30336223665d0e073a56e762ab52b1f5522d9716c2492"
+    },
+    {
+      "member": "arm64-cilium-bpf_xdp.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-cilium-cilium_placeholders.native.json",
+      "bytes": 955,
+      "sha256": "8fcb1d35fe1c49296ebe62089784414d8c4ca4d3156fafd984f43d19c0b8b6f0"
+    },
+    {
+      "member": "arm64-cilium-cilium_placeholders.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-katran-balancer.native.json",
+      "bytes": 35819,
+      "sha256": "12f7da2bddfecac07a8c42f6c6a09723d7d08a175c92a8269bc02990260d4511"
+    },
+    {
+      "member": "arm64-katran-balancer.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-katran-healthchecking_ipip.native.json",
+      "bytes": 836,
+      "sha256": "dbf0a86f3aa61003cc0c8eb139bc1c889d464f4ad17b15a0a8178cc6e12feece"
+    },
+    {
+      "member": "arm64-katran-healthchecking_ipip.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-katran-xdp_root.native.json",
+      "bytes": 816,
+      "sha256": "bdc91f4bcbc743d3da84c228ccd828a9569f0e639ec77119f90d4fa39dcf9750"
+    },
+    {
+      "member": "arm64-katran-xdp_root.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-otelcol-ebpf-profiler-otelcol-ebpf-profiler.native.json",
+      "bytes": 224479,
+      "sha256": "e0aae099c1f44701df1aa3e34c28d7aa24af733c85fb3bdb58cd8b0060cd6aed"
+    },
+    {
+      "member": "arm64-otelcol-ebpf-profiler-otelcol-ebpf-profiler.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_cgroup.native.json",
+      "bytes": 2493,
+      "sha256": "53403fd452b5d736162c883b6292ad114fa0b9ad5fa6c21f43a96055106066ac"
+    },
+    {
+      "member": "arm64-tetragon-bpf_cgroup.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_cgroup_mkdir_v511.native.json",
+      "bytes": 6407,
+      "sha256": "5f199e420c82e2a34b3c14b0d31c1122e5d339b5f252923cd37ef59c6406c58d"
+    },
+    {
+      "member": "arm64-tetragon-bpf_cgroup_mkdir_v511.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_cgroup_release_v511.native.json",
+      "bytes": 5920,
+      "sha256": "155614caf84647f0d4c7d4f036e8b31b9519cb9fc43630f171c45dc1f6aa974f"
+    },
+    {
+      "member": "arm64-tetragon-bpf_cgroup_release_v511.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_cgroup_rmdir_v511.native.json",
+      "bytes": 5916,
+      "sha256": "c4d34fd5d7ca0265ccff739ecbae5c286508b270759b3434c0277bd8e80f6898"
+    },
+    {
+      "member": "arm64-tetragon-bpf_cgroup_rmdir_v511.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_cgtracker.native.json",
+      "bytes": 3019,
+      "sha256": "14e210ce97eaa4a721b61cf8ee2df495c32cac7375b1d7be8bcbc4973ff08911"
+    },
+    {
+      "member": "arm64-tetragon-bpf_cgtracker.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_enforcer.native.json",
+      "bytes": 971,
+      "sha256": "c7ee792334bb9ea7833f203c22a6bda34337c73569d029a59a7b3599523c20e4"
+    },
+    {
+      "member": "arm64-tetragon-bpf_enforcer.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_execve_bprm_commit_creds.native.json",
+      "bytes": 3514,
+      "sha256": "e37c3c2935d4d578cdf68c11332977a4986ecf6a6318c74292e8b9034f746914"
+    },
+    {
+      "member": "arm64-tetragon-bpf_execve_bprm_commit_creds.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_execve_event_v61.native.json",
+      "bytes": 16859,
+      "sha256": "b055043659184dd19009e85164032b8d7e71a45314b0dde357bcf4696cb79dfa"
+    },
+    {
+      "member": "arm64-tetragon-bpf_execve_event_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_execve_map_update_v61.native.json",
+      "bytes": 4142,
+      "sha256": "b08ab378193bcc94df1286676b9b24d8935421f0e968bbed4fbc737d0aea05ea"
+    },
+    {
+      "member": "arm64-tetragon-bpf_execve_map_update_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_exit_v511.native.json",
+      "bytes": 4947,
+      "sha256": "73de564a7c2a6fbd5fbc596b1e030f5c16535f9f99f7dbe879f5bd10316c441a"
+    },
+    {
+      "member": "arm64-tetragon-bpf_exit_v511.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_fmodret_enforcer.native.json",
+      "bytes": 980,
+      "sha256": "0af3472cb198d3f868d168923dae29ef82bc4fb773d8a8e82ec0be4e7d41dc8f"
+    },
+    {
+      "member": "arm64-tetragon-bpf_fmodret_enforcer.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_fork_v511.native.json",
+      "bytes": 6844,
+      "sha256": "412b19ca7b82bdc2cf66eb2c1b5c2f15479096372653caf12e9deaa4fd9732df"
+    },
+    {
+      "member": "arm64-tetragon-bpf_fork_v511.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_fentry_v61.native.json",
+      "bytes": 67586,
+      "sha256": "fc1c47737195a09b0e2690e96d65fea8dc07c3e6e9333687ccd4932944feedd3"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_fentry_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_fexit_v61.native.json",
+      "bytes": 32189,
+      "sha256": "0201b264853faa51bdd0df9370784c8962f22b864905ac718d6864a4447c807d"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_fexit_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_kprobe_v61.native.json",
+      "bytes": 161969,
+      "sha256": "103b211d149b02475297bf2623169daf6532de6ce602f852d637f072da77ee5c"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_kprobe_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_lsm_core_v511.native.json",
+      "bytes": 66572,
+      "sha256": "459f0111f0c459491bc5b52f03a6d692ef39b099aa227636c73651263261c3ba"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_lsm_core_v511.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_lsm_core_v61.native.json",
+      "bytes": 65570,
+      "sha256": "615c085e071c16479b1db56ce7b7b1519ee3c8a1bf1d3729edb3d2569a47270c"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_lsm_core_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_lsm_ima_bprm_v61.native.json",
+      "bytes": 982,
+      "sha256": "d0bce76fefa524d608654a8948174f91cd01f3f1b8e2fd10a232adbfc2b1a8ff"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_lsm_ima_bprm_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_lsm_ima_file_v61.native.json",
+      "bytes": 982,
+      "sha256": "136d68d5f84dd1ed5226d94d14cf468e51dc4852721f7043c6067b036bfe586b"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_lsm_ima_file_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_lsm_output_v61.native.json",
+      "bytes": 5083,
+      "sha256": "15a41a603b28749835b66b72d147e9d9234039c68f427b2f61551801aeacc020"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_lsm_output_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_rawtp_v61.native.json",
+      "bytes": 67518,
+      "sha256": "79ed7061d985aae5d620ab7a8556aec657bcaaed4cb282f61e1c738a0be8c3ec"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_rawtp_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_retkprobe_v61.native.json",
+      "bytes": 32913,
+      "sha256": "f6431362c80a3e717de66d87990e601b0cea06e9342756525f92e17bb952b122"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_retkprobe_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_retuprobe_v61.native.json",
+      "bytes": 32913,
+      "sha256": "2471e310e18c3920cde44171474fea95e9ef4848e412ae47f3c4696a7f45f430"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_retuprobe_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_tracepoint_v61.native.json",
+      "bytes": 67433,
+      "sha256": "781823bf08f8a0d3e2dcf9fa70af9cdcdbd2ba845b85f5d463070ed81308f248"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_tracepoint_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_uprobe_v61.native.json",
+      "bytes": 163268,
+      "sha256": "33bf7e4807e237f21c77108c0196a40ddff1be8243c115e3eec5752013426ae7"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_uprobe_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_usdt_v61.native.json",
+      "bytes": 175350,
+      "sha256": "8d07c9a5ff93bed1bd56d5fe7ca432df7c34e3ddb9d59a7d371e86fc9c14f715"
+    },
+    {
+      "member": "arm64-tetragon-bpf_generic_usdt_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_loader_v511.native.json",
+      "bytes": 3760,
+      "sha256": "a13d5e7b918ccee7251edebbfb3a0cfca94d9ebe9d61cb3a101955467a0e5292"
+    },
+    {
+      "member": "arm64-tetragon-bpf_loader_v511.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_multi_enforcer.native.json",
+      "bytes": 983,
+      "sha256": "a2dd7156e762d43e939a31fd0c52028598b75fec060ab7c7d89a952c0cfc2442"
+    },
+    {
+      "member": "arm64-tetragon-bpf_multi_enforcer.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_multi_kprobe_v61.native.json",
+      "bytes": 162097,
+      "sha256": "6863ff9440face236fe0cc46e326102a8e6b00d308d51bc9f8c2fd9b9ffae6d1"
+    },
+    {
+      "member": "arm64-tetragon-bpf_multi_kprobe_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_multi_retkprobe_v61.native.json",
+      "bytes": 33041,
+      "sha256": "51d4b4558ef2fc6e9ce522f753898a473fec44039fc0d9b77073b6fdaeab6f97"
+    },
+    {
+      "member": "arm64-tetragon-bpf_multi_retkprobe_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_multi_retuprobe_v61.native.json",
+      "bytes": 33041,
+      "sha256": "4e358d5aa2dfe80fed662a0883508a05e2d6c9e16ec7a3180a1af7c610ea85ff"
+    },
+    {
+      "member": "arm64-tetragon-bpf_multi_retuprobe_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_multi_uprobe_v61.native.json",
+      "bytes": 163417,
+      "sha256": "e26adb98c6d4077fd97c153d54bb64920003bbde684b1b9d6322df6d4562eb9d"
+    },
+    {
+      "member": "arm64-tetragon-bpf_multi_uprobe_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_multi_usdt_v511.native.json",
+      "bytes": 176278,
+      "sha256": "a1f6950319afb0ddf3036fbe006c7a963f3dc4ba407843f807a5d4b0d0ceddcf"
+    },
+    {
+      "member": "arm64-tetragon-bpf_multi_usdt_v511.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_multi_usdt_v61.native.json",
+      "bytes": 175499,
+      "sha256": "29bf9cce8c7e6d40c0619d08587b433e743a97eda3b73e41e493b079f84d776f"
+    },
+    {
+      "member": "arm64-tetragon-bpf_multi_usdt_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tetragon-bpf_prog_iter.native.json",
+      "bytes": 821,
+      "sha256": "54a8b02ed4c2bbc39fec6d710f0fb0096497265f984637ae44bac846c6e7493a"
+    },
+    {
+      "member": "arm64-tetragon-bpf_prog_iter.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tracee-kprobe_check.native.json",
+      "bytes": 995,
+      "sha256": "51dc015b9f5e93fc4241188aead9623bcc93d8963d480b982f0bef9cfe7dea8c"
+    },
+    {
+      "member": "arm64-tracee-kprobe_check.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tracee-lsm_check.native.json",
+      "bytes": 974,
+      "sha256": "96ff78f73a5f3beedfe1b1a76d17cf8e87aa4dd8a485c0b77649829ac0263f55"
+    },
+    {
+      "member": "arm64-tracee-lsm_check.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-tracee-tracee.native.json",
+      "bytes": 193133,
+      "sha256": "83cb8d6a7e269ed5a715f02fa5e692c6bc3c3bb5fbea2148a5ef9f42ac896fe0"
+    },
+    {
+      "member": "arm64-tracee-tracee.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "controller.json",
+      "bytes": 92523,
+      "sha256": "550c30c22b7a55e2751b96a457e46c17f257f0e8927092ffe9ea504bbe8559e5"
+    },
+    {
+      "member": "job.log",
+      "bytes": 242,
+      "sha256": "5ef74c2d90ea523ebdbcc6c65657ab5e3d23a4cedab373546a1304acd9cc1c48"
+    },
+    {
+      "member": "per-program.json",
+      "bytes": 1576916,
+      "sha256": "191e4c15d78d592bf071390ae4b50f797b12c4059bdc58fcd0d7931ef7c992a5"
+    },
+    {
+      "member": "x86-bcc-biosnoop.native.json",
+      "bytes": 4974,
+      "sha256": "f8efb2a85af7b61a038a66d8130eefb54685650c08a854879779c786b08ae00b"
+    },
+    {
+      "member": "x86-bcc-biosnoop.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-bcc-capable.native.json",
+      "bytes": 3239,
+      "sha256": "ebe028c4713ffe3940adb64e267b4565b64db98b37ea52008277e57be226c471"
+    },
+    {
+      "member": "x86-bcc-capable.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-bcc-opensnoop.native.json",
+      "bytes": 3665,
+      "sha256": "1e1c02493c1e80d0314313486491f3014462d0f23e76704d45aa38bf81f632b9"
+    },
+    {
+      "member": "x86-bcc-opensnoop.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-bcc-runqlat.native.json",
+      "bytes": 13656,
+      "sha256": "f24f06fd0a7bac674bc5426cb2c9602ea16aad1d9f942f004580f05ae1aa340e"
+    },
+    {
+      "member": "x86-bcc-runqlat.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-bcc-syscount.native.json",
+      "bytes": 4428,
+      "sha256": "4ece68a7d8db309b042328625a75baa0c97f8246694c1d67e051928e0b5f7a19"
+    },
+    {
+      "member": "x86-bcc-syscount.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-bcc-tcpconnect.native.json",
+      "bytes": 5815,
+      "sha256": "bdcf806cdbb1d464e6caf85f92e648a35b39661c9794f5793665561553ab6328"
+    },
+    {
+      "member": "x86-bcc-tcpconnect.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-bcc-tcplife.native.json",
+      "bytes": 3428,
+      "sha256": "b0825c483e822a7788cf04afa0614cf041d82e72985a92104e8d1db552c66847"
+    },
+    {
+      "member": "x86-bcc-tcplife.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-bcc-vfsstat.native.json",
+      "bytes": 3810,
+      "sha256": "ec5a5be2458f915e24fd2b6a0bed9e58683e0d3046a30d8fc4105e6ae276c219"
+    },
+    {
+      "member": "x86-bcc-vfsstat.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-cilium-bpf_host.native.json",
+      "bytes": 233635,
+      "sha256": "f8ade93fcbc46a2a940ac60621ac77f0ba922544e2ee2cdd9767f745a704711a"
+    },
+    {
+      "member": "x86-cilium-bpf_host.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-cilium-bpf_lxc.native.json",
+      "bytes": 276688,
+      "sha256": "1ab2ef669c01af3b97d57b22c53981b7309ab622e3ecc11c7f6a7312ef38a26b"
+    },
+    {
+      "member": "x86-cilium-bpf_lxc.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-cilium-bpf_overlay.native.json",
+      "bytes": 226186,
+      "sha256": "0b9092e61e6709beec2423b0af035794571002ed679719dca813fb5dbd2918d0"
+    },
+    {
+      "member": "x86-cilium-bpf_overlay.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-cilium-bpf_sock.native.json",
+      "bytes": 201246,
+      "sha256": "c01d6ed6b6bc352453ce4f05ac5c718b0965b722590f4c59cdce56e7eeeb1b71"
+    },
+    {
+      "member": "x86-cilium-bpf_sock.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-cilium-bpf_wireguard.native.json",
+      "bytes": 240222,
+      "sha256": "f5c7510a60210f75b303b9ee3f9e99a290f20566f0cb1fa0d935fd3bc72858d6"
+    },
+    {
+      "member": "x86-cilium-bpf_wireguard.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-cilium-bpf_xdp.native.json",
+      "bytes": 93645,
+      "sha256": "59ce7c904fab933b96e5d021e1d832ed606d51aa90d8001ec308eff70f862f2c"
+    },
+    {
+      "member": "x86-cilium-bpf_xdp.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-cilium-cilium_placeholders.native.json",
+      "bytes": 951,
+      "sha256": "a641e47f3419f864139c5d2afc39757017d9d3c3605eb49e00cf7a26e271a1c9"
+    },
+    {
+      "member": "x86-cilium-cilium_placeholders.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-katran-balancer.native.json",
+      "bytes": 35999,
+      "sha256": "186763e6d1d46b2268787880109ef8d875800c46aac7d5cea550bed3d789b059"
+    },
+    {
+      "member": "x86-katran-balancer.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-katran-healthchecking_ipip.native.json",
+      "bytes": 832,
+      "sha256": "6884bdd0cd2f56f04d62d5090e9e61cf6d6628da4f0f138ec8520a5be98ad6d9"
+    },
+    {
+      "member": "x86-katran-healthchecking_ipip.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-katran-xdp_root.native.json",
+      "bytes": 812,
+      "sha256": "7d4277dc3fea34e13de19dc1931d0ef26f4076760af1558ab01843ef36cd9ede"
+    },
+    {
+      "member": "x86-katran-xdp_root.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-otelcol-ebpf-profiler-otelcol-ebpf-profiler.native.json",
+      "bytes": 224385,
+      "sha256": "7f9f28464175d9c65f5c5ee84273a373e775a7577d89ff6f3ae2905fc00277c2"
+    },
+    {
+      "member": "x86-otelcol-ebpf-profiler-otelcol-ebpf-profiler.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_cgroup.native.json",
+      "bytes": 2629,
+      "sha256": "6ba0914e750d36ebc0cb226aacced24d9c66ca65822b8f76cd5f6a1d2d5c1ecb"
+    },
+    {
+      "member": "x86-tetragon-bpf_cgroup.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_cgroup_mkdir_v511.native.json",
+      "bytes": 6599,
+      "sha256": "fd7bb76cc12e657818f973d43d91f9a17b22df80273513c9de9f971d7339878e"
+    },
+    {
+      "member": "x86-tetragon-bpf_cgroup_mkdir_v511.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_cgroup_release_v511.native.json",
+      "bytes": 6112,
+      "sha256": "277c6a47aad44b8e13640f6d17a8b7f23a300add9c67e5cff5e731ce588b60c0"
+    },
+    {
+      "member": "x86-tetragon-bpf_cgroup_release_v511.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_cgroup_rmdir_v511.native.json",
+      "bytes": 6108,
+      "sha256": "db74ecc05058c0fd27e0c8edcab4d28781bf7515f2d9f691e2ee8b98f2ec3d3d"
+    },
+    {
+      "member": "x86-tetragon-bpf_cgroup_rmdir_v511.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_cgtracker.native.json",
+      "bytes": 3155,
+      "sha256": "c3281a8d6350dcf0c7c14a5c5c891faecd281c84843890bfdacfa061cd297d4e"
+    },
+    {
+      "member": "x86-tetragon-bpf_cgtracker.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_enforcer.native.json",
+      "bytes": 967,
+      "sha256": "000c99f3a59b6db83aa98b8a68c520aa26a82e597f86124aeddb9d3123730318"
+    },
+    {
+      "member": "x86-tetragon-bpf_enforcer.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_execve_bprm_commit_creds.native.json",
+      "bytes": 3650,
+      "sha256": "7efc85093319197e542c35a42c7afee9a17935b88b1fa3e7b532f59c7f403aab"
+    },
+    {
+      "member": "x86-tetragon-bpf_execve_bprm_commit_creds.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_execve_event_v61.native.json",
+      "bytes": 17111,
+      "sha256": "d58b4f037dc72bbc166410ca5caebcbff57251cb4cbaed71a08da25dfe2d1972"
+    },
+    {
+      "member": "x86-tetragon-bpf_execve_event_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_execve_map_update_v61.native.json",
+      "bytes": 4138,
+      "sha256": "4823a1f8a0c032912780f05a01dfd5edcdc79c864f60f469e89bbf17a6bc909a"
+    },
+    {
+      "member": "x86-tetragon-bpf_execve_map_update_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_exit_v511.native.json",
+      "bytes": 5083,
+      "sha256": "693a80636aae92515815bcec5cf2ffbfb3365a840bf68e9d9263a7d708c30d08"
+    },
+    {
+      "member": "x86-tetragon-bpf_exit_v511.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_fmodret_enforcer.native.json",
+      "bytes": 976,
+      "sha256": "109637e9e2cb146f84e576ddfd03366bed8b8bc9d060ce414b0d16b8aa501360"
+    },
+    {
+      "member": "x86-tetragon-bpf_fmodret_enforcer.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_fork_v511.native.json",
+      "bytes": 7036,
+      "sha256": "15ddc4289115c58a621805cb2a184ea620447f19d2d8fb447dd6757d53f89e40"
+    },
+    {
+      "member": "x86-tetragon-bpf_fork_v511.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_fentry_v61.native.json",
+      "bytes": 67786,
+      "sha256": "ea056127f8017289fb526b3ddea446aabebc25aa925d8ea13a8036aedccd14bf"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_fentry_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_fexit_v61.native.json",
+      "bytes": 32385,
+      "sha256": "3a04fb42a0e0b54ee570986ac9e9529bc31b7314b926cde762060a82ba3c1f8b"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_fexit_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_kprobe_v61.native.json",
+      "bytes": 118863,
+      "sha256": "c2c1bfeadcb6dc57f822b91a6185412773f77312b3a9f52812e822a7b58fe14e"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_kprobe_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_lsm_core_v511.native.json",
+      "bytes": 66772,
+      "sha256": "58fb54b099e7f92f5215dbf1f9ceb1885e42d9b91824742709aa0854434566da"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_lsm_core_v511.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_lsm_core_v61.native.json",
+      "bytes": 65770,
+      "sha256": "5a0821a1671aa42a994b95fdb6eb2e7f8dc0bd9303d197973075ab70c8436d55"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_lsm_core_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_lsm_ima_bprm_v61.native.json",
+      "bytes": 978,
+      "sha256": "879c3d6e134d92e99a4682b4eddf052050d42fbd954ff04e8fdadec220050007"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_lsm_ima_bprm_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_lsm_ima_file_v61.native.json",
+      "bytes": 978,
+      "sha256": "60bb985f1b72ce27d27b3afe88852076682cd093a69115adee142be3ed16c36d"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_lsm_ima_file_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_lsm_output_v61.native.json",
+      "bytes": 5219,
+      "sha256": "0c402750a25a42b4138f3afd0fc2b3f5ccd039edabbd0402fcbdb02cc9c1e728"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_lsm_output_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_rawtp_v61.native.json",
+      "bytes": 67718,
+      "sha256": "7ff2bbd359453f4fd37a1577d480427914cb5edd87f5f5c9e3e3f59cbe777b39"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_rawtp_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_retkprobe_v61.native.json",
+      "bytes": 33109,
+      "sha256": "b89e199b0dafbd7ac0f9a68cb863c310ced3636461d772ac91d3664f3fe419c1"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_retkprobe_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_retuprobe_v61.native.json",
+      "bytes": 33109,
+      "sha256": "a53a9d7cd0347f96330e61fd42cba2edffd0f22a581be6417dc84a9c8bbe381e"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_retuprobe_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_tracepoint_v61.native.json",
+      "bytes": 67633,
+      "sha256": "94b053627cbbd6c3ae0700b97f1431e4f07e98e90e84cb2e6e6564a729321770"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_tracepoint_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_uprobe_v61.native.json",
+      "bytes": 120162,
+      "sha256": "f22d06c8eb17a908c79e68a9894888e003ad14dc81c55164041c86d6c4f5073d"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_uprobe_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_usdt_v61.native.json",
+      "bytes": 132068,
+      "sha256": "97a649989181e923004afdaf40ea6e7ba5800476e7e299523ba7f88b2cd20f0d"
+    },
+    {
+      "member": "x86-tetragon-bpf_generic_usdt_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_loader_v511.native.json",
+      "bytes": 3952,
+      "sha256": "1e44f44fb5a2d400c360b58be9763726b9c81800cc262e5c6eef7e0759ed31d0"
+    },
+    {
+      "member": "x86-tetragon-bpf_loader_v511.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_multi_enforcer.native.json",
+      "bytes": 979,
+      "sha256": "21a8a4063cffcae21bae87a067c628bc4def33398e1fa354de81711b42721e5c"
+    },
+    {
+      "member": "x86-tetragon-bpf_multi_enforcer.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_multi_kprobe_v61.native.json",
+      "bytes": 118991,
+      "sha256": "373bad5618ef290d81e5464c5b5790fbcb2dbe24caba114615490adcd30c0900"
+    },
+    {
+      "member": "x86-tetragon-bpf_multi_kprobe_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_multi_retkprobe_v61.native.json",
+      "bytes": 33237,
+      "sha256": "30a6986eccef19ab5a3c03d9f0f0346a4276e7702870d8ccdd11ef82c31ba025"
+    },
+    {
+      "member": "x86-tetragon-bpf_multi_retkprobe_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_multi_retuprobe_v61.native.json",
+      "bytes": 33237,
+      "sha256": "1e05bb1d5ba557b16637807db4da0b1d1271eb8f46af3f7a4f14634c17b2cdb9"
+    },
+    {
+      "member": "x86-tetragon-bpf_multi_retuprobe_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_multi_uprobe_v61.native.json",
+      "bytes": 120311,
+      "sha256": "cb25684d63f56e39de75b8037e4c27637c193a6369aad4582b291201a3485a77"
+    },
+    {
+      "member": "x86-tetragon-bpf_multi_uprobe_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_multi_usdt_v511.native.json",
+      "bytes": 132996,
+      "sha256": "6ec745a92ce57f5737e1bfe62a43ec2bdaa258d233df5b67a77a39661aac793d"
+    },
+    {
+      "member": "x86-tetragon-bpf_multi_usdt_v511.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_multi_usdt_v61.native.json",
+      "bytes": 132217,
+      "sha256": "a95598899876ce185626dd7cfc4629275c705623b0f007fd5f6524b2302b2956"
+    },
+    {
+      "member": "x86-tetragon-bpf_multi_usdt_v61.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tetragon-bpf_prog_iter.native.json",
+      "bytes": 817,
+      "sha256": "255eaa2d93ab642cffc7f7b66eb4125fb65ee2eb495ff2b8f1771d6bab32a90c"
+    },
+    {
+      "member": "x86-tetragon-bpf_prog_iter.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tracee-kprobe_check.native.json",
+      "bytes": 991,
+      "sha256": "0de011069309395d8dfea46795ce0c33a8c08614d81a306397c7c3b3846d5b3f"
+    },
+    {
+      "member": "x86-tracee-kprobe_check.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tracee-lsm_check.native.json",
+      "bytes": 970,
+      "sha256": "8216b2c6802f91945e1e8fe7f515d9c17093b25a54e8b9e54cca141bf9834e6b"
+    },
+    {
+      "member": "x86-tracee-lsm_check.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-tracee-tracee.native.json",
+      "bytes": 193532,
+      "sha256": "f9f8e0ee00e0b6042b3fa85a5c4be6c65ab4f3346362f88cbbb2ec77655fe957"
+    },
+    {
+      "member": "x86-tracee-tracee.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "verified_every_member": true,
+  "raw_copies_preserved": true,
+  "archive_command": [
+    "tar",
+    "--zstd",
+    "-cf",
+    "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/census-records.tar.zst",
+    "-C",
+    "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts",
+    "arm64-bcc-biosnoop.native.json",
+    "arm64-bcc-biosnoop.native.stderr",
+    "arm64-bcc-capable.native.json",
+    "arm64-bcc-capable.native.stderr",
+    "arm64-bcc-opensnoop.native.json",
+    "arm64-bcc-opensnoop.native.stderr",
+    "arm64-bcc-runqlat.native.json",
+    "arm64-bcc-runqlat.native.stderr",
+    "arm64-bcc-syscount.native.json",
+    "arm64-bcc-syscount.native.stderr",
+    "arm64-bcc-tcpconnect.native.json",
+    "arm64-bcc-tcpconnect.native.stderr",
+    "arm64-bcc-tcplife.native.json",
+    "arm64-bcc-tcplife.native.stderr",
+    "arm64-bcc-vfsstat.native.json",
+    "arm64-bcc-vfsstat.native.stderr",
+    "arm64-cilium-bpf_host.native.json",
+    "arm64-cilium-bpf_host.native.stderr",
+    "arm64-cilium-bpf_lxc.native.json",
+    "arm64-cilium-bpf_lxc.native.stderr",
+    "arm64-cilium-bpf_overlay.native.json",
+    "arm64-cilium-bpf_overlay.native.stderr",
+    "arm64-cilium-bpf_sock.native.json",
+    "arm64-cilium-bpf_sock.native.stderr",
+    "arm64-cilium-bpf_wireguard.native.json",
+    "arm64-cilium-bpf_wireguard.native.stderr",
+    "arm64-cilium-bpf_xdp.native.json",
+    "arm64-cilium-bpf_xdp.native.stderr",
+    "arm64-cilium-cilium_placeholders.native.json",
+    "arm64-cilium-cilium_placeholders.native.stderr",
+    "arm64-katran-balancer.native.json",
+    "arm64-katran-balancer.native.stderr",
+    "arm64-katran-healthchecking_ipip.native.json",
+    "arm64-katran-healthchecking_ipip.native.stderr",
+    "arm64-katran-xdp_root.native.json",
+    "arm64-katran-xdp_root.native.stderr",
+    "arm64-otelcol-ebpf-profiler-otelcol-ebpf-profiler.native.json",
+    "arm64-otelcol-ebpf-profiler-otelcol-ebpf-profiler.native.stderr",
+    "arm64-tetragon-bpf_cgroup.native.json",
+    "arm64-tetragon-bpf_cgroup.native.stderr",
+    "arm64-tetragon-bpf_cgroup_mkdir_v511.native.json",
+    "arm64-tetragon-bpf_cgroup_mkdir_v511.native.stderr",
+    "arm64-tetragon-bpf_cgroup_release_v511.native.json",
+    "arm64-tetragon-bpf_cgroup_release_v511.native.stderr",
+    "arm64-tetragon-bpf_cgroup_rmdir_v511.native.json",
+    "arm64-tetragon-bpf_cgroup_rmdir_v511.native.stderr",
+    "arm64-tetragon-bpf_cgtracker.native.json",
+    "arm64-tetragon-bpf_cgtracker.native.stderr",
+    "arm64-tetragon-bpf_enforcer.native.json",
+    "arm64-tetragon-bpf_enforcer.native.stderr",
+    "arm64-tetragon-bpf_execve_bprm_commit_creds.native.json",
+    "arm64-tetragon-bpf_execve_bprm_commit_creds.native.stderr",
+    "arm64-tetragon-bpf_execve_event_v61.native.json",
+    "arm64-tetragon-bpf_execve_event_v61.native.stderr",
+    "arm64-tetragon-bpf_execve_map_update_v61.native.json",
+    "arm64-tetragon-bpf_execve_map_update_v61.native.stderr",
+    "arm64-tetragon-bpf_exit_v511.native.json",
+    "arm64-tetragon-bpf_exit_v511.native.stderr",
+    "arm64-tetragon-bpf_fmodret_enforcer.native.json",
+    "arm64-tetragon-bpf_fmodret_enforcer.native.stderr",
+    "arm64-tetragon-bpf_fork_v511.native.json",
+    "arm64-tetragon-bpf_fork_v511.native.stderr",
+    "arm64-tetragon-bpf_generic_fentry_v61.native.json",
+    "arm64-tetragon-bpf_generic_fentry_v61.native.stderr",
+    "arm64-tetragon-bpf_generic_fexit_v61.native.json",
+    "arm64-tetragon-bpf_generic_fexit_v61.native.stderr",
+    "arm64-tetragon-bpf_generic_kprobe_v61.native.json",
+    "arm64-tetragon-bpf_generic_kprobe_v61.native.stderr",
+    "arm64-tetragon-bpf_generic_lsm_core_v511.native.json",
+    "arm64-tetragon-bpf_generic_lsm_core_v511.native.stderr",
+    "arm64-tetragon-bpf_generic_lsm_core_v61.native.json",
+    "arm64-tetragon-bpf_generic_lsm_core_v61.native.stderr",
+    "arm64-tetragon-bpf_generic_lsm_ima_bprm_v61.native.json",
+    "arm64-tetragon-bpf_generic_lsm_ima_bprm_v61.native.stderr",
+    "arm64-tetragon-bpf_generic_lsm_ima_file_v61.native.json",
+    "arm64-tetragon-bpf_generic_lsm_ima_file_v61.native.stderr",
+    "arm64-tetragon-bpf_generic_lsm_output_v61.native.json",
+    "arm64-tetragon-bpf_generic_lsm_output_v61.native.stderr",
+    "arm64-tetragon-bpf_generic_rawtp_v61.native.json",
+    "arm64-tetragon-bpf_generic_rawtp_v61.native.stderr",
+    "arm64-tetragon-bpf_generic_retkprobe_v61.native.json",
+    "arm64-tetragon-bpf_generic_retkprobe_v61.native.stderr",
+    "arm64-tetragon-bpf_generic_retuprobe_v61.native.json",
+    "arm64-tetragon-bpf_generic_retuprobe_v61.native.stderr",
+    "arm64-tetragon-bpf_generic_tracepoint_v61.native.json",
+    "arm64-tetragon-bpf_generic_tracepoint_v61.native.stderr",
+    "arm64-tetragon-bpf_generic_uprobe_v61.native.json",
+    "arm64-tetragon-bpf_generic_uprobe_v61.native.stderr",
+    "arm64-tetragon-bpf_generic_usdt_v61.native.json",
+    "arm64-tetragon-bpf_generic_usdt_v61.native.stderr",
+    "arm64-tetragon-bpf_loader_v511.native.json",
+    "arm64-tetragon-bpf_loader_v511.native.stderr",
+    "arm64-tetragon-bpf_multi_enforcer.native.json",
+    "arm64-tetragon-bpf_multi_enforcer.native.stderr",
+    "arm64-tetragon-bpf_multi_kprobe_v61.native.json",
+    "arm64-tetragon-bpf_multi_kprobe_v61.native.stderr",
+    "arm64-tetragon-bpf_multi_retkprobe_v61.native.json",
+    "arm64-tetragon-bpf_multi_retkprobe_v61.native.stderr",
+    "arm64-tetragon-bpf_multi_retuprobe_v61.native.json",
+    "arm64-tetragon-bpf_multi_retuprobe_v61.native.stderr",
+    "arm64-tetragon-bpf_multi_uprobe_v61.native.json",
+    "arm64-tetragon-bpf_multi_uprobe_v61.native.stderr",
+    "arm64-tetragon-bpf_multi_usdt_v511.native.json",
+    "arm64-tetragon-bpf_multi_usdt_v511.native.stderr",
+    "arm64-tetragon-bpf_multi_usdt_v61.native.json",
+    "arm64-tetragon-bpf_multi_usdt_v61.native.stderr",
+    "arm64-tetragon-bpf_prog_iter.native.json",
+    "arm64-tetragon-bpf_prog_iter.native.stderr",
+    "arm64-tracee-kprobe_check.native.json",
+    "arm64-tracee-kprobe_check.native.stderr",
+    "arm64-tracee-lsm_check.native.json",
+    "arm64-tracee-lsm_check.native.stderr",
+    "arm64-tracee-tracee.native.json",
+    "arm64-tracee-tracee.native.stderr",
+    "controller.json",
+    "job.log",
+    "per-program.json",
+    "x86-bcc-biosnoop.native.json",
+    "x86-bcc-biosnoop.native.stderr",
+    "x86-bcc-capable.native.json",
+    "x86-bcc-capable.native.stderr",
+    "x86-bcc-opensnoop.native.json",
+    "x86-bcc-opensnoop.native.stderr",
+    "x86-bcc-runqlat.native.json",
+    "x86-bcc-runqlat.native.stderr",
+    "x86-bcc-syscount.native.json",
+    "x86-bcc-syscount.native.stderr",
+    "x86-bcc-tcpconnect.native.json",
+    "x86-bcc-tcpconnect.native.stderr",
+    "x86-bcc-tcplife.native.json",
+    "x86-bcc-tcplife.native.stderr",
+    "x86-bcc-vfsstat.native.json",
+    "x86-bcc-vfsstat.native.stderr",
+    "x86-cilium-bpf_host.native.json",
+    "x86-cilium-bpf_host.native.stderr",
+    "x86-cilium-bpf_lxc.native.json",
+    "x86-cilium-bpf_lxc.native.stderr",
+    "x86-cilium-bpf_overlay.native.json",
+    "x86-cilium-bpf_overlay.native.stderr",
+    "x86-cilium-bpf_sock.native.json",
+    "x86-cilium-bpf_sock.native.stderr",
+    "x86-cilium-bpf_wireguard.native.json",
+    "x86-cilium-bpf_wireguard.native.stderr",
+    "x86-cilium-bpf_xdp.native.json",
+    "x86-cilium-bpf_xdp.native.stderr",
+    "x86-cilium-cilium_placeholders.native.json",
+    "x86-cilium-cilium_placeholders.native.stderr",
+    "x86-katran-balancer.native.json",
+    "x86-katran-balancer.native.stderr",
+    "x86-katran-healthchecking_ipip.native.json",
+    "x86-katran-healthchecking_ipip.native.stderr",
+    "x86-katran-xdp_root.native.json",
+    "x86-katran-xdp_root.native.stderr",
+    "x86-otelcol-ebpf-profiler-otelcol-ebpf-profiler.native.json",
+    "x86-otelcol-ebpf-profiler-otelcol-ebpf-profiler.native.stderr",
+    "x86-tetragon-bpf_cgroup.native.json",
+    "x86-tetragon-bpf_cgroup.native.stderr",
+    "x86-tetragon-bpf_cgroup_mkdir_v511.native.json",
+    "x86-tetragon-bpf_cgroup_mkdir_v511.native.stderr",
+    "x86-tetragon-bpf_cgroup_release_v511.native.json",
+    "x86-tetragon-bpf_cgroup_release_v511.native.stderr",
+    "x86-tetragon-bpf_cgroup_rmdir_v511.native.json",
+    "x86-tetragon-bpf_cgroup_rmdir_v511.native.stderr",
+    "x86-tetragon-bpf_cgtracker.native.json",
+    "x86-tetragon-bpf_cgtracker.native.stderr",
+    "x86-tetragon-bpf_enforcer.native.json",
+    "x86-tetragon-bpf_enforcer.native.stderr",
+    "x86-tetragon-bpf_execve_bprm_commit_creds.native.json",
+    "x86-tetragon-bpf_execve_bprm_commit_creds.native.stderr",
+    "x86-tetragon-bpf_execve_event_v61.native.json",
+    "x86-tetragon-bpf_execve_event_v61.native.stderr",
+    "x86-tetragon-bpf_execve_map_update_v61.native.json",
+    "x86-tetragon-bpf_execve_map_update_v61.native.stderr",
+    "x86-tetragon-bpf_exit_v511.native.json",
+    "x86-tetragon-bpf_exit_v511.native.stderr",
+    "x86-tetragon-bpf_fmodret_enforcer.native.json",
+    "x86-tetragon-bpf_fmodret_enforcer.native.stderr",
+    "x86-tetragon-bpf_fork_v511.native.json",
+    "x86-tetragon-bpf_fork_v511.native.stderr",
+    "x86-tetragon-bpf_generic_fentry_v61.native.json",
+    "x86-tetragon-bpf_generic_fentry_v61.native.stderr",
+    "x86-tetragon-bpf_generic_fexit_v61.native.json",
+    "x86-tetragon-bpf_generic_fexit_v61.native.stderr",
+    "x86-tetragon-bpf_generic_kprobe_v61.native.json",
+    "x86-tetragon-bpf_generic_kprobe_v61.native.stderr",
+    "x86-tetragon-bpf_generic_lsm_core_v511.native.json",
+    "x86-tetragon-bpf_generic_lsm_core_v511.native.stderr",
+    "x86-tetragon-bpf_generic_lsm_core_v61.native.json",
+    "x86-tetragon-bpf_generic_lsm_core_v61.native.stderr",
+    "x86-tetragon-bpf_generic_lsm_ima_bprm_v61.native.json",
+    "x86-tetragon-bpf_generic_lsm_ima_bprm_v61.native.stderr",
+    "x86-tetragon-bpf_generic_lsm_ima_file_v61.native.json",
+    "x86-tetragon-bpf_generic_lsm_ima_file_v61.native.stderr",
+    "x86-tetragon-bpf_generic_lsm_output_v61.native.json",
+    "x86-tetragon-bpf_generic_lsm_output_v61.native.stderr",
+    "x86-tetragon-bpf_generic_rawtp_v61.native.json",
+    "x86-tetragon-bpf_generic_rawtp_v61.native.stderr",
+    "x86-tetragon-bpf_generic_retkprobe_v61.native.json",
+    "x86-tetragon-bpf_generic_retkprobe_v61.native.stderr",
+    "x86-tetragon-bpf_generic_retuprobe_v61.native.json",
+    "x86-tetragon-bpf_generic_retuprobe_v61.native.stderr",
+    "x86-tetragon-bpf_generic_tracepoint_v61.native.json",
+    "x86-tetragon-bpf_generic_tracepoint_v61.native.stderr",
+    "x86-tetragon-bpf_generic_uprobe_v61.native.json",
+    "x86-tetragon-bpf_generic_uprobe_v61.native.stderr",
+    "x86-tetragon-bpf_generic_usdt_v61.native.json",
+    "x86-tetragon-bpf_generic_usdt_v61.native.stderr",
+    "x86-tetragon-bpf_loader_v511.native.json",
+    "x86-tetragon-bpf_loader_v511.native.stderr",
+    "x86-tetragon-bpf_multi_enforcer.native.json",
+    "x86-tetragon-bpf_multi_enforcer.native.stderr",
+    "x86-tetragon-bpf_multi_kprobe_v61.native.json",
+    "x86-tetragon-bpf_multi_kprobe_v61.native.stderr",
+    "x86-tetragon-bpf_multi_retkprobe_v61.native.json",
+    "x86-tetragon-bpf_multi_retkprobe_v61.native.stderr",
+    "x86-tetragon-bpf_multi_retuprobe_v61.native.json",
+    "x86-tetragon-bpf_multi_retuprobe_v61.native.stderr",
+    "x86-tetragon-bpf_multi_uprobe_v61.native.json",
+    "x86-tetragon-bpf_multi_uprobe_v61.native.stderr",
+    "x86-tetragon-bpf_multi_usdt_v511.native.json",
+    "x86-tetragon-bpf_multi_usdt_v511.native.stderr",
+    "x86-tetragon-bpf_multi_usdt_v61.native.json",
+    "x86-tetragon-bpf_multi_usdt_v61.native.stderr",
+    "x86-tetragon-bpf_prog_iter.native.json",
+    "x86-tetragon-bpf_prog_iter.native.stderr",
+    "x86-tracee-kprobe_check.native.json",
+    "x86-tracee-kprobe_check.native.stderr",
+    "x86-tracee-lsm_check.native.json",
+    "x86-tracee-lsm_check.native.stderr",
+    "x86-tracee-tracee.native.json",
+    "x86-tracee-tracee.native.stderr"
+  ]
+}
